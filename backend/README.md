@@ -43,3 +43,20 @@ Health check:
 ```text
 GET /api/health
 ```
+
+Create user:
+
+```text
+POST /api/users
+```
+
+```json
+{
+  "username": "amos",
+  "email": "amos@example.com",
+  "password": "secret123",
+  "referralCode": "482917"
+}
+```
+
+The referral code must be exactly six numbers and unique.

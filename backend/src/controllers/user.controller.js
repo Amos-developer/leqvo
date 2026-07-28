@@ -10,12 +10,28 @@ const createUser = async (req, res) => {
     });
   }
 
+  if (!/^\d{6}$/.test(referralCode)) {
+    return res.status(400).json({
+      success: false,
+      message: "Referral code must be exactly 6 numbers"
+    });
+  }
+
   const existingUser = await userModel.findUserByEmail(email);
 
   if (existingUser) {
     return res.status(409).json({
       success: false,
       message: "A user with this email already exists"
+    });
+  }
+
+  const existingReferralCode = await userModel.findUserByReferralCode(referralCode);
+
+  if (existingReferralCode) {
+    return res.status(409).json({
+      success: false,
+      message: "Referral code is already in use"
     });
   }
 

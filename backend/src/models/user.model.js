@@ -52,9 +52,21 @@ const findUserByEmail = async (email) => {
   return result.rows[0] || null;
 };
 
+const findUserByReferralCode = async (referralCode) => {
+  const result = await database.query(
+    `SELECT ${userFields}
+     FROM users
+     WHERE referral_code = $1`,
+    [referralCode]
+  );
+
+  return result.rows[0] || null;
+};
+
 module.exports = {
   createUser,
   findAllUsers,
   findUserById,
-  findUserByEmail
+  findUserByEmail,
+  findUserByReferralCode
 };
