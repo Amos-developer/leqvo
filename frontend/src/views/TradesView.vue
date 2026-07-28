@@ -1,21 +1,43 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { CandlestickSeries, createChart } from "lightweight-charts";
+import { createBinanceKlineSocket, fetchBinanceKlines } from "../utils/binanceKlineSocket";
 import { createBinanceMarketSocket, createInitialBinanceMarkets } from "../utils/binanceMarketSocket";
+import { saveTradeRecord } from "../utils/tradeHistory";
 
+const route = useRoute();
+const router = useRouter();
 const storedUser = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 const userBalance = ref(Number(storedUser.balance || 0));
 const markets = ref(createInitialBinanceMarkets());
-const selectedSymbol = ref("BTC");
+const routePair = String(route.query.pair || "BTCUSDT").toUpperCase();
+const selectedSymbol = ref(routePair.replace("USDT", "") || "BTC");
 const signalCode = ref("");
 const selectedPercent = ref(20);
 const tradeStatus = ref("");
 const tradeError = ref("");
+const chartContainer = ref(null);
+const chartError = ref("");
+const isChartLoading = ref(true);
 let marketSocket = null;
+let chart = null;
+let candleSeries = null;
+let klineSocket = null;
+let resizeObserver = null;
 
 const percentages = [20, 40, 50, 60, 100];
 
 const selectedMarket = computed(() => {
   return markets.value.find((market) => market.symbol === selectedSymbol.value) || markets.value[0];
+});
+
+const selectedPair = computed(() => {
+  return selectedMarket.value?.pair || `${selectedSymbol.value}USDT`;
+});
+
+const selectedPairLabel = computed(() => {
+  return selectedPair.value.replace("USDT", "/USDT");
 });
 
 const investmentAmount = computed(() => {
@@ -38,19 +60,6 @@ const formatChange = (value) => {
   return `${sign}${numberValue.toFixed(2)}%`;
 };
 
-const candles = computed(() => {
-  const change = Number(selectedMarket.value?.change24h || 0);
-
-  return Array.from({ length: 28 }, (_, index) => {
-    const wave = Math.sin(index * 0.78) * 18;
-    const pulse = Math.cos(index * 0.42 + change) * 11;
-    const height = Math.max(22, Math.min(92, 54 + wave + pulse + change * 1.6));
-    const isUp = index % 3 !== 0 || change >= 0;
-
-    return { height, isUp };
-  });
-});
-
 const completeTrade = () => {
   tradeError.value = "";
   tradeStatus.value = "";
@@ -65,7 +74,17 @@ const completeTrade = () => {
     return;
   }
 
-  tradeStatus.value = `${selectedMarket.value.symbol}/USDT trade submitted with ${selectedPercent.value}% allocation.`;
+  saveTradeRecord({
+    pair: selectedPairLabel.value,
+    symbol: selectedMarket.value.symbol,
+    signalCode: signalCode.value.trim().toUpperCase(),
+    allocationPercent: selectedPercent.value,
+    amount: Number(investmentAmount.value.toFixed(2)),
+    entryPrice: Number(selectedMarket.value.price || 0),
+    change24h: Number(selectedMarket.value.change24h || 0)
+  });
+
+  router.push({ name: "history", query: { tab: "active" } });
 };
 
 const startMarketStream = () => {
@@ -78,10 +97,105 @@ const startMarketStream = () => {
   });
 };
 
-onMounted(startMarketStream);
+const createTradeChart = () => {
+  if (!chartContainer.value || chart) {
+    return;
+  }
+
+  chart = createChart(chartContainer.value, {
+    width: chartContainer.value.clientWidth,
+    height: chartContainer.value.clientHeight,
+    layout: {
+      background: { color: "#121722" },
+      textColor: "#9ca3af"
+    },
+    grid: {
+      vertLines: { color: "rgba(255, 255, 255, 0.06)" },
+      horzLines: { color: "rgba(255, 255, 255, 0.06)" }
+    },
+    rightPriceScale: {
+      borderColor: "rgba(255, 255, 255, 0.08)"
+    },
+    timeScale: {
+      borderColor: "rgba(255, 255, 255, 0.08)",
+      timeVisible: true,
+      secondsVisible: false
+    },
+    crosshair: {
+      mode: 1
+    }
+  });
+
+  candleSeries = chart.addSeries(CandlestickSeries, {
+    upColor: "#0ecb81",
+    downColor: "#f6465d",
+    borderUpColor: "#0ecb81",
+    borderDownColor: "#f6465d",
+    wickUpColor: "#0ecb81",
+    wickDownColor: "#f6465d"
+  });
+
+  resizeObserver = new ResizeObserver(() => {
+    chart?.applyOptions({
+      width: chartContainer.value.clientWidth,
+      height: chartContainer.value.clientHeight
+    });
+  });
+  resizeObserver.observe(chartContainer.value);
+};
+
+const loadRealChart = async () => {
+  if (!candleSeries) {
+    return;
+  }
+
+  isChartLoading.value = true;
+  chartError.value = "";
+  klineSocket?.close();
+
+  try {
+    const candles = await fetchBinanceKlines(selectedPair.value, "1m", 120);
+
+    if (!candles.length) {
+      throw new Error("Binance returned no candle data");
+    }
+
+    candleSeries.setData(candles);
+    chart.timeScale().fitContent();
+
+    klineSocket = createBinanceKlineSocket({
+      pair: selectedPair.value,
+      interval: "1m",
+      onCandle: (candle) => {
+        candleSeries?.update(candle);
+      },
+      onError: () => {
+        chartError.value = "Live candles paused. Check your network.";
+      }
+    });
+  } catch (error) {
+    chartError.value = "Could not load real Binance candles.";
+  } finally {
+    isChartLoading.value = false;
+  }
+};
+
+onMounted(async () => {
+  startMarketStream();
+  await nextTick();
+  createTradeChart();
+  loadRealChart();
+});
+
+watch(selectedPair, () => {
+  loadRealChart();
+});
 
 onUnmounted(() => {
   marketSocket?.close();
+  klineSocket?.close();
+  resizeObserver?.disconnect();
+  chart?.remove();
 });
 </script>
 
@@ -90,15 +204,15 @@ onUnmounted(() => {
     <header class="trade-header">
       <div>
         <p>Spot signal</p>
-        <h1>Trades</h1>
+        <h1 class="trade-pair-title">{{ selectedPairLabel }}</h1>
       </div>
-      <div class="trade-badge">USDT</div>
+      <button class="trade-back-button" type="button" aria-label="Go back" @click="router.back()">&larr;</button>
     </header>
 
     <section class="trade-market-card">
       <div class="trade-market-top">
         <div>
-          <span>{{ selectedMarket.symbol }}/USDT</span>
+          <span>{{ selectedPairLabel }}</span>
           <strong>{{ formatCurrency(selectedMarket.price) }}</strong>
         </div>
         <div class="trade-change" :class="selectedMarket.change24h >= 0 ? 'up' : 'down'">
@@ -108,26 +222,19 @@ onUnmounted(() => {
 
       <div class="trade-pair-strip" aria-label="Select market pair">
         <button
-          v-for="market in markets.slice(0, 5)"
+          v-for="market in markets"
           :key="market.id"
           :class="{ active: selectedSymbol === market.symbol }"
           @click="selectedSymbol = market.symbol"
         >
-          {{ market.symbol }}
+          {{ market.symbol }}/USDT
         </button>
       </div>
 
-      <div class="trade-chart" aria-label="Live chart preview">
-        <div class="chart-grid"></div>
-        <div class="chart-line"></div>
-        <div class="candle-row">
-          <span
-            v-for="(candle, index) in candles"
-            :key="index"
-            :class="candle.isUp ? 'up' : 'down'"
-            :style="{ height: `${candle.height}%` }"
-          ></span>
-        </div>
+      <div class="trade-chart real-chart" aria-label="Real Binance candlestick chart">
+        <div ref="chartContainer" class="chart-container"></div>
+        <div v-if="isChartLoading" class="chart-overlay">Loading real candles...</div>
+        <div v-else-if="chartError" class="chart-overlay error">{{ chartError }}</div>
       </div>
 
       <div class="trade-stats">

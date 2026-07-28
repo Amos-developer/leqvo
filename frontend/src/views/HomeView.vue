@@ -81,6 +81,13 @@ const filteredMarkets = computed(() => {
   });
 });
 
+const getTradeRoute = (coin) => {
+  return {
+    name: "trades",
+    query: { pair: coin.pair || `${coin.symbol}USDT` }
+  };
+};
+
 const fetchMarkets = async () => {
   marketError.value = "";
 
@@ -233,7 +240,7 @@ onUnmounted(() => {
           <strong>No crypto found</strong>
         </article>
         <template v-else>
-          <article v-for="coin in filteredMarkets" :key="coin.id">
+          <RouterLink v-for="coin in filteredMarkets" :key="coin.id" :to="getTradeRoute(coin)" class="crypto-trade-link">
             <img class="crypto-logo" :src="coin.image" :alt="coin.name" />
             <div>
               <strong>{{ coin.name }}</strong>
@@ -245,7 +252,7 @@ onUnmounted(() => {
                 {{ formatChange(coin.change24h) }}
               </span>
             </div>
-          </article>
+          </RouterLink>
         </template>
       </div>
     </section>

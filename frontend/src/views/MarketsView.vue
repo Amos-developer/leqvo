@@ -82,6 +82,13 @@ const marketLeader = computed(() => {
   return [...markets.value].sort((first, second) => second.change24h - first.change24h)[0];
 });
 
+const getTradeRoute = (coin) => {
+  return {
+    name: "trades",
+    query: { pair: coin.pair || `${coin.symbol}USDT` }
+  };
+};
+
 const loadMarkets = async () => {
   errorMessage.value = "";
 
@@ -183,7 +190,7 @@ onUnmounted(() => {
         </article>
         <article v-else-if="!filteredMarkets.length" class="market-row-state">No market found</article>
 
-        <article v-for="coin in filteredMarkets" v-else :key="coin.id" class="market-row">
+        <RouterLink v-for="coin in filteredMarkets" v-else :key="coin.id" :to="getTradeRoute(coin)" class="market-row">
           <img :src="coin.image" :alt="coin.name" />
           <div class="market-identity">
             <strong>{{ coin.name }}</strong>
@@ -197,7 +204,7 @@ onUnmounted(() => {
             <span>24h Vol</span>
             <strong>{{ formatVolume(coin.volume24h) }}</strong>
           </div>
-        </article>
+        </RouterLink>
       </div>
     </section>
   </section>
