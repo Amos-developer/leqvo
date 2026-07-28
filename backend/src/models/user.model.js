@@ -9,12 +9,12 @@ const userFields = `
   updated_at AS "updatedAt"
 `;
 
-const createUser = async ({ username, email, password, referralCode }) => {
+const createUser = async ({ id, username, email, password, referralCode }) => {
   const result = await database.query(
-    `INSERT INTO users (username, email, password, referral_code)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO users (id, username, email, password, referral_code)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING ${userFields}`,
-    [username, email, password, referralCode]
+    [id, username, email, password, referralCode]
   );
 
   return result.rows[0];

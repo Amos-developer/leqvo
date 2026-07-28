@@ -1,5 +1,23 @@
 const userModel = require("../models/user.model");
 
+const generateUserId = () => {
+  const numbers = Math.floor(100000 + Math.random() * 900000);
+
+  return `LEQ-${numbers}`;
+};
+
+const createUniqueUserId = async () => {
+  let id = generateUserId();
+  let existingUser = await userModel.findUserById(id);
+
+  while (existingUser) {
+    id = generateUserId();
+    existingUser = await userModel.findUserById(id);
+  }
+
+  return id;
+};
+
 const createUser = async (req, res) => {
   const { username, email, password, referralCode } = req.body;
 
@@ -35,7 +53,9 @@ const createUser = async (req, res) => {
     });
   }
 
+  const id = await createUniqueUserId();
   const user = await userModel.createUser({
+    id,
     username,
     email,
     password,
