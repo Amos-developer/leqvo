@@ -3,6 +3,14 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getPopularCrypto, getUserById } from "../utils/api";
 import { createBinanceMarketSocket, createInitialBinanceMarkets } from "../utils/binanceMarketSocket";
+import dailySpinIcon from "../assets/icons/daily-spin.svg";
+import depositIcon from "../assets/icons/deposit.svg";
+import inviteIcon from "../assets/icons/invite.svg";
+import leadershipIcon from "../assets/icons/leadership.svg";
+import luckyBoxIcon from "../assets/icons/lucky-box.svg";
+import rewardsIcon from "../assets/icons/rewards.svg";
+import teamIcon from "../assets/icons/team.svg";
+import withdrawalIcon from "../assets/icons/withdrawal.svg";
 
 const router = useRouter();
 const storedUser = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
@@ -16,6 +24,17 @@ const marketSocketStatus = ref("Connecting to Binance live");
 const activeMarketTab = ref("all");
 const cryptoSearch = ref("");
 let marketSocket = null;
+
+const quickActions = [
+  { label: "Deposit", to: "/deposit", icon: depositIcon, tone: "pink" },
+  { label: "Withdrawal", icon: withdrawalIcon, tone: "green" },
+  { label: "Invite", icon: inviteIcon, tone: "amber" },
+  { label: "Team", icon: teamIcon, tone: "blue" },
+  { label: "Lucky-box", icon: luckyBoxIcon, tone: "violet" },
+  { label: "Leadership", icon: leadershipIcon, tone: "teal" },
+  { label: "Rewards", icon: rewardsIcon, tone: "rose" },
+  { label: "Daily-spin", icon: dailySpinIcon, tone: "indigo" }
+];
 
 const username = computed(() => user.value.username || "Member");
 const balance = computed(() => {
@@ -156,7 +175,7 @@ onUnmounted(() => {
 
     <section class="balance-card">
       <div class="balance-copy">
-        <h1>Hi {{ username }} <span>Waving</span></h1>
+        <h1>Hi {{ username }}</h1>
         <p>Welcome back to your account</p>
         <span class="muted-label">Total Balance</span>
         <strong>{{ isLoadingUser ? "Loading..." : balance }}</strong>
@@ -168,21 +187,24 @@ onUnmounted(() => {
         <div class="sparkle two"></div>
         <div class="money-bag"><span>$</span></div>
         <div class="coin-stack"><i></i><i></i><i></i></div>
-        <div class="piggy"></div>
       </div>
     </section>
 
     <section class="quick-link-section" aria-labelledby="quick-link-heading">
       <h2 id="quick-link-heading">Quick link</h2>
       <div class="quick-actions">
-        <RouterLink to="/deposit"><span class="action-icon pink"><i class="line-icon icon-deposit"></i></span>Deposit</RouterLink>
-        <button><span class="action-icon green"><i class="line-icon icon-withdrawal"></i></span>Withdrawal</button>
-        <button><span class="action-icon amber"><i class="line-icon icon-invite"></i></span>Invite</button>
-        <button><span class="action-icon blue"><i class="line-icon icon-team"></i></span>Team</button>
-        <button><span class="action-icon violet"><i class="line-icon icon-box"></i></span>Lucky-box</button>
-        <button><span class="action-icon teal"><i class="line-icon icon-leadership"></i></span>Leadership</button>
-        <button><span class="action-icon rose"><i class="line-icon icon-rewards"></i></span>Rewards</button>
-        <button><span class="action-icon indigo"><i class="line-icon icon-spin"></i></span>Daily-spin</button>
+        <component
+          :is="action.to ? 'RouterLink' : 'button'"
+          v-for="action in quickActions"
+          :key="action.label"
+          :to="action.to"
+          type="button"
+        >
+          <span class="action-icon" :class="action.tone">
+            <img :src="action.icon" :alt="`${action.label} icon`" />
+          </span>
+          {{ action.label }}
+        </component>
       </div>
     </section>
 

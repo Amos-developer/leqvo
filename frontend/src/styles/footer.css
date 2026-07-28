@@ -41,87 +41,27 @@
 }
 
 .footer-icon {
-  position: relative;
-  display: inline-block;
-  width: 21px;
-  height: 21px;
-  color: currentColor;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 10px;
+  background: transparent;
 }
 
-.footer-icon::before,
-.footer-icon::after {
-  position: absolute;
-  content: "";
+.footer-icon img {
+  display: block;
+  width: 23px;
+  height: 23px;
+  object-fit: contain;
+  opacity: 0.72;
+  transition: opacity 180ms ease, transform 180ms ease, filter 180ms ease;
 }
 
-.footer-icon-home {
-  transform: translateY(2px) rotate(45deg) scale(0.82);
-  border: 2px solid currentColor;
-  border-radius: 4px 4px 7px 7px;
-}
-
-.footer-icon-markets::before {
-  left: 1px;
-  bottom: 2px;
-  width: 4px;
-  height: 10px;
-  border-radius: 99px;
-  background: currentColor;
-  box-shadow: 7px -5px 0 currentColor, 14px -1px 0 currentColor;
-}
-
-.footer-icon-trades {
-  border: 2px solid currentColor;
-  border-radius: 50%;
-}
-
-.footer-icon-trades::before {
-  left: 5px;
-  top: 5px;
-  width: 7px;
-  height: 7px;
-  transform: rotate(45deg);
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-}
-
-.footer-icon-history {
-  border: 2px solid currentColor;
-  border-radius: 50%;
-}
-
-.footer-icon-history::before {
-  left: 9px;
-  top: 4px;
-  width: 2px;
-  height: 7px;
-  background: currentColor;
-}
-
-.footer-icon-history::after {
-  left: 9px;
-  top: 10px;
-  width: 6px;
-  height: 2px;
-  background: currentColor;
-}
-
-.footer-icon-account::before {
-  left: 6px;
-  top: 1px;
-  width: 8px;
-  height: 8px;
-  border: 2px solid currentColor;
-  border-radius: 50%;
-}
-
-.footer-icon-account::after {
-  left: 2px;
-  bottom: 1px;
-  width: 17px;
-  height: 8px;
-  border: 2px solid currentColor;
-  border-radius: 12px 12px 4px 4px;
+.footer-link.router-link-active .footer-icon img {
+  opacity: 1;
+  transform: translateY(-1px);
+  filter: drop-shadow(0 6px 10px rgba(249, 79, 167, 0.24));
 }
 
 @media (min-width: 760px) {
