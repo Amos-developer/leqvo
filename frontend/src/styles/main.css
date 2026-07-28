@@ -5,6 +5,7 @@
 @import "./login.css";
 @import "./deposit.css";
 @import "./trade.css";
+@import "./history.css";
 
 :root {
   --bg: #f5f7fc;
