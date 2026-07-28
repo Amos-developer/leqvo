@@ -5,6 +5,7 @@ const userFields = `
   username,
   email,
   referral_code AS "referralCode",
+  balance,
   created_at AS "createdAt",
   updated_at AS "updatedAt"
 `;
@@ -52,6 +53,19 @@ const findUserByEmail = async (email) => {
   return result.rows[0] || null;
 };
 
+const findUserWithPasswordByEmail = async (email) => {
+  const result = await database.query(
+    `SELECT
+       ${userFields},
+       password
+     FROM users
+     WHERE email = $1`,
+    [email]
+  );
+
+  return result.rows[0] || null;
+};
+
 const findUserByReferralCode = async (referralCode) => {
   const result = await database.query(
     `SELECT ${userFields}
@@ -68,5 +82,6 @@ module.exports = {
   findAllUsers,
   findUserById,
   findUserByEmail,
+  findUserWithPasswordByEmail,
   findUserByReferralCode
 };

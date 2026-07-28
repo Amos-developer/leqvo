@@ -1,29 +1,71 @@
 <script setup>
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import BottomNavigation from "../components/BottomNavigation.vue";
+import { getUserById } from "../utils/api";
+
+const router = useRouter();
+const storedUser = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
+const user = ref(storedUser);
+const isLoadingUser = ref(false);
+const userError = ref("");
+
+const username = computed(() => user.value.username || "Member");
+const balance = computed(() => {
+  const userBalance = Number(user.value.balance || 0);
+
+  return userBalance.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD"
+  });
+});
+
+const refreshUser = async () => {
+  if (!storedUser.id) {
+    handleLogout();
+    return;
+  }
+
+  isLoadingUser.value = true;
+  userError.value = "";
+
+  try {
+    const result = await getUserById(storedUser.id);
+
+    user.value = result.data;
+    localStorage.setItem("leqvoUser", JSON.stringify(result.data));
+  } catch (error) {
+    userError.value = "Could not refresh account details";
+  } finally {
+    isLoadingUser.value = false;
+  }
+};
+
+const handleLogout = () => {
+  localStorage.removeItem("leqvoUser");
+  router.push("/login");
+};
+
+onMounted(refreshUser);
 </script>
 
 <template>
   <section class="phone-shell page-enter">
-    <header class="top-bar">
-      <strong>12:30</strong>
-      <div class="status-pill"></div>
-      <div class="status-icons">
-        <span></span><span></span><span></span>
-      </div>
-    </header>
-
     <div class="app-toolbar">
       <button class="icon-button" aria-label="Menu"><span class="icon-menu"></span></button>
-      <button class="icon-button alert" aria-label="Notifications"><span class="icon-bell"></span></button>
+      <button class="icon-button logout-button" aria-label="Logout" @click="handleLogout">
+        <span class="icon-logout"></span>
+      </button>
     </div>
 
     <section class="balance-card">
       <div class="balance-copy">
-        <h1>Hi Sabbir <span>Waving</span></h1>
+        <h1>Hi {{ username }} <span>Waving</span></h1>
         <p>Welcome back to your account</p>
         <span class="muted-label">Total Balance</span>
-        <strong>$1,520.00</strong>
-        <RouterLink to="/login">View account details</RouterLink>
+        <strong>{{ isLoadingUser ? "Loading..." : balance }}</strong>
+        <span class="account-id">ID: {{ user.id }}</span>
+        <span v-if="userError" class="account-id error">{{ userError }}</span>
       </div>
       <div class="hero-asset" aria-hidden="true">
         <div class="sparkle one"></div>
@@ -35,8 +77,8 @@ import BottomNavigation from "../components/BottomNavigation.vue";
     </section>
 
     <section class="quick-actions" aria-label="Quick actions">
-      <button><span class="action-icon pink">↗</span>Send</button>
-      <button><span class="action-icon green">↙</span>Receive</button>
+      <button><span class="action-icon pink">&uarr;</span>Send</button>
+      <button><span class="action-icon green">&darr;</span>Receive</button>
       <button><span class="action-icon amber">$</span>Loan</button>
       <button><span class="action-icon blue">+</span>Top Up</button>
     </section>
@@ -57,7 +99,7 @@ import BottomNavigation from "../components/BottomNavigation.vue";
       <article class="summary-card savings">
         <span class="mini-icon"></span>
         <p>Savings</p>
-        <strong>$1,520.00</strong>
+        <strong>{{ isLoadingUser ? "Loading..." : balance }}</strong>
         <div class="sparkline"></div>
       </article>
     </section>
@@ -65,7 +107,7 @@ import BottomNavigation from "../components/BottomNavigation.vue";
     <section class="transactions">
       <div class="section-heading">
         <h2>Recent Transaction</h2>
-        <RouterLink to="/register">See all</RouterLink>
+        <a href="#">See all</a>
       </div>
       <div class="search-row">
         <label>
@@ -81,7 +123,7 @@ import BottomNavigation from "../components/BottomNavigation.vue";
       </div>
       <div class="transaction-list">
         <article>
-          <span class="transaction-icon up">↗</span>
+          <span class="transaction-icon up">&uarr;</span>
           <div>
             <strong>Signal profit</strong>
             <p>Today, 9:24 AM</p>
@@ -89,7 +131,7 @@ import BottomNavigation from "../components/BottomNavigation.vue";
           <b>+$420.00</b>
         </article>
         <article>
-          <span class="transaction-icon down">↙</span>
+          <span class="transaction-icon down">&darr;</span>
           <div>
             <strong>Wallet top up</strong>
             <p>Yesterday, 4:18 PM</p>

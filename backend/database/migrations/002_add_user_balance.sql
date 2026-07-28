@@ -1,0 +1,4 @@
+\connect leqvo;
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00;
