@@ -1,0 +1,506 @@
+.deposit-page {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.deposit-header {
+  position: relative;
+  display: grid;
+  min-height: 52px;
+  place-items: center;
+  align-items: center;
+  padding-top: 8px;
+  text-align: center;
+}
+
+.back-button {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: white;
+  box-shadow: 0 16px 28px rgba(249, 79, 167, 0.28);
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.deposit-header p {
+  margin: 0 0 4px;
+  color: var(--pink);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.deposit-header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.deposit-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 38px rgba(78, 83, 110, 0.1);
+  backdrop-filter: blur(14px);
+}
+
+.deposit-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  min-height: 150px;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(255, 255, 255, 0.62), transparent 7rem),
+    linear-gradient(135deg, #261d3f, #7342a4 54%, #f94fa7);
+  color: white;
+}
+
+.deposit-hero::after {
+  position: absolute;
+  right: -46px;
+  bottom: -64px;
+  width: 150px;
+  height: 150px;
+  content: "";
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.deposit-card h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.deposit-hero span,
+.address-summary span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.deposit-hero span {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.deposit-hero strong {
+  display: block;
+  margin-top: 5px;
+  color: white;
+  font-size: 2rem;
+}
+
+.deposit-hero p,
+.copy-note {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.84rem;
+}
+
+.deposit-hero p {
+  position: relative;
+  z-index: 1;
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.minimum-pill {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 86px;
+  min-height: 86px;
+  place-items: center;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.14);
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.minimum-pill span {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.68rem;
+}
+
+.minimum-pill strong {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.asset-grid,
+.network-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.asset-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.asset-grid button,
+.network-grid button {
+  display: grid;
+  gap: 5px;
+  min-height: 76px;
+  padding: 12px;
+  border: 1px solid #eef1f7;
+  border-radius: 20px;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  box-shadow: 0 10px 22px rgba(78, 83, 110, 0.05);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.asset-grid button:hover,
+.network-grid button:hover {
+  transform: translateY(-2px);
+}
+
+.asset-grid button.active,
+.network-grid button.active {
+  border-color: rgba(249, 79, 167, 0.42);
+  background: linear-gradient(135deg, #ffe0f3, #f5e9ff);
+  color: var(--pink);
+}
+
+.asset-grid span,
+.network-grid span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.amount-field {
+  display: grid;
+  gap: 8px;
+  color: #4c4a55;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.amount-field div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.amount-field input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.amount-field span {
+  color: var(--pink);
+  font-weight: 900;
+}
+
+.minimum-note {
+  margin: -4px 0 0;
+  color: #c2255c;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.address-card {
+  gap: 16px;
+  border-color: rgba(249, 79, 167, 0.16);
+  background:
+    radial-gradient(circle at 94% 8%, rgba(249, 79, 167, 0.12), transparent 8rem),
+    rgba(255, 255, 255, 0.96);
+}
+
+.address-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.address-summary div {
+  min-width: 0;
+  padding: 12px;
+  border-radius: 18px;
+  background: #f8f8fb;
+}
+
+.address-summary strong {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qr-shell {
+  display: grid;
+  justify-content: center;
+}
+
+.qr-code {
+  display: grid;
+  width: 168px;
+  aspect-ratio: 1;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  padding: 14px;
+  border-radius: 24px;
+  background: white;
+  box-shadow:
+    0 16px 30px rgba(78, 83, 110, 0.09),
+    inset 0 0 0 1px #eef1f7;
+}
+
+.qr-code span {
+  border-radius: 5px;
+  background: #f0edf5;
+}
+
+.qr-code span.dark {
+  background: linear-gradient(135deg, var(--pink), #9d36f2);
+}
+
+.address-box {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 10px 10px 14px;
+  border-radius: 18px;
+  background: #f8f8fb;
+  box-shadow: inset 0 0 0 1px #eef1f7;
+}
+
+.address-box span {
+  min-width: 0;
+  overflow: hidden;
+  color: #4c4a55;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.address-box button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: var(--pink);
+  color: white;
+}
+
+.copy-icon.dark,
+.copy-icon.dark::after {
+  border-color: currentColor;
+}
+
+.deposit-warning {
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  overflow: hidden;
+  padding: 16px;
+  border: 1px solid rgba(194, 37, 92, 0.12);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(249, 79, 167, 0.16), transparent 7rem),
+    linear-gradient(135deg, #fff0f5, #ffffff);
+  box-shadow: 0 16px 32px rgba(194, 37, 92, 0.08);
+}
+
+.deposit-warning::after {
+  position: absolute;
+  right: -24px;
+  bottom: -38px;
+  width: 110px;
+  height: 110px;
+  content: "";
+  border-radius: 50%;
+  background: rgba(249, 79, 167, 0.1);
+}
+
+.warning-icon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: white;
+  font-weight: 900;
+  box-shadow: 0 14px 26px rgba(249, 79, 167, 0.22);
+}
+
+.deposit-warning strong {
+  display: block;
+  color: #9f1f52;
+  font-size: 0.92rem;
+}
+
+.deposit-warning p {
+  margin: 5px 0 0;
+  color: #7d4b62;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.deposit-address-page {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.scan-card {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(249, 79, 167, 0.12), transparent 8rem),
+    rgba(255, 255, 255, 0.96);
+  box-shadow: 0 22px 46px rgba(78, 83, 110, 0.12);
+  backdrop-filter: blur(16px);
+}
+
+.scan-summary {
+  text-align: center;
+}
+
+.scan-summary span,
+.scan-address span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.scan-summary strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 2rem;
+}
+
+.scan-summary p {
+  margin: 6px 0 0;
+  color: var(--pink);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.scan-qr-shell {
+  display: grid;
+  justify-content: center;
+  padding: 18px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, #fff0f8, #f5e9ff);
+}
+
+.scan-qr {
+  display: grid;
+  width: min(64vw, 230px);
+  aspect-ratio: 1;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 5px;
+  padding: 16px;
+  border-radius: 28px;
+  background: white;
+  box-shadow:
+    0 18px 34px rgba(78, 83, 110, 0.12),
+    inset 0 0 0 1px #eef1f7;
+}
+
+.scan-qr span {
+  border-radius: 5px;
+  background: #f0edf5;
+}
+
+.scan-qr span.dark {
+  background: linear-gradient(135deg, var(--pink), #9d36f2);
+}
+
+.scan-address {
+  display: grid;
+  gap: 9px;
+  padding: 14px;
+  border-radius: 22px;
+  background: #f8f8fb;
+  box-shadow: inset 0 0 0 1px #eef1f7;
+}
+
+.scan-address strong {
+  overflow-wrap: anywhere;
+  color: #4c4a55;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.scan-address button,
+.send-money-button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: white;
+  box-shadow: 0 16px 28px rgba(249, 79, 167, 0.24);
+  font-weight: 900;
+}
+
+.send-money-button {
+  width: 100%;
+}
+
+.empty-deposit p {
+  margin: 0;
+  color: var(--muted);
+}
+
+@media (max-width: 360px) {
+  .asset-grid,
+  .network-grid,
+  .address-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .deposit-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .minimum-pill {
+    width: 100%;
+    min-height: 68px;
+  }
+}

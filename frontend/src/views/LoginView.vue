@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import AuthLayout from "../components/AuthLayout.vue";
 import { loginUser } from "../utils/api";
 
 const router = useRouter();
@@ -36,33 +35,43 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <AuthLayout
-    title="Welcome back"
-    subtitle="Access your Leqvo account and continue managing your trading balance."
-  >
-    <form class="auth-form" @submit.prevent="handleLogin">
-      <div class="login-card-header">
-        <span class="secure-badge">Secure login</span>
-        <span class="pulse-dot"></span>
+  <section class="login-page page-enter">
+    <div class="login-form-panel">
+      <div class="login-welcome-copy">
+        <h1>Welcome back</h1>
+        <p>Sign in to continue managing your Leqvo trading account.</p>
       </div>
-      <label>
-        Email
-        <input v-model.trim="form.email" type="email" placeholder="amos@example.com" required />
-      </label>
-      <label>
-        Password
-        <input v-model="form.password" type="password" placeholder="Enter password" required />
-      </label>
-      <div class="form-row">
-        <label class="check-label"><input type="checkbox" /> Remember me</label>
-        <RouterLink to="/forgot-password">Forgot password?</RouterLink>
-      </div>
-      <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="form-message success">{{ successMessage }}</p>
-      <button type="submit" class="primary-button" :disabled="isLoading">
-        {{ isLoading ? "Signing in..." : "Login" }}
-      </button>
-    </form>
-    <p class="auth-footer">New to Leqvo? <RouterLink to="/register">Register now</RouterLink></p>
-  </AuthLayout>
+
+      <form class="login-form" @submit.prevent="handleLogin">
+        <div class="login-card-header">
+          <span class="secure-badge">Secure login</span>
+          <span class="pulse-dot"></span>
+        </div>
+
+        <label>
+          Email
+          <input v-model.trim="form.email" type="email" placeholder="amos@example.com" required />
+        </label>
+
+        <label>
+          Password
+          <input v-model="form.password" type="password" placeholder="Enter password" required />
+        </label>
+
+        <div class="form-row">
+          <label class="check-label"><input type="checkbox" /> Remember me</label>
+          <RouterLink to="/forgot-password">Forgot password?</RouterLink>
+        </div>
+
+        <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
+        <p v-if="successMessage" class="form-message success">{{ successMessage }}</p>
+
+        <button type="submit" class="primary-button" :disabled="isLoading">
+          {{ isLoading ? "Signing in..." : "Login" }}
+        </button>
+      </form>
+
+      <p class="login-footer">New to Leqvo? <RouterLink to="/register">Create account</RouterLink></p>
+    </div>
+  </section>
 </template>

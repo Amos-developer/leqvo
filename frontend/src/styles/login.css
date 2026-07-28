@@ -1,0 +1,215 @@
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  align-content: center;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(249, 79, 167, 0.22), transparent 18rem),
+    radial-gradient(circle at 92% 18%, rgba(161, 72, 255, 0.22), transparent 18rem),
+    linear-gradient(145deg, #fff7fc, #f7f4ff 58%, #f5f7fc);
+}
+
+.login-hero-panel,
+.login-form-panel {
+  width: min(100%, 460px);
+  margin: 0 auto;
+}
+
+.login-hero-panel {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  overflow: hidden;
+  padding: 8px 18px 18px;
+  text-align: center;
+}
+
+.logo-showcase {
+  position: relative;
+  display: grid;
+  width: min(64vw, 220px);
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.86);
+  border-radius: 34%;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(255, 255, 255, 0.96), transparent 9rem),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 238, 250, 0.82));
+  box-shadow:
+    0 24px 70px rgba(177, 74, 217, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.62);
+  animation: logoFloat 4s ease-in-out infinite;
+}
+
+.logo-showcase .app-logo {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+}
+
+.logo-showcase .logo-symbol-svg {
+  width: min(33vw, 112px);
+}
+
+.logo-showcase .logo-text {
+  margin-top: 8px;
+  font-size: clamp(2rem, 9vw, 3.1rem);
+  background: linear-gradient(135deg, var(--pink), #8e35f1);
+  background-clip: text;
+  color: transparent;
+}
+
+.logo-shine {
+  position: absolute;
+  inset: -40% auto auto -35%;
+  width: 58%;
+  height: 180%;
+  transform: rotate(28deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.52), transparent);
+  animation: shineSweep 3.2s ease-in-out infinite;
+}
+
+.login-form-panel {
+  display: grid;
+  align-content: center;
+  padding: 6px 0 12px;
+}
+
+.login-welcome-copy {
+  margin-bottom: 20px;
+}
+
+.login-welcome-copy h1 {
+  margin: 0;
+  color: #161525;
+  font-size: clamp(2.35rem, 12vw, 3.7rem);
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.login-welcome-copy p {
+  max-width: 24rem;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.login-form {
+  display: grid;
+  gap: 15px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 22px 54px rgba(78, 83, 110, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.login-form label {
+  display: grid;
+  gap: 8px;
+  color: #4c4a55;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.login-form input {
+  width: 100%;
+  height: 54px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  outline: 0;
+  padding: 0 16px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 8px 20px rgba(77, 82, 107, 0.04);
+}
+
+.login-form input:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 4px rgba(249, 79, 167, 0.12);
+}
+
+.login-footer {
+  margin: 20px 0 0;
+  color: var(--muted);
+  text-align: center;
+}
+
+.login-footer a {
+  color: var(--pink);
+  font-weight: 900;
+}
+
+@media (min-width: 900px) {
+  .login-page {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0;
+    padding: 42px;
+  }
+
+  .login-hero-panel {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .logo-showcase {
+    width: min(30vw, 300px);
+  }
+
+  .logo-showcase .logo-symbol-svg {
+    width: min(15vw, 144px);
+  }
+
+  .logo-showcase .logo-text {
+    font-size: clamp(2.6rem, 5vw, 4rem);
+  }
+
+  .login-form-panel {
+    padding: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-page {
+    padding: 12px;
+  }
+
+  .logo-showcase {
+    width: min(58vw, 190px);
+  }
+
+  .login-hero-panel h1 {
+    font-size: 2.2rem;
+  }
+
+  .login-form {
+    padding: 15px;
+  }
+}
+
+@keyframes logoFloat {
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes shineSweep {
+  0%,
+  42% {
+    transform: translateX(-130%) rotate(28deg);
+  }
+  100% {
+    transform: translateX(360%) rotate(28deg);
+  }
+}
+
+@keyframes signalWave {
+  50% {
+    opacity: 0.62;
+    transform: scaleY(0.74);
+  }
+}

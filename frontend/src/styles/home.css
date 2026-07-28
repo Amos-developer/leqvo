@@ -125,3 +125,684 @@
   color: #c2255c;
   background: #fff0f5;
 }
+
+.account-page {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.profile-hero,
+.account-balance-card,
+.settings-list button {
+  border: 1px solid #eef1f7;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14px 30px rgba(78, 83, 110, 0.08);
+}
+
+.profile-hero {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 24px;
+}
+
+.avatar {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 900;
+  box-shadow: 0 14px 26px rgba(249, 79, 167, 0.24);
+}
+
+.profile-main {
+  min-width: 0;
+}
+
+.profile-title-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.profile-title-row h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1.1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verified-badge {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: #12845b;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.profile-main p,
+.profile-main span,
+.account-balance-card p,
+.settings-list p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.account-balance-card {
+  padding: 18px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 16%, rgba(255, 255, 255, 0.72), transparent 5rem),
+    linear-gradient(135deg, #ffe0f3, #eee7ff);
+}
+
+.account-balance-card span {
+  color: #725e80;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.account-balance-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.8rem;
+}
+
+.settings-section {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-section h2 {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 1rem;
+}
+
+.settings-list {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-list button {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 70px;
+  padding: 12px;
+  border-radius: 18px;
+  color: inherit;
+  text-align: left;
+}
+
+.settings-list strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.settings-icon {
+  position: relative;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--pink-soft);
+  color: var(--pink);
+}
+
+.settings-icon::before,
+.settings-icon::after {
+  position: absolute;
+  content: "";
+}
+
+.icon-profile::before {
+  top: 10px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.icon-profile::after {
+  bottom: 9px;
+  width: 20px;
+  height: 9px;
+  border: 2px solid currentColor;
+  border-radius: 12px 12px 5px 5px;
+}
+
+.icon-shield::before {
+  width: 20px;
+  height: 24px;
+  clip-path: polygon(50% 0, 90% 14%, 82% 70%, 50% 100%, 18% 70%, 10% 14%);
+  background: currentColor;
+}
+
+.icon-deposits,
+.icon-withdrawals {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.icon-deposits::before,
+.icon-withdrawals::before {
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+}
+
+.icon-deposits::after {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg) translateY(-2px);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+.icon-withdrawals::after {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg) translateY(2px);
+  border-left: 2px solid currentColor;
+  border-top: 2px solid currentColor;
+}
+
+.icon-pin {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.icon-pin::before {
+  top: 10px;
+  width: 18px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-radius: 8px 8px 4px 4px;
+}
+
+.icon-pin::after {
+  bottom: 10px;
+  width: 22px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-radius: 5px;
+}
+
+.icon-address {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.icon-address::before {
+  width: 22px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+}
+
+.icon-address::after {
+  right: 11px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.icon-preferences {
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+
+.icon-preferences::before {
+  width: 22px;
+  height: 22px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.icon-preferences::after {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.logout-action {
+  width: 100%;
+  height: 54px;
+  border: 0;
+  border-radius: 18px;
+  background: #fff0f5;
+  color: #c2255c;
+  font-weight: 900;
+  box-shadow: 0 14px 28px rgba(194, 37, 92, 0.1);
+}
+
+.premium-account {
+  gap: 14px;
+}
+
+.account-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 2px 4px;
+}
+
+.account-topbar p {
+  margin: 0 0 5px;
+  color: var(--pink);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.account-topbar h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.account-topbar button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 16px;
+  background: white;
+  color: var(--violet);
+  box-shadow: 0 12px 26px rgba(78, 83, 110, 0.1);
+}
+
+.premium-profile-card {
+  position: relative;
+  overflow: hidden;
+  padding: 18px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 84% 0%, rgba(255, 255, 255, 0.5), transparent 8rem),
+    linear-gradient(135deg, #29213f, #583a85 52%, #f94fa7);
+  color: white;
+  box-shadow: 0 22px 44px rgba(74, 47, 105, 0.22);
+}
+
+.profile-glow {
+  position: absolute;
+  right: -38px;
+  bottom: -54px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.premium-profile-head {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.premium-avatar {
+  display: grid;
+  width: 70px;
+  height: 70px;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.62);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  font-size: 1.35rem;
+  font-weight: 900;
+  backdrop-filter: blur(10px);
+}
+
+.premium-identity {
+  min-width: 0;
+}
+
+.premium-identity > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.premium-identity h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1.18rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.premium-identity p {
+  margin: 7px 0 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verified-badge.premium {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.profile-meta-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.profile-meta-grid div {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.profile-meta-grid span {
+  display: block;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.profile-meta-grid strong {
+  display: block;
+  margin-top: 5px;
+  overflow: hidden;
+  color: white;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-id-row {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.copy-id-button {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+}
+
+.copy-icon,
+.copy-icon::after {
+  display: block;
+  width: 11px;
+  height: 13px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  content: "";
+}
+
+.copy-icon {
+  position: relative;
+}
+
+.copy-icon::after {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.copy-feedback {
+  display: inline-flex;
+  margin-top: 7px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  font-size: 0.66rem;
+  font-weight: 900;
+}
+
+.portfolio-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  border: 1px solid #eef1f7;
+  border-radius: 26px;
+  background: white;
+  box-shadow: 0 16px 34px rgba(78, 83, 110, 0.09);
+}
+
+.portfolio-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.portfolio-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.7rem;
+}
+
+.portfolio-ring {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, white 54%, transparent 55%),
+    conic-gradient(var(--pink) 0 82%, #edf0f6 82% 100%);
+}
+
+.portfolio-ring span {
+  color: var(--pink);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.finance-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.finance-grid button {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  min-width: 0;
+  min-height: 94px;
+  padding: 12px 4px;
+  border: 1px solid #eef1f7;
+  border-radius: 22px;
+  background: white;
+  box-shadow: 0 14px 28px rgba(78, 83, 110, 0.08);
+}
+
+.finance-grid strong {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.finance-grid small {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.finance-icon {
+  position: relative;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 16px;
+}
+
+.finance-icon::before,
+.finance-icon::after {
+  position: absolute;
+  content: "";
+}
+
+.finance-icon.deposits {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.finance-icon.withdrawals {
+  background: #fff0f5;
+  color: #c2255c;
+}
+
+.finance-icon.pin {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.finance-icon.address {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.finance-icon.deposits::before,
+.finance-icon.withdrawals::before {
+  width: 19px;
+  height: 19px;
+  border: 2px solid currentColor;
+  border-radius: 7px;
+}
+
+.finance-icon.deposits::after {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+}
+
+.finance-icon.withdrawals::after {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  border-left: 2px solid currentColor;
+  border-top: 2px solid currentColor;
+}
+
+.finance-icon.pin::before {
+  top: 10px;
+  width: 18px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-radius: 8px 8px 4px 4px;
+}
+
+.finance-icon.pin::after {
+  bottom: 10px;
+  width: 22px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-radius: 5px;
+}
+
+.finance-icon.address::before {
+  width: 22px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+}
+
+.finance-icon.address::after {
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.premium-settings {
+  display: grid;
+  gap: 11px;
+}
+
+.premium-settings h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.premium-list {
+  display: grid;
+  gap: 10px;
+}
+
+.premium-list button {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 18px;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #eef1f7;
+  border-radius: 20px;
+  background: white;
+  color: inherit;
+  text-align: left;
+  box-shadow: 0 12px 26px rgba(78, 83, 110, 0.07);
+}
+
+.premium-list p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.premium-list i {
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  border-top: 2px solid #c1c5d0;
+  border-right: 2px solid #c1c5d0;
+}
+
+.logout-action.premium {
+  margin-top: 2px;
+  background: linear-gradient(135deg, #fff0f5, #ffffff);
+}

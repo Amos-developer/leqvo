@@ -1,0 +1,141 @@
+.app-logo {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: clamp(8px, 2.8vw, 14px);
+  color: #061a3d;
+  line-height: 1;
+}
+
+.logo-symbol-svg {
+  width: clamp(54px, 18vw, 86px);
+  height: auto;
+  flex: 0 0 auto;
+  overflow: visible;
+  filter: drop-shadow(0 12px 18px rgba(26, 45, 83, 0.14));
+}
+
+.app-logo.compact .logo-symbol-svg {
+  width: clamp(42px, 14vw, 58px);
+}
+
+.logo-text {
+  min-width: 0;
+  color: #061a3d;
+  font-size: clamp(2rem, 11vw, 3.7rem);
+  font-weight: 900;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.logo-text span {
+  color: var(--green);
+}
+
+.new-logo-bar {
+  fill: url("#leqvoLogoGradient");
+}
+
+.new-logo-arrow,
+.new-logo-arrow-head {
+  fill: none;
+  stroke: url("#leqvoLogoGradient");
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.new-logo-arrow-head {
+  stroke-width: 6;
+}
+
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(249, 79, 167, 0.2), transparent 18rem),
+    linear-gradient(145deg, #fff8fc, #eef5ff);
+}
+
+.preloader-card {
+  display: grid;
+  width: min(100%, 320px);
+  justify-items: center;
+  gap: 18px;
+  padding: 30px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 24px 60px rgba(68, 63, 91, 0.16);
+  backdrop-filter: blur(18px);
+  animation: loaderCardIn 520ms ease both;
+}
+
+.preloader .app-logo {
+  justify-content: center;
+  animation: logoPulse 1.4s ease-in-out infinite;
+}
+
+.preloader .logo-symbol-svg {
+  width: 64px;
+}
+
+.preloader .logo-text {
+  font-size: 2.5rem;
+}
+
+.loader-track {
+  position: relative;
+  width: 150px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f0e7f5;
+}
+
+.loader-track span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 46%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--pink), #d94fff);
+  animation: loadingSweep 1.1s ease-in-out infinite;
+}
+
+.preloader p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+@keyframes loaderCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes logoPulse {
+  50% {
+    transform: translateY(-3px) scale(1.03);
+  }
+}
+
+@keyframes loadingSweep {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(230%);
+  }
+}

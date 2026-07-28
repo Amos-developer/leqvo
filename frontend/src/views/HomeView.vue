@@ -78,7 +78,7 @@ onMounted(refreshUser);
     <section class="quick-link-section" aria-labelledby="quick-link-heading">
       <h2 id="quick-link-heading">Quick link</h2>
       <div class="quick-actions">
-        <button><span class="action-icon pink"><i class="line-icon icon-deposit"></i></span>Deposit</button>
+        <RouterLink to="/deposit"><span class="action-icon pink"><i class="line-icon icon-deposit"></i></span>Deposit</RouterLink>
         <button><span class="action-icon green"><i class="line-icon icon-withdrawal"></i></span>Withdrawal</button>
         <button><span class="action-icon amber"><i class="line-icon icon-invite"></i></span>Invite</button>
         <button><span class="action-icon blue"><i class="line-icon icon-team"></i></span>Team</button>

@@ -1,6 +1,9 @@
 @import "./auth.css";
 @import "./home.css";
 @import "./footer.css";
+@import "./brand.css";
+@import "./login.css";
+@import "./deposit.css";
 
 :root {
   --bg: #f5f7fc;
@@ -422,7 +425,8 @@ a {
   box-shadow: 0 14px 30px rgba(78, 83, 110, 0.08);
 }
 
-.quick-actions button {
+.quick-actions button,
+.quick-actions a {
   display: grid;
   gap: 8px;
   justify-items: center;
@@ -439,7 +443,8 @@ a {
   transition: background 180ms ease, transform 180ms ease;
 }
 
-.quick-actions button:hover {
+.quick-actions button:hover,
+.quick-actions a:hover {
   transform: translateY(-2px);
   background: #f8f8fb;
 }
@@ -966,6 +971,11 @@ a {
   color: var(--pink);
   font-weight: 800;
   box-shadow: 0 12px 26px rgba(64, 42, 93, 0.14);
+}
+
+.brand-mark .app-logo svg {
+  width: 28px;
+  height: 28px;
 }
 
 .auth-ring {
