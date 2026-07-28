@@ -12,6 +12,7 @@ const pool = new Pool({
 });
 
 const resetUsersTable = async () => {
+  await pool.query("DROP TABLE IF EXISTS trades;");
   await pool.query("DROP TABLE IF EXISTS deposits;");
   await pool.query("DROP TABLE IF EXISTS users;");
   await pool.query(`
@@ -50,6 +51,36 @@ const resetUsersTable = async () => {
     CREATE UNIQUE INDEX deposits_pending_user_currency_network_unique
       ON deposits (user_id, pay_currency, pay_network)
       WHERE status IN ('waiting', 'confirming', 'confirmed');
+  `);
+  await pool.query(`
+    CREATE TABLE trades (
+      id SERIAL PRIMARY KEY,
+      user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      username VARCHAR(80) NOT NULL,
+      pair VARCHAR(20) NOT NULL,
+      symbol VARCHAR(20) NOT NULL,
+      signal_code VARCHAR(80) NOT NULL,
+      allocation_percent NUMERIC(5, 2) NOT NULL,
+      amount NUMERIC(18, 8) NOT NULL,
+      entry_price NUMERIC(18, 8) NOT NULL DEFAULT 0,
+      exit_price NUMERIC(18, 8),
+      pnl_amount NUMERIC(18, 8) NOT NULL DEFAULT 0,
+      pnl_percent NUMERIC(8, 4) NOT NULL DEFAULT 0,
+      status VARCHAR(20) NOT NULL DEFAULT 'active',
+      opened_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      closed_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      CONSTRAINT trades_status_check CHECK (status IN ('active', 'win', 'loose'))
+    );
+  `);
+  await pool.query(`
+    CREATE INDEX trades_user_id_status_index
+      ON trades (user_id, status);
+  `);
+  await pool.query(`
+    CREATE INDEX trades_created_at_index
+      ON trades (created_at DESC);
   `);
 };
 
