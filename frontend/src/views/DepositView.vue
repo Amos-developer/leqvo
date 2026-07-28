@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { createDeposit } from "../utils/api";
 
 const assets = [
   {
@@ -31,6 +32,8 @@ const selectedNetwork = ref(selectedAsset.value.networks[0]);
 const amount = ref("");
 const MINIMUM_DEPOSIT = 30;
 const router = useRouter();
+const isGenerating = ref(false);
+const errorMessage = ref("");
 
 const availableNetworks = computed(() => selectedAsset.value.networks);
 const isMinimumMet = computed(() => Number(amount.value) >= MINIMUM_DEPOSIT);
@@ -43,26 +46,44 @@ const formattedAmount = computed(() => {
   });
 });
 
-const generateAddress = () => {
+const generateAddress = async () => {
   if (!canGenerate.value) {
     return;
   }
 
-  const assetPrefix = selectedAsset.value.label;
-  const networkPrefix = selectedNetwork.value.value.toUpperCase();
-  const seed = `${assetPrefix}${networkPrefix}${Date.now().toString(36)}`.replace(/[^A-Z0-9]/g, "");
+  const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 
-  localStorage.setItem(
-    "leqvoDepositRequest",
-    JSON.stringify({
-      asset: selectedAsset.value.label,
-      network: selectedNetwork.value.label,
-      amount: formattedAmount.value,
-      address: `NOW-${assetPrefix}-${networkPrefix}-${seed.slice(-10)}-LEQVO`
-    })
-  );
+  isGenerating.value = true;
+  errorMessage.value = "";
 
-  router.push("/deposit/address");
+  try {
+    const result = await createDeposit({
+      userId: user.id,
+      asset: selectedAsset.value.value,
+      network: selectedNetwork.value.value,
+      amount: Number(amount.value)
+    });
+
+    localStorage.setItem(
+      "leqvoDepositRequest",
+      JSON.stringify({
+        asset: result.data.asset,
+        network: result.data.network,
+        amount: formattedAmount.value,
+        payAmount: result.data.payAmount,
+        address: result.data.payAddress,
+        qrCode: result.data.qrCode,
+        paymentId: result.data.paymentId,
+        status: result.data.status
+      })
+    );
+
+    router.push("/deposit/address");
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    isGenerating.value = false;
+  }
 };
 
 watch(selectedAsset, (asset) => {
@@ -130,9 +151,10 @@ watch(selectedAsset, (asset) => {
         </div>
       </label>
       <p v-if="amount && !isMinimumMet" class="minimum-note">Minimum deposit amount is $30.</p>
+      <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
 
-      <button class="primary-button" :disabled="!canGenerate" @click="generateAddress">
-        Generate address
+      <button class="primary-button" :disabled="!canGenerate || isGenerating" @click="generateAddress">
+        {{ isGenerating ? "Requesting address..." : "Generate address" }}
       </button>
     </section>
 

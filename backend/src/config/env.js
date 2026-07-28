@@ -10,6 +10,13 @@ const env = {
     user: process.env.DB_USER || "postgres",
     password: process.env.DB_PASSWORD || "postgres",
     ssl: process.env.DB_SSL === "true"
+  },
+  nowpayments: {
+    apiKey: process.env.NOWPAYMENTS_API_KEY,
+    publicKey: process.env.NOWPAYMENTS_PUBLIC_KEY,
+    ipnSecret: process.env.NOWPAYMENTS_IPN_SECRET,
+    ipnCallbackUrl: process.env.NOWPAYMENTS_IPN_CALLBACK_URL,
+    apiUrl: process.env.NOWPAYMENTS_API_URL || "https://api.nowpayments.io/v1"
   }
 };
 

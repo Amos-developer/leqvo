@@ -1,15 +1,12 @@
 <script setup>
 import { computed, ref } from "vue";
+import { refreshDepositStatus } from "../utils/api";
 
 const copied = ref(false);
+const isRefreshing = ref(false);
+const refreshMessage = ref("");
 const request = computed(() => {
   return JSON.parse(localStorage.getItem("leqvoDepositRequest") || "{}");
-});
-
-const qrCells = computed(() => {
-  return Array.from({ length: 81 }, (_, index) => {
-    return index % 2 === 0 || index % 5 === 0 || index % 13 === 0;
-  });
 });
 
 const copyAddress = async () => {
@@ -33,6 +30,34 @@ const copyAddress = async () => {
     copied.value = false;
   }, 1400);
 };
+
+const checkPaymentStatus = async () => {
+  if (!request.value.paymentId) {
+    return;
+  }
+
+  isRefreshing.value = true;
+  refreshMessage.value = "";
+
+  try {
+    const result = await refreshDepositStatus(request.value.paymentId);
+    const updatedRequest = {
+      ...request.value,
+      status: result.data.status,
+      payAmount: result.data.payAmount,
+      creditedAt: result.data.creditedAt
+    };
+
+    localStorage.setItem("leqvoDepositRequest", JSON.stringify(updatedRequest));
+    refreshMessage.value = result.data.creditedAt
+      ? "Payment confirmed. Balance updated."
+      : `Current status: ${result.data.status}`;
+  } catch (error) {
+    refreshMessage.value = error.message;
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 </script>
 
 <template>
@@ -47,14 +72,13 @@ const copyAddress = async () => {
     <section v-if="request.address" class="scan-card">
       <div class="scan-summary">
         <span>Send exactly</span>
-        <strong>{{ request.amount }} {{ request.asset }}</strong>
+        <strong>{{ request.payAmount || request.amount }} {{ request.asset }}</strong>
         <p>{{ request.network }} network</p>
+        <p class="scan-status">Status: {{ request.status || "waiting" }}</p>
       </div>
 
       <div class="scan-qr-shell">
-        <div class="scan-qr">
-          <span v-for="(dark, index) in qrCells" :key="index" :class="{ dark }"></span>
-        </div>
+        <img class="real-qr-code" :src="request.qrCode" alt="Deposit address QR code" />
       </div>
 
       <div class="scan-address">
@@ -66,7 +90,10 @@ const copyAddress = async () => {
         </button>
       </div>
 
-      <RouterLink to="/" class="send-money-button">I have sent the money</RouterLink>
+      <button class="send-money-button" :disabled="isRefreshing" @click="checkPaymentStatus">
+        {{ isRefreshing ? "Checking..." : "I have sent the money" }}
+      </button>
+      <p v-if="refreshMessage" class="copy-note">{{ refreshMessage }}</p>
     </section>
 
     <section v-else class="deposit-card empty-deposit">

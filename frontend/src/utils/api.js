@@ -41,3 +41,16 @@ export const loginUser = (payload) => {
 export const getUserById = (id) => {
   return request(`/users/${id}`);
 };
+
+export const createDeposit = (payload) => {
+  return request("/deposits/create", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const refreshDepositStatus = (paymentId) => {
+  return request(`/deposits/${paymentId}/refresh`, {
+    method: "POST"
+  });
+};

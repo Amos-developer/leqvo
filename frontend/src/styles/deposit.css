@@ -425,27 +425,16 @@
   background: linear-gradient(135deg, #fff0f8, #f5e9ff);
 }
 
-.scan-qr {
-  display: grid;
+.real-qr-code {
   width: min(64vw, 230px);
   aspect-ratio: 1;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 5px;
-  padding: 16px;
+  padding: 12px;
   border-radius: 28px;
   background: white;
+  object-fit: contain;
   box-shadow:
     0 18px 34px rgba(78, 83, 110, 0.12),
     inset 0 0 0 1px #eef1f7;
-}
-
-.scan-qr span {
-  border-radius: 5px;
-  background: #f0edf5;
-}
-
-.scan-qr span.dark {
-  background: linear-gradient(135deg, var(--pink), #9d36f2);
 }
 
 .scan-address {

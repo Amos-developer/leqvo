@@ -77,11 +77,25 @@ const findUserByReferralCode = async (referralCode) => {
   return result.rows[0] || null;
 };
 
+const incrementUserBalance = async (id, amount, client = database) => {
+  const result = await client.query(
+    `UPDATE users
+     SET balance = balance + $1,
+         updated_at = NOW()
+     WHERE id = $2
+     RETURNING ${userFields}`,
+    [amount, id]
+  );
+
+  return result.rows[0] || null;
+};
+
 module.exports = {
   createUser,
   findAllUsers,
   findUserById,
   findUserByEmail,
   findUserWithPasswordByEmail,
-  findUserByReferralCode
+  findUserByReferralCode,
+  incrementUserBalance
 };

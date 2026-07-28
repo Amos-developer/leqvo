@@ -11,23 +11,9 @@ const pool = new Pool({
   ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false
 });
 
-const resetUsersTable = async () => {
-  await pool.query("DROP TABLE IF EXISTS deposits;");
-  await pool.query("DROP TABLE IF EXISTS users;");
+const createDepositsTable = async () => {
   await pool.query(`
-    CREATE TABLE users (
-      id VARCHAR(10) PRIMARY KEY,
-      username VARCHAR(80) NOT NULL UNIQUE,
-      email VARCHAR(160) NOT NULL UNIQUE,
-      password TEXT NOT NULL,
-      referral_code CHAR(6) NOT NULL UNIQUE,
-      balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `);
-  await pool.query(`
-    CREATE TABLE deposits (
+    CREATE TABLE IF NOT EXISTS deposits (
       id SERIAL PRIMARY KEY,
       user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       username VARCHAR(80) NOT NULL,
@@ -46,19 +32,28 @@ const resetUsersTable = async () => {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+
   await pool.query(`
-    CREATE UNIQUE INDEX deposits_pending_user_currency_network_unique
+    CREATE UNIQUE INDEX IF NOT EXISTS deposits_pending_user_currency_network_unique
       ON deposits (user_id, pay_currency, pay_network)
       WHERE status IN ('waiting', 'confirming', 'confirmed');
   `);
+
+  await pool.query(`
+    ALTER TABLE deposits
+      ADD COLUMN IF NOT EXISTS price_amount NUMERIC(18, 8) NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS actually_paid NUMERIC(18, 8) NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS actually_paid_at_fiat NUMERIC(18, 8) NOT NULL DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS credited_at TIMESTAMPTZ;
+  `);
 };
 
-resetUsersTable()
+createDepositsTable()
   .then(() => {
-    console.log("Users table reset successfully");
+    console.log("Deposits table ready");
   })
   .catch((error) => {
-    console.error("Failed to reset users table:", error.message);
+    console.error("Failed to create deposits table:", error.message);
     process.exitCode = 1;
   })
   .finally(() => {
