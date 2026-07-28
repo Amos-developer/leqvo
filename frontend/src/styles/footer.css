@@ -1,0 +1,133 @@
+.app-footer {
+  position: fixed;
+  right: 50%;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  width: min(100%, 430px);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding: 9px 8px max(10px, env(safe-area-inset-bottom));
+  transform: translateX(50%);
+  border: 1px solid rgba(235, 238, 245, 0.82);
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 -18px 34px rgba(54, 56, 76, 0.12);
+  backdrop-filter: blur(16px);
+}
+
+.footer-link {
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+  min-width: 0;
+  padding: 9px 2px;
+  border-radius: 16px;
+  color: #7b7c86;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+  transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.footer-link.router-link-active {
+  color: var(--pink);
+  background: var(--pink-soft);
+}
+
+.footer-link:hover {
+  transform: translateY(-2px);
+}
+
+.footer-icon {
+  position: relative;
+  display: inline-block;
+  width: 21px;
+  height: 21px;
+  color: currentColor;
+}
+
+.footer-icon::before,
+.footer-icon::after {
+  position: absolute;
+  content: "";
+}
+
+.footer-icon-home {
+  transform: translateY(2px) rotate(45deg) scale(0.82);
+  border: 2px solid currentColor;
+  border-radius: 4px 4px 7px 7px;
+}
+
+.footer-icon-markets::before {
+  left: 1px;
+  bottom: 2px;
+  width: 4px;
+  height: 10px;
+  border-radius: 99px;
+  background: currentColor;
+  box-shadow: 7px -5px 0 currentColor, 14px -1px 0 currentColor;
+}
+
+.footer-icon-trades {
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.footer-icon-trades::before {
+  left: 5px;
+  top: 5px;
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+
+.footer-icon-history {
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.footer-icon-history::before {
+  left: 9px;
+  top: 4px;
+  width: 2px;
+  height: 7px;
+  background: currentColor;
+}
+
+.footer-icon-history::after {
+  left: 9px;
+  top: 10px;
+  width: 6px;
+  height: 2px;
+  background: currentColor;
+}
+
+.footer-icon-account::before {
+  left: 6px;
+  top: 1px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.footer-icon-account::after {
+  left: 2px;
+  bottom: 1px;
+  width: 17px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-radius: 12px 12px 4px 4px;
+}
+
+@media (min-width: 760px) {
+  .app-footer {
+    position: fixed;
+    right: 50%;
+    transform: translateX(50%);
+  }
+}
