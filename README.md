@@ -1,0 +1,2 @@
+# leqvo
+Signal Trading Platform
