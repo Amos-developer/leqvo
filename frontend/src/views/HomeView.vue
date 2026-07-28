@@ -1,13 +1,21 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getUserById } from "../utils/api";
+import { getPopularCrypto, getUserById } from "../utils/api";
+import { createBinanceMarketSocket, createInitialBinanceMarkets } from "../utils/binanceMarketSocket";
 
 const router = useRouter();
 const storedUser = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 const user = ref(storedUser);
 const isLoadingUser = ref(false);
 const userError = ref("");
+const cryptoMarkets = ref(createInitialBinanceMarkets());
+const isLoadingMarkets = ref(true);
+const marketError = ref("");
+const marketSocketStatus = ref("Connecting to Binance live");
+const activeMarketTab = ref("all");
+const cryptoSearch = ref("");
+let marketSocket = null;
 
 const username = computed(() => user.value.username || "Member");
 const balance = computed(() => {
@@ -40,12 +48,94 @@ const refreshUser = async () => {
   }
 };
 
+const formatPrice = (price) => {
+  return Number(price || 0).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: price < 1 ? 6 : 2
+  });
+};
+
+const formatChange = (change) => {
+  const value = Number(change || 0);
+  const sign = value > 0 ? "+" : "";
+
+  return `${sign}${value.toFixed(2)}%`;
+};
+
+const filteredMarkets = computed(() => {
+  const search = cryptoSearch.value.trim().toLowerCase();
+
+  return cryptoMarkets.value.filter((coin) => {
+    const matchesSearch =
+      !search ||
+      coin.name.toLowerCase().includes(search) ||
+      coin.symbol.toLowerCase().includes(search);
+
+    const matchesTab =
+      activeMarketTab.value === "all" ||
+      (activeMarketTab.value === "gainers" && coin.change24h >= 0) ||
+      (activeMarketTab.value === "losers" && coin.change24h < 0);
+
+    return matchesSearch && matchesTab;
+  });
+});
+
+const fetchMarkets = async () => {
+  marketError.value = "";
+
+  try {
+    const result = await getPopularCrypto();
+    cryptoMarkets.value = result.data.map((coin) => ({
+      ...coin,
+      pair: `${coin.symbol}USDT`,
+      lastUpdated: new Date().toISOString()
+    }));
+  } catch (error) {
+    marketError.value = "Could not load backup market prices";
+  } finally {
+    isLoadingMarkets.value = false;
+  }
+};
+
+const startMarketStream = () => {
+  marketSocket = createBinanceMarketSocket({
+    onOpen: () => {
+      marketSocketStatus.value = "See More";
+      marketError.value = "";
+    },
+    onUpdate: (updatedMarket) => {
+      cryptoMarkets.value = cryptoMarkets.value.map((market) => {
+        return market.pair === updatedMarket.pair ? updatedMarket : market;
+      });
+      isLoadingMarkets.value = false;
+    },
+    onError: () => {
+      marketSocketStatus.value = "Backup prices";
+      marketError.value = "Binance live stream is unavailable on this network";
+      fetchMarkets();
+    },
+    onClose: () => {
+      if (marketSocketStatus.value === "Binance live") {
+        marketSocketStatus.value = "Reconnecting...";
+      }
+    }
+  });
+};
+
 const handleLogout = () => {
   localStorage.removeItem("leqvoUser");
   router.push("/login");
 };
 
-onMounted(refreshUser);
+onMounted(() => {
+  refreshUser();
+  startMarketStream();
+});
+
+onUnmounted(() => {
+  marketSocket?.close();
+});
 </script>
 
 <template>
@@ -113,76 +203,50 @@ onMounted(refreshUser);
     <section class="transactions">
       <div class="section-heading">
         <h2>Popular Crypto</h2>
-        <RouterLink to="/markets">See all</RouterLink>
+        <RouterLink to="/markets">{{ marketSocketStatus }}</RouterLink>
       </div>
       <div class="search-row">
         <label>
           <span class="icon-search"></span>
-          <input type="search" placeholder="Search crypto..." />
+          <input v-model="cryptoSearch" type="search" placeholder="Search crypto..." />
         </label>
         <button class="filter-button" aria-label="Filter"><span class="icon-filter"></span></button>
       </div>
       <div class="tabs">
-        <button class="active">All</button>
-        <button><span class="dot green"></span>Gainers</button>
-        <button><span class="dot pink-dot"></span>Losers</button>
+        <button :class="{ active: activeMarketTab === 'all' }" @click="activeMarketTab = 'all'">All</button>
+        <button :class="{ active: activeMarketTab === 'gainers' }" @click="activeMarketTab = 'gainers'">
+          <span class="dot green"></span>Gainers
+        </button>
+        <button :class="{ active: activeMarketTab === 'losers' }" @click="activeMarketTab = 'losers'">
+          <span class="dot pink-dot"></span>Losers
+        </button>
       </div>
       <div class="crypto-list">
-        <article>
-          <span class="crypto-icon btc">BTC</span>
-          <div>
-            <strong>Bitcoin</strong>
-            <p>BTC / USDT</p>
-          </div>
-          <div class="crypto-price">
-            <strong>$67,420.00</strong>
-            <span class="market-change up">+2.41%</span>
-          </div>
+        <article v-if="isLoadingMarkets" class="market-state">
+          <strong>Loading live markets...</strong>
         </article>
-        <article>
-          <span class="crypto-icon eth">ETH</span>
-          <div>
-            <strong>Ethereum</strong>
-            <p>ETH / USDT</p>
-          </div>
-          <div class="crypto-price">
-            <strong>$3,520.18</strong>
-            <span class="market-change up">+1.18%</span>
-          </div>
+        <article v-else-if="marketError" class="market-state">
+          <strong>{{ marketError }}</strong>
+          <button @click="fetchMarkets">Retry</button>
         </article>
-        <article>
-          <span class="crypto-icon bnb">BNB</span>
-          <div>
-            <strong>BNB</strong>
-            <p>BNB / USDT</p>
-          </div>
-          <div class="crypto-price">
-            <strong>$612.40</strong>
-            <span class="market-change down">-0.64%</span>
-          </div>
+        <article v-else-if="!filteredMarkets.length" class="market-state">
+          <strong>No crypto found</strong>
         </article>
-        <article>
-          <span class="crypto-icon sol">SOL</span>
-          <div>
-            <strong>Solana</strong>
-            <p>SOL / USDT</p>
-          </div>
-          <div class="crypto-price">
-            <strong>$148.72</strong>
-            <span class="market-change up">+4.08%</span>
-          </div>
-        </article>
-        <article>
-          <span class="crypto-icon xrp">XRP</span>
-          <div>
-            <strong>XRP</strong>
-            <p>XRP / USDT</p>
-          </div>
-          <div class="crypto-price">
-            <strong>$0.58</strong>
-            <span class="market-change down">-1.22%</span>
-          </div>
-        </article>
+        <template v-else>
+          <article v-for="coin in filteredMarkets" :key="coin.id">
+            <img class="crypto-logo" :src="coin.image" :alt="coin.name" />
+            <div>
+              <strong>{{ coin.name }}</strong>
+              <p>{{ coin.symbol }} / USDT - Rank #{{ coin.marketCapRank }}</p>
+            </div>
+            <div class="crypto-price">
+              <strong>{{ formatPrice(coin.price) }}</strong>
+              <span class="market-change" :class="coin.change24h >= 0 ? 'up' : 'down'">
+                {{ formatChange(coin.change24h) }}
+              </span>
+            </div>
+          </article>
+        </template>
       </div>
     </section>
   </section>

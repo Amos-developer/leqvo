@@ -4,6 +4,7 @@
 @import "./brand.css";
 @import "./login.css";
 @import "./deposit.css";
+@import "./trade.css";
 
 :root {
   --bg: #f5f7fc;
@@ -811,21 +812,27 @@ a {
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   margin-top: 14px;
+  padding: 5px;
+  border-radius: 999px;
+  background: #f4f5f8;
 }
 
 .tabs button {
   min-width: 0;
-  height: 40px;
+  height: 38px;
   border: 0;
   border-radius: 999px;
-  background: #f7f7fa;
+  background: transparent;
   color: #7b7783;
   font-size: 0.76rem;
+  font-weight: 900;
+  transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
 .tabs .active {
   background: var(--pink);
   color: white;
+  box-shadow: 0 10px 22px rgba(249, 79, 167, 0.22);
 }
 
 .dot {

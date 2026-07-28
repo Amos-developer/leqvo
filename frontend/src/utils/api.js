@@ -54,3 +54,7 @@ export const refreshDepositStatus = (paymentId) => {
     method: "POST"
   });
 };
+
+export const getPopularCrypto = () => {
+  return request("/markets/popular");
+};
