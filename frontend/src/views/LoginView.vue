@@ -25,7 +25,7 @@ const handleLogin = async () => {
     localStorage.setItem("leqvoUser", JSON.stringify(result.data));
     successMessage.value = `Welcome back, ${result.data.username}.`;
     setTimeout(() => {
-      router.push("/");
+      router.push(result.data.isAdmin ? "/admin" : "/");
     }, 700);
   } catch (error) {
     errorMessage.value = error.message;

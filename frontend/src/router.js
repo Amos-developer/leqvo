@@ -10,6 +10,7 @@ import AccountView from "./views/AccountView.vue";
 import DepositView from "./views/DepositView.vue";
 import DepositAddressView from "./views/DepositAddressView.vue";
 import WithdrawalView from "./views/WithdrawalView.vue";
+import AdminView from "./views/AdminView.vue";
 
 const routes = [
   { path: "/", name: "home", component: HomeView, meta: { requiresAuth: true } },
@@ -21,6 +22,12 @@ const routes = [
   { path: "/deposit", name: "deposit", component: DepositView, meta: { requiresAuth: true } },
   { path: "/deposit/address", name: "deposit-address", component: DepositAddressView, meta: { requiresAuth: true } },
   { path: "/withdrawal", name: "withdrawal", component: WithdrawalView, meta: { requiresAuth: true } },
+  {
+    path: "/admin",
+    name: "admin",
+    component: AdminView,
+    meta: { requiresAuth: true, requiresAdmin: true, hideFooter: true }
+  },
   { path: "/login", name: "login", component: LoginView },
   { path: "/register", name: "register", component: RegisterView },
   { path: "/forgot-password", name: "forgot-password", component: ForgotPasswordView }
@@ -33,13 +40,18 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const savedUser = localStorage.getItem("leqvoUser");
+  const user = savedUser ? JSON.parse(savedUser) : null;
 
   if (to.meta.requiresAuth && !savedUser) {
     return "/login";
   }
 
-  if ((to.name === "login" || to.name === "register") && savedUser) {
+  if (to.meta.requiresAdmin && !user?.isAdmin) {
     return "/";
+  }
+
+  if ((to.name === "login" || to.name === "register") && savedUser) {
+    return user?.isAdmin ? "/admin" : "/";
   }
 
   return true;

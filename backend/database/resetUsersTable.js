@@ -23,6 +23,7 @@ const resetUsersTable = async () => {
       password TEXT NOT NULL,
       referral_code CHAR(6) NOT NULL UNIQUE,
       balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+      is_admin BOOLEAN NOT NULL DEFAULT FALSE,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );

@@ -9,6 +9,7 @@
      "build": "echo \"No build required\"",
     "db:create-deposits": "node database/createDepositsTable.js",
     "db:create-trades": "node database/createTradesTable.js",
+    "db:update-users": "node database/updateUsersTable.js",
     "db:check-users": "node database/checkUsersTable.js",
     "db:check-deposits": "node database/checkDepositsTable.js",
     "db:check-trades": "node database/checkTradesTable.js"

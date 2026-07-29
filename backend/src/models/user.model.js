@@ -6,6 +6,7 @@ const userFields = `
   email,
   referral_code AS "referralCode",
   balance,
+  is_admin AS "isAdmin",
   created_at AS "createdAt",
   updated_at AS "updatedAt"
 `;

@@ -12,8 +12,22 @@ const pool = new Pool({
 
 const connectDatabase = async () => {
   const client = await pool.connect();
-  client.release();
-  console.log("PostgreSQL database connection established");
+
+  try {
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS users_is_admin_index
+        ON users (is_admin);
+    `);
+
+    console.log("PostgreSQL database connection established");
+  } finally {
+    client.release();
+  }
 };
 
 const query = (text, params) => pool.query(text, params);

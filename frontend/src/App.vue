@@ -15,7 +15,7 @@ import AppPreloader from "./components/AppPreloader.vue";
 const route = useRoute();
 const isLoading = ref(true);
 const hasMounted = ref(false);
-const showFooter = computed(() => route.meta.requiresAuth);
+const showFooter = computed(() => route.meta.requiresAuth && !route.meta.hideFooter);
 const PRELOADER_DURATION_MS = 2000;
 
 onMounted(() => {
