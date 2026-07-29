@@ -188,7 +188,6 @@ onMounted(loadAdminData);
             <span>{{ adminName.charAt(0).toUpperCase() }}</span>
             <div>
               <strong>{{ adminName }}</strong>
-              <small>Operator</small>
             </div>
           </button>
         </div>

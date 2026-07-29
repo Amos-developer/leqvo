@@ -22,7 +22,10 @@ const createUniqueUserId = async () => {
 };
 
 const createUser = async (req, res) => {
-  const { username, email, password, referralCode } = req.body;
+  const username = req.body.username?.trim();
+  const email = req.body.email?.trim().toLowerCase();
+  const password = req.body.password;
+  const referralCode = req.body.referralCode?.trim();
 
   if (!username || !email || !password || !referralCode) {
     return res.status(400).json({
@@ -74,12 +77,13 @@ const createUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const email = req.body.email?.trim().toLowerCase();
+  const password = req.body.password;
 
   if (!email || !password) {
     return res.status(400).json({
       success: false,
-      message: "Email and password are required"
+      message: "Email and password are required. Please fill both fields and try again."
     });
   }
 
