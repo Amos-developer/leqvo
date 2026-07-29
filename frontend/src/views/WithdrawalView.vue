@@ -198,30 +198,6 @@ const submitWithdrawal = () => {
       </div>
     </section>
 
-    <aside class="withdrawal-visual-panel" aria-hidden="true">
-      <div class="visual-orbit">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-      <div class="visual-card primary">
-        <small>Processing</small>
-        <strong>Secure payout</strong>
-        <div class="visual-progress"><span></span></div>
-      </div>
-      <div class="visual-card floating">
-        <small>Fee</small>
-        <strong>5%</strong>
-      </div>
-      <div class="visual-wallet">
-        <div class="wallet-top"></div>
-        <div class="wallet-body">
-          <span></span>
-        </div>
-      </div>
-      <div class="visual-transfer-line"></div>
-    </aside>
-
     <section class="withdrawal-guide" aria-labelledby="withdrawal-guide-title">
       <div class="withdrawal-guide-heading">
         <span>Guide</span>

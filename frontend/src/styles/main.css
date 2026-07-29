@@ -1303,6 +1303,35 @@ a {
   }
 }
 
+@media (max-width: 759px) {
+  .auth-page.has-auth-visual {
+    min-height: 100dvh;
+    place-items: stretch;
+    padding: 0;
+  }
+
+  .auth-page.has-auth-visual .auth-panel {
+    display: grid;
+    width: 100%;
+    min-height: 100dvh;
+    align-content: center;
+    margin: 0;
+    padding: 22px 16px 24px;
+  }
+
+  .auth-page.has-auth-visual .auth-form.register-form {
+    gap: 12px;
+    margin-top: 18px;
+    padding: 15px;
+    border-radius: 22px;
+  }
+
+  .auth-page.has-auth-visual .auth-form.register-form input {
+    height: 48px;
+    border-radius: 14px;
+  }
+}
+
 @keyframes pageEnter {
   from {
     opacity: 0;
