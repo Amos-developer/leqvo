@@ -33,6 +33,7 @@ const form = ref({
   email: "",
   password: "",
   referralCode: "",
+  inviterCode: "",
   balance: 0,
   isAdmin: false,
   emailVerified: false
@@ -62,6 +63,7 @@ const openAddUser = () => {
     email: "",
     password: "",
     referralCode: generateReferralCode(),
+    inviterCode: "",
     balance: 0,
     isAdmin: false,
     emailVerified: false
@@ -77,6 +79,7 @@ const editUser = (user) => {
     email: user.email,
     password: "",
     referralCode: user.referralCode,
+    inviterCode: "",
     balance: Number(user.balance || 0),
     isAdmin: user.isAdmin,
     emailVerified: user.emailVerified
@@ -190,6 +193,10 @@ const removeUser = async (user) => {
         <input v-model.trim="form.referralCode" type="text" maxlength="6" :disabled="Boolean(editingUserId)" required />
       </label>
       <label>
+        Inviter code
+        <input v-model.trim="form.inviterCode" type="text" maxlength="6" placeholder="Optional" :disabled="Boolean(editingUserId)" />
+      </label>
+      <label>
         Balance
         <input v-model.number="form.balance" type="number" min="0" step="0.01" />
       </label>
@@ -242,6 +249,8 @@ const removeUser = async (user) => {
         <article>
           <h4>Details</h4>
           <p>Referral: {{ selectedUserDetails.user.referralCode }}</p>
+          <p>Referred by: {{ selectedUserDetails.user.referredBy || "Direct" }}</p>
+          <p>Members: {{ selectedUserDetails.user.memberCount || 0 }}</p>
           <p>Status: {{ selectedUserDetails.user.isActive ? "Active" : "Inactive" }}</p>
           <p>Email: {{ selectedUserDetails.user.emailVerified ? "Verified" : "Unverified" }}</p>
           <p>Role: {{ selectedUserDetails.user.isAdmin ? "Admin" : "Member" }}</p>
@@ -266,6 +275,8 @@ const removeUser = async (user) => {
             <th>User</th>
             <th>ID</th>
             <th>Balance</th>
+            <th>Referred By</th>
+            <th>Members</th>
             <th>Status</th>
             <th>Verified</th>
             <th>Role</th>
@@ -282,6 +293,8 @@ const removeUser = async (user) => {
             </td>
             <td>{{ user.id }}</td>
             <td>{{ money(user.balance) }}</td>
+            <td>{{ user.referredBy || "Direct" }}</td>
+            <td>{{ user.memberCount || 0 }}</td>
             <td>
               <span class="admin-status-pill" :class="{ inactive: !user.isActive }">
                 {{ user.isActive ? "Active" : "Inactive" }}

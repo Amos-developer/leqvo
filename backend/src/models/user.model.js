@@ -5,6 +5,7 @@ const userFields = `
   username,
   email,
   referral_code AS "referralCode",
+  referred_by AS "referredBy",
   balance,
   is_admin AS "isAdmin",
   email_verified AS "emailVerified",
@@ -12,12 +13,12 @@ const userFields = `
   updated_at AS "updatedAt"
 `;
 
-const createUser = async ({ id, username, email, password, referralCode }) => {
+const createUser = async ({ id, username, email, password, referralCode, referredBy = null }) => {
   const result = await database.query(
-    `INSERT INTO users (id, username, email, password, referral_code)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO users (id, username, email, password, referral_code, referred_by)
+     VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING ${userFields}`,
-    [id, username, email, password, referralCode]
+    [id, username, email, password, referralCode, referredBy]
   );
 
   return result.rows[0];

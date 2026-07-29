@@ -28,7 +28,7 @@ const quickActions = [
   { label: "Deposit", to: "/deposit", icon: depositIcon, tone: "pink" },
   { label: "Withdrawal", to: "/withdrawal", icon: withdrawalIcon, tone: "green" },
   { label: "Invite", icon: inviteIcon, tone: "amber" },
-  { label: "Team", icon: teamIcon, tone: "blue" },
+  { label: "Team", to: "/team", icon: teamIcon, tone: "blue" },
   { label: "Lucky-box", icon: luckyBoxIcon, tone: "violet" },
   { label: "Leadership", icon: leadershipIcon, tone: "teal" },
   { label: "Rewards", icon: rewardsIcon, tone: "rose" },

@@ -74,6 +74,8 @@ const getUsers = async () => {
       u.username,
       u.email,
       u.referral_code AS "referralCode",
+      u.referred_by AS "referredBy",
+      (SELECT COUNT(*) FROM teams t WHERE t.user_id = u.id)::INT AS "memberCount",
       u.balance,
       u.is_admin AS "isAdmin",
       u.email_verified AS "emailVerified",
@@ -116,13 +118,13 @@ const getUserSummary = async () => {
   return result.rows[0];
 };
 
-const createUser = async ({ id, username, email, password, referralCode, balance = 0, isAdmin = false, emailVerified = false }) => {
+const createUser = async ({ id, username, email, password, referralCode, referredBy = null, balance = 0, isAdmin = false, emailVerified = false }) => {
   const result = await database.query(
-    `INSERT INTO users (id, username, email, password, referral_code, balance, is_admin, email_verified)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-     RETURNING id, username, email, referral_code AS "referralCode", balance, is_admin AS "isAdmin",
+    `INSERT INTO users (id, username, email, password, referral_code, referred_by, balance, is_admin, email_verified)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     RETURNING id, username, email, referral_code AS "referralCode", referred_by AS "referredBy", balance, is_admin AS "isAdmin",
        email_verified AS "emailVerified", created_at AS "createdAt"`,
-    [id, username, email, password, referralCode, balance, isAdmin, emailVerified]
+    [id, username, email, password, referralCode, referredBy, balance, isAdmin, emailVerified]
   );
 
   return result.rows[0];
@@ -211,6 +213,8 @@ const getUserDetails = async (id) => {
          u.username,
          u.email,
          u.referral_code AS "referralCode",
+         u.referred_by AS "referredBy",
+         (SELECT COUNT(*) FROM teams t WHERE t.user_id = u.id)::INT AS "memberCount",
          u.balance,
          u.is_admin AS "isAdmin",
          u.email_verified AS "emailVerified",

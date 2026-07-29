@@ -21,6 +21,7 @@ const connectDatabase = async () => {
         email VARCHAR(160) NOT NULL UNIQUE,
         password TEXT NOT NULL,
         referral_code CHAR(6) NOT NULL UNIQUE,
+        referred_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
         balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
         is_admin BOOLEAN NOT NULL DEFAULT FALSE,
         email_verified BOOLEAN NOT NULL DEFAULT FALSE,
@@ -37,6 +38,11 @@ const connectDatabase = async () => {
     await client.query(`
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS referred_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL;
     `);
 
     await client.query(`
@@ -130,6 +136,22 @@ const connectDatabase = async () => {
     await client.query(`
       CREATE INDEX IF NOT EXISTS withdrawals_created_at_index
         ON withdrawals (created_at DESC);
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS teams (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        member_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        level INT NOT NULL CHECK (level BETWEEN 1 AND 5),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (user_id, member_id)
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS teams_user_id_level_index
+        ON teams (user_id, level);
     `);
 
     console.log("PostgreSQL database connection established");

@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const userModel = require("../models/user.model");
+const teamModel = require("../models/team.model");
 
 const PASSWORD_SALT_ROUNDS = 10;
 
@@ -8,6 +9,8 @@ const generateUserId = () => {
 
   return `LEQ-${numbers}`;
 };
+
+const generateReferralCode = () => String(Math.floor(100000 + Math.random() * 900000));
 
 const createUniqueUserId = async () => {
   let id = generateUserId();
@@ -21,23 +24,28 @@ const createUniqueUserId = async () => {
   return id;
 };
 
+const createUniqueReferralCode = async () => {
+  let referralCode = generateReferralCode();
+  let existingUser = await userModel.findUserByReferralCode(referralCode);
+
+  while (existingUser) {
+    referralCode = generateReferralCode();
+    existingUser = await userModel.findUserByReferralCode(referralCode);
+  }
+
+  return referralCode;
+};
+
 const createUser = async (req, res) => {
   const username = req.body.username?.trim();
   const email = req.body.email?.trim().toLowerCase();
   const password = req.body.password;
-  const referralCode = req.body.referralCode?.trim();
+  const inviterCode = req.body.inviterCode?.trim();
 
-  if (!username || !email || !password || !referralCode) {
+  if (!username || !email || !password) {
     return res.status(400).json({
       success: false,
-      message: "Username, email, password, and referralCode are required"
-    });
-  }
-
-  if (!/^\d{6}$/.test(referralCode)) {
-    return res.status(400).json({
-      success: false,
-      message: "Referral code must be exactly 6 numbers"
+      message: "Username, email, and password are required"
     });
   }
 
@@ -50,24 +58,22 @@ const createUser = async (req, res) => {
     });
   }
 
-  const existingReferralCode = await userModel.findUserByReferralCode(referralCode);
-
-  if (existingReferralCode) {
-    return res.status(409).json({
-      success: false,
-      message: "Referral code is already in use"
-    });
-  }
-
   const id = await createUniqueUserId();
+  const referralCode = await createUniqueReferralCode();
+  const inviter = inviterCode ? await userModel.findUserByReferralCode(inviterCode) : null;
   const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
   const user = await userModel.createUser({
     id,
     username,
     email,
     password: hashedPassword,
-    referralCode
+    referralCode,
+    referredBy: inviter?.id || null
   });
+
+  if (inviter) {
+    await teamModel.createTeamLinks({ inviterId: inviter.id, memberId: user.id });
+  }
 
   return res.status(201).json({
     success: true,

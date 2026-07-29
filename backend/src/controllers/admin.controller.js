@@ -1,10 +1,12 @@
 const adminModel = require("../models/admin.model");
 const userModel = require("../models/user.model");
+const teamModel = require("../models/team.model");
 const bcrypt = require("bcryptjs");
 
 const PASSWORD_SALT_ROUNDS = 10;
 
 const generateUserId = () => `LEQ-${Math.floor(100000 + Math.random() * 900000)}`;
+const generateReferralCode = () => String(Math.floor(100000 + Math.random() * 900000));
 
 const createUniqueUserId = async () => {
   let id = generateUserId();
@@ -16,6 +18,18 @@ const createUniqueUserId = async () => {
   }
 
   return id;
+};
+
+const createUniqueReferralCode = async () => {
+  let referralCode = generateReferralCode();
+  let existingUser = await userModel.findUserByReferralCode(referralCode);
+
+  while (existingUser) {
+    referralCode = generateReferralCode();
+    existingUser = await userModel.findUserByReferralCode(referralCode);
+  }
+
+  return referralCode;
 };
 
 const requireAdmin = async (req, res) => {
@@ -110,12 +124,13 @@ const createUser = async (req, res) => {
   const username = req.body.username?.trim();
   const email = req.body.email?.trim().toLowerCase();
   const password = req.body.password;
-  const referralCode = req.body.referralCode?.trim();
+  const requestedReferralCode = req.body.referralCode?.trim();
+  const inviterCode = req.body.inviterCode?.trim();
 
-  if (!username || !email || !password || !referralCode) {
+  if (!username || !email || !password) {
     return res.status(400).json({
       success: false,
-      message: "Username, email, password, and referralCode are required"
+      message: "Username, email, and password are required"
     });
   }
 
@@ -126,7 +141,7 @@ const createUser = async (req, res) => {
     });
   }
 
-  if (!/^\d{6}$/.test(referralCode)) {
+  if (requestedReferralCode && !/^\d{6}$/.test(requestedReferralCode)) {
     return res.status(400).json({
       success: false,
       message: "Referral code must be exactly 6 numbers"
@@ -140,23 +155,30 @@ const createUser = async (req, res) => {
     });
   }
 
-  if (await userModel.findUserByReferralCode(referralCode)) {
+  if (requestedReferralCode && await userModel.findUserByReferralCode(requestedReferralCode)) {
     return res.status(409).json({
       success: false,
       message: "Referral code is already in use"
     });
   }
 
+  const inviter = inviterCode ? await userModel.findUserByReferralCode(inviterCode) : null;
+  const referralCode = requestedReferralCode || await createUniqueReferralCode();
   const user = await adminModel.createUser({
     id: await createUniqueUserId(),
     username,
     email,
     password: await bcrypt.hash(password, PASSWORD_SALT_ROUNDS),
     referralCode,
+    referredBy: inviter?.id || null,
     balance: Number(req.body.balance || 0),
     isAdmin: Boolean(req.body.isAdmin),
     emailVerified: Boolean(req.body.emailVerified)
   });
+
+  if (inviter) {
+    await teamModel.createTeamLinks({ inviterId: inviter.id, memberId: user.id });
+  }
 
   return res.status(201).json({
     success: true,

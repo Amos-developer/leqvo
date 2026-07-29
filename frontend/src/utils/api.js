@@ -66,6 +66,10 @@ export const getPopularCrypto = () => {
   return request("/markets/popular");
 };
 
+export const getTeamOverview = (userId) => {
+  return request(`/teams/${userId}`);
+};
+
 const getAdminHeaders = () => {
   const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 

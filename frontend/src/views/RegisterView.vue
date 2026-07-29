@@ -1,12 +1,12 @@
 <script setup>
 import { reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import AuthLayout from "../components/AuthLayout.vue";
 import { registerUser } from "../utils/api";
 
 const router = useRouter();
+const route = useRoute();
 const isLoading = ref(false);
-const isCodeRequested = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
 
@@ -15,8 +15,7 @@ const form = reactive({
   email: "",
   password: "",
   confirmPassword: "",
-  referralCode: "",
-  emailCode: "",
+  inviterCode: String(route.query.ref || ""),
   agreed: false
 });
 
@@ -30,19 +29,12 @@ const validators = {
 const validateForm = () => {
   const username = form.username.trim();
   const email = form.email.trim();
-  const referralCode = form.referralCode.trim();
-  const emailCode = form.emailCode.trim();
-
   if (!validators.username.test(username)) {
     return "Username must be 3-20 English letters only.";
   }
 
   if (!validators.email.test(email)) {
     return "Enter a valid email address.";
-  }
-
-  if (!validators.sixDigits.test(emailCode)) {
-    return "Email verification code must be 6 numbers.";
   }
 
   if (!validators.password.test(form.password)) {
@@ -53,8 +45,8 @@ const validateForm = () => {
     return "Passwords do not match.";
   }
 
-  if (!validators.sixDigits.test(referralCode)) {
-    return "Referral code must be exactly 6 numbers.";
+  if (form.inviterCode && !validators.sixDigits.test(form.inviterCode.trim())) {
+    return "Invitation code must be exactly 6 numbers.";
   }
 
   if (!form.agreed) {
@@ -62,19 +54,6 @@ const validateForm = () => {
   }
 
   return "";
-};
-
-const requestEmailCode = () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
-  if (!validators.email.test(form.email.trim())) {
-    errorMessage.value = "Enter a valid email before requesting a verification code.";
-    return;
-  }
-
-  isCodeRequested.value = true;
-  successMessage.value = `Verification code requested for ${form.email}.`;
 };
 
 const handleRegister = async () => {
@@ -94,7 +73,7 @@ const handleRegister = async () => {
       username: form.username.trim(),
       email: form.email.trim(),
       password: form.password,
-      referralCode: form.referralCode.trim()
+      inviterCode: form.inviterCode.trim()
     });
 
     successMessage.value = `${result.data.username} registered successfully. Your ID is ${result.data.id}.`;
@@ -112,7 +91,7 @@ const handleRegister = async () => {
 <template>
   <AuthLayout
     title="Start trading smarter"
-    subtitle="Open your Leqvo trading access with verified email and referral code."
+    subtitle="Open your Leqvo trading access with email verification and optional invite link."
   >
     <form class="auth-form register-form" @submit.prevent="handleRegister">
       <label>
@@ -133,21 +112,6 @@ const handleRegister = async () => {
         Email
         <input v-model.trim="form.email" type="email" placeholder="amos@example.com" autocomplete="email" required />
       </label>
-      <div class="register-code-row">
-        <label>
-          Email verification
-          <input
-            v-model.trim="form.emailCode"
-            type="text"
-            inputmode="numeric"
-            maxlength="6"
-            pattern="[0-9]{6}"
-            placeholder="Enter code"
-            required
-          />
-        </label>
-        <button type="button" @click="requestEmailCode">{{ isCodeRequested ? "Resend" : "Get code" }}</button>
-      </div>
       <label>
         Password
         <input
@@ -170,16 +134,16 @@ const handleRegister = async () => {
           required
         />
       </label>
-      <label>
-        Referral code
+      <label v-if="form.inviterCode">
+        Invitation code
         <input
-          v-model.trim="form.referralCode"
+          v-model.trim="form.inviterCode"
           type="text"
           inputmode="numeric"
           maxlength="6"
           pattern="[0-9]{6}"
           placeholder="482917"
-          required
+          readonly
         />
       </label>
       <div class="register-options">
