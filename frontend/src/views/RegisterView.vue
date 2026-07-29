@@ -20,11 +20,56 @@ const form = reactive({
   agreed: false
 });
 
+const validators = {
+  username: /^[A-Za-z]{3,20}$/,
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+  password: /^(?=.*[A-Za-z])(?=.*\d).{8,}$/,
+  sixDigits: /^\d{6}$/
+};
+
+const validateForm = () => {
+  const username = form.username.trim();
+  const email = form.email.trim();
+  const referralCode = form.referralCode.trim();
+  const emailCode = form.emailCode.trim();
+
+  if (!validators.username.test(username)) {
+    return "Username must be 3-20 English letters only.";
+  }
+
+  if (!validators.email.test(email)) {
+    return "Enter a valid email address.";
+  }
+
+  if (!validators.sixDigits.test(emailCode)) {
+    return "Email verification code must be 6 numbers.";
+  }
+
+  if (!validators.password.test(form.password)) {
+    return "Password must be at least 8 characters and include letters and numbers.";
+  }
+
+  if (form.password !== form.confirmPassword) {
+    return "Passwords do not match.";
+  }
+
+  if (!validators.sixDigits.test(referralCode)) {
+    return "Referral code must be exactly 6 numbers.";
+  }
+
+  if (!form.agreed) {
+    return "You must agree to the terms and privacy policy.";
+  }
+
+  return "";
+};
+
 const requestEmailCode = () => {
   errorMessage.value = "";
+  successMessage.value = "";
 
-  if (!form.email) {
-    errorMessage.value = "Enter your email before requesting a verification code.";
+  if (!validators.email.test(form.email.trim())) {
+    errorMessage.value = "Enter a valid email before requesting a verification code.";
     return;
   }
 
@@ -36,18 +81,9 @@ const handleRegister = async () => {
   errorMessage.value = "";
   successMessage.value = "";
 
-  if (form.password !== form.confirmPassword) {
-    errorMessage.value = "Passwords do not match.";
-    return;
-  }
-
-  if (!form.emailCode.trim()) {
-    errorMessage.value = "Enter the email verification code.";
-    return;
-  }
-
-  if (!form.agreed) {
-    errorMessage.value = "You must agree to the terms and privacy policy.";
+  const validationError = validateForm();
+  if (validationError) {
+    errorMessage.value = validationError;
     return;
   }
 
@@ -55,10 +91,10 @@ const handleRegister = async () => {
 
   try {
     const result = await registerUser({
-      username: form.username,
-      email: form.email,
+      username: form.username.trim(),
+      email: form.email.trim(),
       password: form.password,
-      referralCode: form.referralCode
+      referralCode: form.referralCode.trim()
     });
 
     successMessage.value = `${result.data.username} registered successfully. Your ID is ${result.data.id}.`;
@@ -75,32 +111,64 @@ const handleRegister = async () => {
 
 <template>
   <AuthLayout
-    title="Create account"
-    subtitle="Register with your details and a unique six-number referral code."
+    title="Start trading smarter"
+    subtitle="Open your Leqvo trading access with verified email and referral code."
   >
     <form class="auth-form register-form" @submit.prevent="handleRegister">
       <label>
         Username
-        <input v-model.trim="form.username" type="text" placeholder="amos" required />
+        <input
+          v-model.trim="form.username"
+          type="text"
+          placeholder="Amos"
+          minlength="3"
+          maxlength="20"
+          pattern="[A-Za-z]{3,20}"
+          title="Use 3-20 English letters only."
+          autocomplete="username"
+          required
+        />
       </label>
       <label>
         Email
-        <input v-model.trim="form.email" type="email" placeholder="amos@example.com" required />
+        <input v-model.trim="form.email" type="email" placeholder="amos@example.com" autocomplete="email" required />
       </label>
       <div class="register-code-row">
         <label>
           Email verification
-          <input v-model.trim="form.emailCode" type="text" inputmode="numeric" maxlength="6" placeholder="Enter code" required />
+          <input
+            v-model.trim="form.emailCode"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            placeholder="Enter code"
+            required
+          />
         </label>
         <button type="button" @click="requestEmailCode">{{ isCodeRequested ? "Resend" : "Get code" }}</button>
       </div>
       <label>
         Password
-        <input v-model="form.password" type="password" placeholder="Create password" required />
+        <input
+          v-model="form.password"
+          type="password"
+          minlength="8"
+          placeholder="Create password"
+          autocomplete="new-password"
+          required
+        />
       </label>
       <label>
         Confirm password
-        <input v-model="form.confirmPassword" type="password" placeholder="Repeat password" required />
+        <input
+          v-model="form.confirmPassword"
+          type="password"
+          minlength="8"
+          placeholder="Repeat password"
+          autocomplete="new-password"
+          required
+        />
       </label>
       <label>
         Referral code

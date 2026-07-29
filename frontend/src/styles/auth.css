@@ -13,14 +13,72 @@
   padding: 24px 18px;
 }
 
+.auth-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.auth-wordmark {
+  display: inline-flex;
+  width: 118px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 5px 8px;
+  color: var(--ink);
+  box-shadow: 0 10px 24px rgba(78, 83, 110, 0.08);
+  text-decoration: none;
+}
+
+.auth-wordmark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.auth-language-button {
+  display: inline-flex;
+  min-width: 78px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid rgba(235, 238, 245, 0.95);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 950;
+  box-shadow: 0 10px 22px rgba(78, 83, 110, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.auth-language-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: var(--pink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.9;
+}
+
 .auth-copy {
   text-align: left;
 }
 
 .auth-copy h1 {
-  max-width: 12ch;
-  font-size: clamp(2.45rem, 12vw, 4rem);
-  line-height: 0.96;
+  max-width: 15ch;
+  font-size: clamp(1.95rem, 8vw, 3rem);
+  line-height: 1.05;
   letter-spacing: 0;
 }
 
@@ -86,10 +144,17 @@
   min-height: 54px;
   border: 0;
   border-radius: 16px;
-  background: #111827;
-  color: #f6c453;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: white;
   font-size: 0.76rem;
   font-weight: 950;
+  box-shadow: 0 14px 24px rgba(249, 79, 167, 0.24);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.register-code-row button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 30px rgba(249, 79, 167, 0.32);
 }
 
 .register-options {
@@ -138,9 +203,13 @@
     padding: 22px 16px 24px;
   }
 
+  .auth-page.has-auth-visual .auth-topbar {
+    margin-bottom: 18px;
+  }
+
   .auth-page.has-auth-visual .auth-copy h1 {
     max-width: none;
-    font-size: clamp(2rem, 11vw, 3rem);
+    font-size: clamp(1.72rem, 8vw, 2.35rem);
   }
 
   .auth-page.has-auth-visual .auth-copy > p:last-child {
