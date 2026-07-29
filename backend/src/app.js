@@ -27,6 +27,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Leqvo API is running"
+  });
+});
+
 app.use("/api", routes);
 
 app.use(notFoundHandler);
