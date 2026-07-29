@@ -6,6 +6,7 @@
 @import "./deposit.css";
 @import "./trade.css";
 @import "./history.css";
+@import "./withdrawal.css";
 
 :root {
   --bg: #f5f7fc;

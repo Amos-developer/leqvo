@@ -9,6 +9,7 @@ import HistoryView from "./views/HistoryView.vue";
 import AccountView from "./views/AccountView.vue";
 import DepositView from "./views/DepositView.vue";
 import DepositAddressView from "./views/DepositAddressView.vue";
+import WithdrawalView from "./views/WithdrawalView.vue";
 
 const routes = [
   { path: "/", name: "home", component: HomeView, meta: { requiresAuth: true } },
@@ -19,6 +20,7 @@ const routes = [
   { path: "/account", name: "account", component: AccountView, meta: { requiresAuth: true } },
   { path: "/deposit", name: "deposit", component: DepositView, meta: { requiresAuth: true } },
   { path: "/deposit/address", name: "deposit-address", component: DepositAddressView, meta: { requiresAuth: true } },
+  { path: "/withdrawal", name: "withdrawal", component: WithdrawalView, meta: { requiresAuth: true } },
   { path: "/login", name: "login", component: LoginView },
   { path: "/register", name: "register", component: RegisterView },
   { path: "/forgot-password", name: "forgot-password", component: ForgotPasswordView }

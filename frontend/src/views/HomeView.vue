@@ -16,7 +16,6 @@ const router = useRouter();
 const storedUser = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 const user = ref(storedUser);
 const isLoadingUser = ref(false);
-const userError = ref("");
 const cryptoMarkets = ref(createInitialBinanceMarkets());
 const isLoadingMarkets = ref(true);
 const marketError = ref("");
@@ -27,7 +26,7 @@ let marketSocket = null;
 
 const quickActions = [
   { label: "Deposit", to: "/deposit", icon: depositIcon, tone: "pink" },
-  { label: "Withdrawal", icon: withdrawalIcon, tone: "green" },
+  { label: "Withdrawal", to: "/withdrawal", icon: withdrawalIcon, tone: "green" },
   { label: "Invite", icon: inviteIcon, tone: "amber" },
   { label: "Team", icon: teamIcon, tone: "blue" },
   { label: "Lucky-box", icon: luckyBoxIcon, tone: "violet" },
@@ -53,7 +52,6 @@ const refreshUser = async () => {
   }
 
   isLoadingUser.value = true;
-  userError.value = "";
 
   try {
     const result = await getUserById(storedUser.id);
@@ -61,7 +59,7 @@ const refreshUser = async () => {
     user.value = result.data;
     localStorage.setItem("leqvoUser", JSON.stringify(result.data));
   } catch (error) {
-    userError.value = "Could not refresh account details";
+    console.warn("Could not refresh account details", error);
   } finally {
     isLoadingUser.value = false;
   }
@@ -178,9 +176,8 @@ onUnmounted(() => {
         <h1>Hi {{ username }}</h1>
         <p>Welcome back to your account</p>
         <span class="muted-label">Total Balance</span>
-        <strong>{{ isLoadingUser ? "Loading..." : balance }}</strong>
+        <strong>{{ balance }}</strong>
         <span class="account-id">ID: {{ user.id }}</span>
-        <span v-if="userError" class="account-id error">{{ userError }}</span>
       </div>
       <div class="hero-asset" aria-hidden="true">
         <div class="sparkle one"></div>
