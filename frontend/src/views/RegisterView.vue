@@ -73,5 +73,32 @@ const handleRegister = async () => {
       </button>
     </form>
     <p class="auth-footer">Already have an account? <RouterLink to="/login">Login</RouterLink></p>
+
+    <template #visual>
+      <aside class="register-visual" aria-hidden="true">
+        <div class="register-orbit">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="register-signal-card">
+          <small>Invite access</small>
+          <strong>6-digit referral</strong>
+          <div class="register-code-dots">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="register-profile-card">
+          <div class="register-avatar"></div>
+          <div>
+            <small>New member</small>
+            <strong>Verified setup</strong>
+          </div>
+        </div>
+        <div class="register-chart">
+          <i></i><i></i><i></i><i></i>
+        </div>
+      </aside>
+    </template>
   </AuthLayout>
 </template>
