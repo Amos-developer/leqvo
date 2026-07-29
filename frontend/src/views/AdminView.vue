@@ -6,7 +6,7 @@ const router = useRouter();
 const admin = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 
 const menuItems = [
-  "Dashboard",
+  "Overview",
   "Copy Signals",
   "Telegram Signals",
   "Users",
@@ -20,10 +20,10 @@ const menuItems = [
 ];
 
 const stats = [
-  { label: "Total Users", value: "1,248", note: "24 joined today", tone: "pink" },
-  { label: "Total Deposit", value: "42,846.58 USDT", note: "18 awaiting confirmation", tone: "blue" },
-  { label: "Total Withdraw", value: "9,630.44 USDT", note: "7 pending review", tone: "green" },
-  { label: "Pending KYC", value: "12", note: "1,236 verified accounts", tone: "amber" }
+  { label: "Users", value: "1,248", note: "24 joined today", tone: "pink" },
+  { label: "Deposits", value: "42,846.58 USDT", note: "18 awaiting confirmation", tone: "blue" },
+  { label: "Withdrawals", value: "9,630.44 USDT", note: "7 pending review", tone: "green" },
+  { label: "KYC Queue", value: "12", note: "1,236 verified accounts", tone: "amber" }
 ];
 
 const volumeBars = [
@@ -37,9 +37,15 @@ const volumeBars = [
 ];
 
 const balances = [
-  { asset: "USDT", note: "Available balance", amount: "36,794.14" },
-  { asset: "USDC", note: "Settlement balance", amount: "8,210.00" },
-  { asset: "BNB", note: "Network reserve", amount: "42.36" }
+  { name: "Amos", email: "amos@example.com", id: "LEQ-482917", joined: "Today" },
+  { name: "Sabir", email: "sabir@example.com", id: "LEQ-639204", joined: "Today" },
+  { name: "Mariam", email: "mariam@example.com", id: "LEQ-104825", joined: "Yesterday" }
+];
+
+const reviewItems = [
+  { title: "Deposit confirmations", status: "18 open", accent: "blue" },
+  { title: "Withdrawal approvals", status: "7 urgent", accent: "pink" },
+  { title: "Verification checks", status: "12 waiting", accent: "amber" }
 ];
 
 const adminName = computed(() => admin.username || "Administrator");
@@ -64,8 +70,8 @@ const handleLogout = () => {
       <div class="admin-brand-row">
         <div class="admin-brand-mark">LQ</div>
         <div>
-          <strong>Leqvo Admin</strong>
-          <span>Control Panel</span>
+          <strong>Leqvo</strong>
+          <span>Operations</span>
         </div>
       </div>
 
@@ -75,7 +81,7 @@ const handleLogout = () => {
           v-for="item in menuItems"
           :key="item"
           type="button"
-          :class="{ active: item === 'Dashboard' }"
+          :class="{ active: item === 'Overview' }"
         >
           <span class="admin-nav-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24">
@@ -105,8 +111,8 @@ const handleLogout = () => {
     <section class="admin-workspace">
       <header class="admin-topbar">
         <div>
-          <p>Admin Workspace</p>
-          <h1>Dashboard</h1>
+          <p>Workspace</p>
+          <h1>Overview</h1>
         </div>
 
         <div class="admin-top-actions">
@@ -121,27 +127,27 @@ const handleLogout = () => {
             <span>{{ adminName.charAt(0).toUpperCase() }}</span>
             <div>
               <strong>{{ adminName }}</strong>
-              <small>Administrator</small>
+              <small>Operator</small>
             </div>
           </button>
         </div>
       </header>
 
       <nav class="admin-mobile-nav" aria-label="Admin shortcuts">
-        <button v-for="item in menuItems.slice(0, 6)" :key="item" type="button" :class="{ active: item === 'Dashboard' }">
+        <button v-for="item in menuItems.slice(0, 6)" :key="item" type="button" :class="{ active: item === 'Overview' }">
           {{ item }}
         </button>
       </nav>
 
       <section class="admin-foundation">
         <div>
-          <p>Admin Foundation</p>
-          <h2>Leqvo admin workspace is live.</h2>
-          <span>Monitor accounts, deposits, withdrawals, verification activity, platform balances, and system operations from one secure control panel.</span>
+          <p>Live Control</p>
+          <h2>Keep Leqvo operations moving with one clear command center.</h2>
+          <span>Review user activity, payment queues, platform balances, and verification flow from a secure workspace built for fast decisions.</span>
         </div>
         <div class="admin-hero-actions">
           <button type="button">Review Users</button>
-          <button type="button">Review Withdrawals</button>
+          <button type="button">Open Queue</button>
         </div>
       </section>
 
@@ -177,24 +183,34 @@ const handleLogout = () => {
           </div>
         </article>
 
-        <article class="admin-panel admin-balance-panel">
+        <article class="admin-panel admin-users-panel">
           <div class="admin-panel-head">
             <div>
-              <h2>Platform Balances</h2>
-              <p>Available user funds grouped by asset</p>
+              <h2>Recently Joined</h2>
+              <p>Latest user accounts created on Leqvo</p>
             </div>
           </div>
 
-          <div class="admin-balance-list">
-            <div v-for="balance in balances" :key="balance.asset" class="admin-balance-row">
-              <div class="admin-asset-icon">{{ balance.asset.charAt(0) }}</div>
+          <div class="admin-user-list">
+            <div v-for="user in balances" :key="user.id" class="admin-user-row">
+              <div class="admin-user-mini">{{ user.name.charAt(0) }}</div>
               <div>
-                <strong>{{ balance.asset }}</strong>
-                <span>{{ balance.note }}</span>
+                <strong>{{ user.name }}</strong>
+                <span>{{ user.email }}</span>
               </div>
-              <b>{{ balance.amount }}</b>
+              <b>{{ user.joined }}</b>
             </div>
           </div>
+        </article>
+      </section>
+
+      <section class="admin-review-strip" aria-label="Review queue">
+        <article v-for="item in reviewItems" :key="item.title" :class="`is-${item.accent}`">
+          <div>
+            <strong>{{ item.title }}</strong>
+            <span>{{ item.status }}</span>
+          </div>
+          <button type="button">Review</button>
         </article>
       </section>
     </section>

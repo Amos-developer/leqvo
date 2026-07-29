@@ -1,8 +1,10 @@
 <template>
   <AppPreloader v-if="isLoading" />
   <template v-else>
+    <div :class="{ 'admin-route-shell': route.name === 'admin' }">
     <RouterView />
     <AppFooter v-if="showFooter" />
+    </div>
   </template>
 </template>
 
