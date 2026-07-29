@@ -23,7 +23,7 @@ const routes = [
   { path: "/deposit/address", name: "deposit-address", component: DepositAddressView, meta: { requiresAuth: true } },
   { path: "/withdrawal", name: "withdrawal", component: WithdrawalView, meta: { requiresAuth: true } },
   {
-    path: "/admin",
+    path: "/admin/:section?",
     name: "admin",
     component: AdminView,
     meta: { requiresAuth: true, requiresAdmin: true, hideFooter: true }

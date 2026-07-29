@@ -1,6 +1,6 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import {
   getAdminDeposits,
   getAdminOverview,
@@ -10,8 +10,8 @@ import {
 import AdminUsersView from "./admin/AdminUsersView.vue";
 
 const router = useRouter();
+const route = useRoute();
 const admin = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
-const activeTab = ref("Overview");
 const isLoading = ref(true);
 const errorMessage = ref("");
 const overview = ref(null);
@@ -32,6 +32,17 @@ const menuItems = [
   "Refund Audit",
   "Leaders"
 ];
+
+const tabToSlug = (tab) => tab.toLowerCase().replace(/\s+/g, "-");
+const slugToTab = (slug) => {
+  return menuItems.find((item) => tabToSlug(item) === slug) || "Overview";
+};
+const activeTab = ref(slugToTab(route.params.section));
+
+const switchTab = (tab) => {
+  activeTab.value = tab;
+  router.push(tab === "Overview" ? "/admin" : `/admin/${tabToSlug(tab)}`);
+};
 
 const adminName = computed(() => admin.username || "Administrator");
 
@@ -123,6 +134,13 @@ const handleLogout = () => {
   router.push("/login");
 };
 
+watch(
+  () => route.params.section,
+  (section) => {
+    activeTab.value = slugToTab(section);
+  }
+);
+
 onMounted(loadAdminData);
 </script>
 
@@ -144,7 +162,7 @@ onMounted(loadAdminData);
           :key="item"
           type="button"
           :class="{ active: item === activeTab }"
-          @click="activeTab = item"
+          @click="switchTab(item)"
         >
           <span class="admin-nav-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24">
@@ -202,7 +220,7 @@ onMounted(loadAdminData);
           :key="item"
           type="button"
           :class="{ active: item === activeTab }"
-          @click="activeTab = item"
+          @click="switchTab(item)"
         >
           {{ item }}
         </button>
@@ -218,8 +236,8 @@ onMounted(loadAdminData);
             <span>Review user activity, payment queues, deposits, withdrawals, and verification flow from PostgreSQL-backed data.</span>
           </div>
           <div class="admin-hero-actions">
-            <button type="button" @click="activeTab = 'Users'">Review Users</button>
-            <button type="button" @click="activeTab = 'Withdrawals'">Open Queue</button>
+            <button type="button" @click="switchTab('Users')">Review Users</button>
+            <button type="button" @click="switchTab('Withdrawals')">Open Queue</button>
           </div>
         </section>
 
@@ -243,7 +261,7 @@ onMounted(loadAdminData);
                 <h2>Deposit Volume</h2>
                 <p>Credited deposits during the last seven days</p>
               </div>
-              <button type="button" @click="activeTab = 'Deposits'">View All</button>
+              <button type="button" @click="switchTab('Deposits')">View All</button>
             </div>
 
             <div class="admin-chart-bars">
