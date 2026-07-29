@@ -70,7 +70,7 @@ const statusLabel = (status) => {
         <p>Trade records</p>
         <h1>History</h1>
       </div>
-      <RouterLink to="/trades" class="history-action">Trade</RouterLink>
+      <RouterLink to="/trade" class="history-action">Trade</RouterLink>
     </header>
 
     <section class="history-summary">

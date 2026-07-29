@@ -84,7 +84,7 @@ const marketLeader = computed(() => {
 
 const getTradeRoute = (coin) => {
   return {
-    name: "trades",
+    name: "trade",
     query: { pair: coin.pair || `${coin.symbol}USDT` }
   };
 };

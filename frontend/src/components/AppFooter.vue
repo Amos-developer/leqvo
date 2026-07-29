@@ -8,7 +8,7 @@ import tradesIcon from "../assets/icons/footer-trades.svg";
 const items = [
   { label: "Home", to: "/", icon: homeIcon },
   { label: "Markets", to: "/markets", icon: marketsIcon },
-  { label: "Trades", to: "/trades", icon: tradesIcon },
+  { label: "Trade", to: "/trade", icon: tradesIcon },
   { label: "History", to: "/history", icon: historyIcon },
   { label: "Account", to: "/account", icon: accountIcon }
 ];

@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "./views/HomeView.vue";
 import LoginView from "./views/LoginView.vue";
 import RegisterView from "./views/RegisterView.vue";
@@ -13,7 +13,8 @@ import DepositAddressView from "./views/DepositAddressView.vue";
 const routes = [
   { path: "/", name: "home", component: HomeView, meta: { requiresAuth: true } },
   { path: "/markets", name: "markets", component: MarketsView, meta: { requiresAuth: true } },
-  { path: "/trades", name: "trades", component: TradesView, meta: { requiresAuth: true } },
+  { path: "/trade", name: "trade", component: TradesView, meta: { requiresAuth: true } },
+  { path: "/trades", redirect: "/trade" },
   { path: "/history", name: "history", component: HistoryView, meta: { requiresAuth: true } },
   { path: "/account", name: "account", component: AccountView, meta: { requiresAuth: true } },
   { path: "/deposit", name: "deposit", component: DepositView, meta: { requiresAuth: true } },
@@ -24,7 +25,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHistory(),
   routes
 });
 
