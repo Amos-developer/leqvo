@@ -23,6 +23,7 @@ const connectDatabase = async () => {
         referral_code CHAR(6) NOT NULL UNIQUE,
         balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
         is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+        email_verified BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
@@ -31,6 +32,11 @@ const connectDatabase = async () => {
     await client.query(`
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
     `);
 
     await client.query(`

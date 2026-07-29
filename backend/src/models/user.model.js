@@ -7,6 +7,7 @@ const userFields = `
   referral_code AS "referralCode",
   balance,
   is_admin AS "isAdmin",
+  email_verified AS "emailVerified",
   created_at AS "createdAt",
   updated_at AS "updatedAt"
 `;

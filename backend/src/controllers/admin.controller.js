@@ -1,5 +1,22 @@
 const adminModel = require("../models/admin.model");
 const userModel = require("../models/user.model");
+const bcrypt = require("bcryptjs");
+
+const PASSWORD_SALT_ROUNDS = 10;
+
+const generateUserId = () => `LEQ-${Math.floor(100000 + Math.random() * 900000)}`;
+
+const createUniqueUserId = async () => {
+  let id = generateUserId();
+  let existingUser = await userModel.findUserById(id);
+
+  while (existingUser) {
+    id = generateUserId();
+    existingUser = await userModel.findUserById(id);
+  }
+
+  return id;
+};
 
 const requireAdmin = async (req, res) => {
   const adminUserId = req.headers["x-user-id"];
@@ -47,11 +64,173 @@ const getUsers = async (req, res) => {
     return;
   }
 
-  const users = await adminModel.getUsers();
+  const [users, summary] = await Promise.all([
+    adminModel.getUsers(),
+    adminModel.getUserSummary()
+  ]);
 
   return res.status(200).json({
     success: true,
-    data: users
+    data: {
+      users,
+      summary
+    }
+  });
+};
+
+const getUserDetails = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const details = await adminModel.getUserDetails(req.params.id);
+
+  if (!details) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: details
+  });
+};
+
+const createUser = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const username = req.body.username?.trim();
+  const email = req.body.email?.trim().toLowerCase();
+  const password = req.body.password;
+  const referralCode = req.body.referralCode?.trim();
+
+  if (!username || !email || !password || !referralCode) {
+    return res.status(400).json({
+      success: false,
+      message: "Username, email, password, and referralCode are required"
+    });
+  }
+
+  if (!/^[A-Za-z]{3,20}$/.test(username)) {
+    return res.status(400).json({
+      success: false,
+      message: "Username must be 3-20 English letters only"
+    });
+  }
+
+  if (!/^\d{6}$/.test(referralCode)) {
+    return res.status(400).json({
+      success: false,
+      message: "Referral code must be exactly 6 numbers"
+    });
+  }
+
+  if (await userModel.findUserByEmail(email)) {
+    return res.status(409).json({
+      success: false,
+      message: "A user with this email already exists"
+    });
+  }
+
+  if (await userModel.findUserByReferralCode(referralCode)) {
+    return res.status(409).json({
+      success: false,
+      message: "Referral code is already in use"
+    });
+  }
+
+  const user = await adminModel.createUser({
+    id: await createUniqueUserId(),
+    username,
+    email,
+    password: await bcrypt.hash(password, PASSWORD_SALT_ROUNDS),
+    referralCode,
+    balance: Number(req.body.balance || 0),
+    isAdmin: Boolean(req.body.isAdmin),
+    emailVerified: Boolean(req.body.emailVerified)
+  });
+
+  return res.status(201).json({
+    success: true,
+    message: "User created successfully",
+    data: user
+  });
+};
+
+const updateUser = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const payload = {
+    id: req.params.id,
+    username: req.body.username?.trim() || undefined,
+    email: req.body.email?.trim().toLowerCase() || undefined,
+    balance: req.body.balance === undefined ? undefined : Number(req.body.balance),
+    isAdmin: req.body.isAdmin === undefined ? undefined : Boolean(req.body.isAdmin),
+    emailVerified: req.body.emailVerified === undefined ? undefined : Boolean(req.body.emailVerified),
+    password: req.body.password ? await bcrypt.hash(req.body.password, PASSWORD_SALT_ROUNDS) : undefined
+  };
+
+  if (payload.username && !/^[A-Za-z]{3,20}$/.test(payload.username)) {
+    return res.status(400).json({
+      success: false,
+      message: "Username must be 3-20 English letters only"
+    });
+  }
+
+  const user = await adminModel.updateUser(payload);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "User updated successfully",
+    data: user
+  });
+};
+
+const deleteUser = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  if (req.params.id === admin.id) {
+    return res.status(400).json({
+      success: false,
+      message: "You cannot delete your own admin account"
+    });
+  }
+
+  const user = await adminModel.deleteUser(req.params.id);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "User deleted successfully"
   });
 };
 
@@ -88,6 +267,10 @@ const getWithdrawals = async (req, res) => {
 module.exports = {
   getOverview,
   getUsers,
+  getUserDetails,
+  createUser,
+  updateUser,
+  deleteUser,
   getDeposits,
   getWithdrawals
 };

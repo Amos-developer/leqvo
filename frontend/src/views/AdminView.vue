@@ -7,6 +7,7 @@ import {
   getAdminUsers,
   getAdminWithdrawals
 } from "../utils/api";
+import AdminUsersView from "./admin/AdminUsersView.vue";
 
 const router = useRouter();
 const admin = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
@@ -15,6 +16,7 @@ const isLoading = ref(true);
 const errorMessage = ref("");
 const overview = ref(null);
 const users = ref([]);
+const userSummary = ref({ total: 0, active: 0, inactive: 0, verified: 0 });
 const deposits = ref([]);
 const withdrawals = ref([]);
 
@@ -105,7 +107,8 @@ const loadAdminData = async () => {
     ]);
 
     overview.value = overviewResult.data;
-    users.value = usersResult.data;
+    users.value = usersResult.data.users;
+    userSummary.value = usersResult.data.summary;
     deposits.value = depositsResult.data;
     withdrawals.value = withdrawalsResult.data;
   } catch (error) {
@@ -284,42 +287,16 @@ onMounted(loadAdminData);
         </section>
       </section>
 
-      <section v-else-if="activeTab === 'Users'" class="admin-panel admin-table-panel">
-        <div class="admin-panel-head">
-          <div>
-            <h2>Manage Users</h2>
-            <p>All registered users from the database</p>
-          </div>
-        </div>
-
-        <div class="admin-table-scroll">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>ID</th>
-                <th>Balance</th>
-                <th>Referral</th>
-                <th>Role</th>
-                <th>Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="user in users" :key="user.id">
-                <td>
-                  <strong>{{ user.username }}</strong>
-                  <span>{{ user.email }}</span>
-                </td>
-                <td>{{ user.id }}</td>
-                <td>{{ money(user.balance) }}</td>
-                <td>{{ user.referralCode }}</td>
-                <td>{{ user.isAdmin ? "Admin" : "Member" }}</td>
-                <td>{{ formatDate(user.createdAt) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <AdminUsersView
+        v-else-if="activeTab === 'Users'"
+        :users="users"
+        :summary="userSummary"
+        :money="money"
+        :format-date="formatDate"
+        @refresh="loadAdminData"
+        @error="errorMessage = $event"
+        @loading="isLoading = $event"
+      />
 
       <section v-else-if="activeTab === 'Deposits'" class="admin-panel admin-table-panel">
         <div class="admin-panel-head">
@@ -333,6 +310,7 @@ onMounted(loadAdminData);
           <table class="admin-table">
             <thead>
               <tr>
+                <th>#</th>
                 <th>User</th>
                 <th>Amount</th>
                 <th>Paid</th>
@@ -342,7 +320,8 @@ onMounted(loadAdminData);
               </tr>
             </thead>
             <tbody>
-              <tr v-for="deposit in deposits" :key="deposit.id">
+              <tr v-for="(deposit, index) in deposits" :key="deposit.id">
+                <td>{{ index + 1 }}</td>
                 <td>{{ deposit.username }}</td>
                 <td>{{ money(deposit.priceAmount) }}</td>
                 <td>{{ money(deposit.actuallyPaid) }}</td>
@@ -367,6 +346,7 @@ onMounted(loadAdminData);
           <table class="admin-table">
             <thead>
               <tr>
+                <th>#</th>
                 <th>User</th>
                 <th>Amount</th>
                 <th>Fee</th>
@@ -376,7 +356,8 @@ onMounted(loadAdminData);
               </tr>
             </thead>
             <tbody>
-              <tr v-for="withdrawal in withdrawals" :key="withdrawal.id">
+              <tr v-for="(withdrawal, index) in withdrawals" :key="withdrawal.id">
+                <td>{{ index + 1 }}</td>
                 <td>{{ withdrawal.username }}</td>
                 <td>{{ money(withdrawal.amount) }}</td>
                 <td>{{ money(withdrawal.feeAmount) }}</td>

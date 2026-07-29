@@ -86,6 +86,35 @@ export const getAdminUsers = () => {
   });
 };
 
+export const getAdminUserDetails = (id) => {
+  return request(`/admin/users/${id}`, {
+    headers: getAdminHeaders()
+  });
+};
+
+export const createAdminUser = (payload) => {
+  return request("/admin/users", {
+    method: "POST",
+    headers: getAdminHeaders(),
+    body: JSON.stringify(payload)
+  });
+};
+
+export const updateAdminUser = (id, payload) => {
+  return request(`/admin/users/${id}`, {
+    method: "PATCH",
+    headers: getAdminHeaders(),
+    body: JSON.stringify(payload)
+  });
+};
+
+export const deleteAdminUser = (id) => {
+  return request(`/admin/users/${id}`, {
+    method: "DELETE",
+    headers: getAdminHeaders()
+  });
+};
+
 export const getAdminDeposits = () => {
   return request("/admin/deposits", {
     headers: getAdminHeaders()

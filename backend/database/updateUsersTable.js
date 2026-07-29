@@ -18,6 +18,11 @@ const updateUsersTable = async () => {
   `);
 
   await pool.query(`
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+
+  await pool.query(`
     CREATE INDEX IF NOT EXISTS users_is_admin_index
       ON users (is_admin);
   `);
