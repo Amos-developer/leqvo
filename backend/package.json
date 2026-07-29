@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+     "build": "echo \"No build required\"",
     "db:create-deposits": "node database/createDepositsTable.js",
     "db:create-trades": "node database/createTradesTable.js",
     "db:check-users": "node database/checkUsersTable.js",
