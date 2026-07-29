@@ -1,5 +1,10 @@
 const getDefaultApiUrl = () => {
   const hostname = window.location.hostname || "localhost";
+  const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+
+  if (window.location.protocol === "https:" && !isLocalHost) {
+    return "/api";
+  }
 
   return `http://${hostname}:5000/api`;
 };
@@ -57,4 +62,36 @@ export const refreshDepositStatus = (paymentId) => {
 
 export const getPopularCrypto = () => {
   return request("/markets/popular");
+};
+
+const getAdminHeaders = () => {
+  const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
+
+  return {
+    "x-user-id": user.id || ""
+  };
+};
+
+export const getAdminOverview = () => {
+  return request("/admin/overview", {
+    headers: getAdminHeaders()
+  });
+};
+
+export const getAdminUsers = () => {
+  return request("/admin/users", {
+    headers: getAdminHeaders()
+  });
+};
+
+export const getAdminDeposits = () => {
+  return request("/admin/deposits", {
+    headers: getAdminHeaders()
+  });
+};
+
+export const getAdminWithdrawals = () => {
+  return request("/admin/withdrawals", {
+    headers: getAdminHeaders()
+  });
 };

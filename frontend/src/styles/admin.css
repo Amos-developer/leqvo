@@ -178,7 +178,8 @@
 }
 
 .admin-hero-actions button,
-.admin-panel-head button {
+.admin-panel-head button,
+.admin-refresh {
   border: 0;
   border-radius: 12px;
   padding: 10px 12px;
@@ -194,6 +195,20 @@
   background: rgba(255, 255, 255, 0.9);
   color: var(--pink);
   box-shadow: 0 12px 26px rgba(78, 83, 110, 0.08);
+}
+
+.admin-refresh {
+  background: var(--pink-soft);
+  color: var(--pink);
+  box-shadow: none;
+}
+
+.admin-view-stack {
+  display: grid;
+}
+
+.admin-error {
+  margin: 10px 0 0;
 }
 
 .admin-metrics {
@@ -429,6 +444,81 @@
 .admin-user-row b {
   color: var(--pink);
   font-size: 0.76rem;
+}
+
+.admin-table-panel,
+.admin-empty-state {
+  margin-top: 10px;
+}
+
+.admin-table-scroll {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px;
+  border-top: 1px solid rgba(224, 231, 242, 0.9);
+  color: var(--ink);
+  font-size: 0.78rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-table th {
+  background: rgba(255, 224, 243, 0.32);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-table td strong,
+.admin-table td span {
+  display: block;
+}
+
+.admin-table td span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.admin-empty-state {
+  padding: 24px;
+  text-align: center;
+}
+
+.admin-empty-state h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.admin-empty-state p {
+  margin: 8px auto 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.admin-loading {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 30;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: #111827;
+  color: white;
+  font-size: 0.74rem;
+  font-weight: 900;
+  box-shadow: 0 16px 32px rgba(17, 24, 39, 0.22);
 }
 
 @media (min-width: 640px) {

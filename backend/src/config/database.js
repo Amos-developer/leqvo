@@ -98,6 +98,34 @@ const connectDatabase = async () => {
         ON trades (created_at DESC);
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS withdrawals (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        amount NUMERIC(18, 8) NOT NULL,
+        fee_amount NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        asset VARCHAR(20) NOT NULL DEFAULT 'USDT',
+        network VARCHAR(40) NOT NULL DEFAULT 'bep20',
+        address TEXT NOT NULL DEFAULT '',
+        status VARCHAR(30) NOT NULL DEFAULT 'pending',
+        requested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        processed_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS withdrawals_user_id_status_index
+        ON withdrawals (user_id, status);
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS withdrawals_created_at_index
+        ON withdrawals (created_at DESC);
+    `);
+
     console.log("PostgreSQL database connection established");
   } finally {
     client.release();
