@@ -11,6 +11,12 @@ const env = {
     password: process.env.DB_PASSWORD || "postgres",
     ssl: process.env.DB_SSL === "true"
   },
+  cors: {
+    origins: (process.env.CORS_ORIGINS || "http://localhost:5173,http://127.0.0.1:5173")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  },
   nowpayments: {
     apiKey: process.env.NOWPAYMENTS_API_KEY,
     publicKey: process.env.NOWPAYMENTS_PUBLIC_KEY,
