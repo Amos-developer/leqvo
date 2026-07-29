@@ -17,10 +17,21 @@ const form = reactive({
 const handleLogin = async () => {
   errorMessage.value = "";
   successMessage.value = "";
+
+  const payload = {
+    email: form.email.trim(),
+    password: form.password
+  };
+
+  if (!payload.email || !payload.password) {
+    errorMessage.value = "Email and password are required.";
+    return;
+  }
+
   isLoading.value = true;
 
   try {
-    const result = await loginUser(form);
+    const result = await loginUser(payload);
 
     localStorage.setItem("leqvoUser", JSON.stringify(result.data));
     successMessage.value = `Welcome back, ${result.data.username}.`;

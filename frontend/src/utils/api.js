@@ -20,7 +20,9 @@ const request = async (path, options = {}) => {
     ...options
   });
 
-  const result = await response.json();
+  const result = await response.json().catch(() => ({
+    message: "Request failed"
+  }));
 
   if (!response.ok) {
     throw new Error(result.message || "Request failed");
