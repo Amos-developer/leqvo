@@ -373,6 +373,74 @@
   line-height: 1.45;
 }
 
+.deposit-guide {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(51, 140, 242, 0.1), transparent 7rem),
+    rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 38px rgba(78, 83, 110, 0.1);
+  backdrop-filter: blur(14px);
+}
+
+.guide-heading span {
+  color: var(--pink);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.guide-heading h2 {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 1.08rem;
+}
+
+.guide-steps {
+  display: grid;
+  gap: 11px;
+}
+
+.guide-steps article {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid #eef1f7;
+  border-radius: 18px;
+  background: #f9fafc;
+}
+
+.guide-step-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: white;
+  box-shadow: 0 12px 22px rgba(249, 79, 167, 0.2);
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.guide-steps strong {
+  display: block;
+  color: #32313c;
+  font-size: 0.9rem;
+}
+
+.guide-steps p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
 .deposit-address-page {
   display: grid;
   gap: 16px;
@@ -408,6 +476,17 @@
   margin-top: 6px;
   color: var(--ink);
   font-size: 2rem;
+}
+
+.scan-summary small {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--pink-soft);
+  color: var(--pink);
+  font-size: 0.72rem;
+  font-weight: 900;
 }
 
 .scan-summary p {

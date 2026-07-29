@@ -16,12 +16,13 @@ const route = useRoute();
 const isLoading = ref(true);
 const hasMounted = ref(false);
 const showFooter = computed(() => route.meta.requiresAuth);
+const PRELOADER_DURATION_MS = 2000;
 
 onMounted(() => {
   setTimeout(() => {
     isLoading.value = false;
     hasMounted.value = true;
-  }, 1100);
+  }, PRELOADER_DURATION_MS);
 });
 
 watch(
@@ -34,7 +35,7 @@ watch(
     isLoading.value = true;
     setTimeout(() => {
       isLoading.value = false;
-    }, 420);
+    }, PRELOADER_DURATION_MS);
   }
 );
 </script>

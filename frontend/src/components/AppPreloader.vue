@@ -1,11 +1,11 @@
 <script setup>
-import AppLogo from "./AppLogo.vue";
+import preloaderLogo from "../assets/icons/leqvo-wordmark.svg";
 </script>
 
 <template>
   <div class="preloader" role="status" aria-live="polite">
     <div class="preloader-card">
-      <AppLogo />
+      <img class="preloader-logo-image" :src="preloaderLogo" alt="Leqvo logo" />
       <div class="loader-track">
         <span></span>
       </div>

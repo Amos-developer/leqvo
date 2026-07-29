@@ -1,0 +1,35 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="leqvoIconGradient" x1="118" y1="96" x2="390" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F94FA7"/>
+      <stop offset="0.55" stop-color="#E447C6"/>
+      <stop offset="1" stop-color="#8E35F1"/>
+    </linearGradient>
+    <radialGradient id="leqvoCardGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(394 430) rotate(-136.5) scale(368 298)">
+      <stop stop-color="#F0DCFF"/>
+      <stop offset="0.52" stop-color="#FFF7FC"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </radialGradient>
+    <filter id="softShadow" x="34" y="28" width="444" height="458" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="14"/>
+      <feGaussianBlur stdDeviation="18"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.62 0 0 0 0 0.25 0 0 0 0 0.75 0 0 0 0.18 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="132" fill="url(#leqvoCardGlow)"/>
+  <g filter="url(#softShadow)">
+    <path d="M172 251V188C172 180 176 173 183 169L216 148C224 143 234 148 234 158V232C234 239 231 245 225 249L190 272C182 277 172 272 172 262V251Z" fill="url(#leqvoIconGradient)"/>
+    <path d="M246 238V143C246 135 250 128 257 124L292 102C300 97 310 102 310 112V252C310 259 307 265 301 269L266 292C258 297 246 292 246 281V238Z" fill="url(#leqvoIconGradient)"/>
+    <path d="M142 306L219 249L267 294L377 184" stroke="url(#leqvoIconGradient)" stroke-width="23" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M336 181L384 171L374 219" stroke="url(#leqvoIconGradient)" stroke-width="23" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M102 404V327C102 320 106 316 113 316H122C129 316 133 320 133 327V378H178C185 378 189 382 189 389V393C189 400 185 404 178 404H102Z" fill="url(#leqvoIconGradient)"/>
+    <path d="M225 407C201 407 184 390 184 366C184 342 202 325 226 325C250 325 267 342 267 366C267 370 264 373 260 373H214C217 381 223 385 232 385C239 385 244 383 249 379C253 376 257 376 261 380L265 384C269 388 269 393 265 397C256 404 243 407 225 407ZM214 355H239C237 348 233 345 226 345C220 345 216 348 214 355Z" fill="url(#leqvoIconGradient)"/>
+    <path d="M310 437C302 437 298 433 298 425V400C290 405 281 407 270 407C245 407 228 389 228 366C228 343 245 325 270 325C281 325 290 328 298 333V329H319C326 329 330 333 330 340V425C330 433 326 437 318 437H310ZM280 380C291 380 299 374 299 366C299 357 291 351 280 351C270 351 262 357 262 366C262 374 270 380 280 380Z" fill="url(#leqvoIconGradient)"/>
+    <path d="M352 404L323 329H351L369 379L388 329H416L386 404H352Z" fill="url(#leqvoIconGradient)"/>
+    <path d="M421 407C396 407 378 390 378 366C378 342 396 325 421 325C446 325 464 342 464 366C464 390 446 407 421 407ZM421 381C431 381 438 375 438 366C438 357 431 351 421 351C411 351 404 357 404 366C404 375 411 381 421 381Z" fill="url(#leqvoIconGradient)"/>
+  </g>
+</svg>

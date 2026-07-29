@@ -108,37 +108,36 @@ const saveDeposit = async ({
   return result.rows[0];
 };
 
-const createNowPaymentsPayment = async ({ user, asset, network, amount }) => {
-  const payCurrency = getPayCurrency(asset, network);
-  const payNetwork = network.toLowerCase();
+const updateDepositPayment = async ({
+  depositId,
+  priceAmount,
+  payAmount,
+  paymentId,
+  payAddress,
+  qrCode,
+  status
+}) => {
+  const result = await database.query(
+    `UPDATE deposits
+     SET price_amount = $1,
+         pay_amount = $2,
+         pay_id = $3,
+         pay_address = $4,
+         qr_code = $5,
+         status = $6,
+         actually_paid = 0,
+         actually_paid_at_fiat = 0,
+         credited_at = NULL,
+         updated_at = NOW()
+     WHERE id = $7
+     RETURNING ${depositFields}`,
+    [priceAmount, payAmount, paymentId, payAddress, qrCode, status, depositId]
+  );
 
-  if (!payCurrency) {
-    const error = new Error("Unsupported asset or network");
-    error.statusCode = 400;
-    throw error;
-  }
+  return result.rows[0];
+};
 
-  if (!env.nowpayments.apiKey) {
-    const error = new Error("NOWPayments API key is not configured");
-    error.statusCode = 500;
-    throw error;
-  }
-
-  const activeDeposit = await findActiveDeposit({
-    userId: user.id,
-    payCurrency,
-    payNetwork
-  });
-
-  if (activeDeposit) {
-    return {
-      ...activeDeposit,
-      asset: asset.toUpperCase(),
-      network: network.toUpperCase(),
-      reused: true
-    };
-  }
-
+const requestNowPaymentsPayment = async ({ user, asset, network, payCurrency, amount }) => {
   const response = await fetch(`${env.nowpayments.apiUrl}/payment`, {
     method: "POST",
     headers: {
@@ -172,17 +171,88 @@ const createNowPaymentsPayment = async ({ user, asset, network, amount }) => {
     }
   });
 
-  const deposit = await saveDeposit({
-    userId: user.id,
-    username: user.username,
+  return {
     priceAmount: amount,
     payAmount: result.pay_amount || amount,
-    payCurrency,
-    payNetwork,
     paymentId: String(result.payment_id),
     payAddress: result.pay_address,
     qrCode,
     status: result.payment_status || "waiting"
+  };
+};
+
+const createNowPaymentsPayment = async ({ user, asset, network, amount }) => {
+  const payCurrency = getPayCurrency(asset, network);
+  const payNetwork = network.toLowerCase();
+
+  if (!payCurrency) {
+    const error = new Error("Unsupported asset or network");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!env.nowpayments.apiKey) {
+    const error = new Error("NOWPayments API key is not configured");
+    error.statusCode = 500;
+    throw error;
+  }
+
+  const activeDeposit = await findActiveDeposit({
+    userId: user.id,
+    payCurrency,
+    payNetwork
+  });
+
+  if (activeDeposit) {
+    if (Number(activeDeposit.priceAmount) !== Number(amount)) {
+      const payment = await requestNowPaymentsPayment({
+        user,
+        asset,
+        network,
+        payCurrency,
+        amount
+      });
+      const updatedDeposit = await updateDepositPayment({
+        depositId: activeDeposit.id,
+        ...payment
+      });
+
+      return {
+        ...updatedDeposit,
+        asset: asset.toUpperCase(),
+        network: network.toUpperCase(),
+        reused: true,
+        amountUpdated: true
+      };
+    }
+
+    return {
+      ...activeDeposit,
+      asset: asset.toUpperCase(),
+      network: network.toUpperCase(),
+      reused: true
+    };
+  }
+
+  const payment = await requestNowPaymentsPayment({
+    user,
+    asset,
+    network,
+    payCurrency,
+    amount
+  });
+
+  const deposit = await saveDeposit({
+    userId: user.id,
+    username: user.username,
+    priceAmount: payment.priceAmount,
+    payAmount: payment.payAmount,
+    payCurrency,
+    payNetwork,
+    paymentId: payment.paymentId,
+    payAddress: payment.payAddress,
+    qrCode: payment.qrCode,
+    status: payment.status
   });
 
   return {

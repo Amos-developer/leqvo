@@ -73,6 +73,7 @@ const checkPaymentStatus = async () => {
       <div class="scan-summary">
         <span>Send exactly</span>
         <strong>{{ request.payAmount || request.amount }} {{ request.asset }}</strong>
+        <small>Deposit request: ${{ request.amount }}</small>
         <p>{{ request.network }} network</p>
         <p class="scan-status">Status: {{ request.status || "waiting" }}</p>
       </div>
@@ -107,6 +108,44 @@ const checkPaymentStatus = async () => {
       <div>
         <strong>Network warning</strong>
         <p>Send only the selected asset through the selected network. Wrong deposits may be lost.</p>
+      </div>
+    </section>
+
+    <section class="deposit-guide address-guide" aria-labelledby="address-guide-title">
+      <div class="guide-heading">
+        <span>Payment guide</span>
+        <h2 id="address-guide-title">How this works</h2>
+      </div>
+
+      <div class="guide-steps">
+        <article>
+          <span class="guide-step-icon">1</span>
+          <div>
+            <strong>Use this exact payment</strong>
+            <p>The QR code and address belong to your selected asset, network, and latest amount.</p>
+          </div>
+        </article>
+        <article>
+          <span class="guide-step-icon">2</span>
+          <div>
+            <strong>Copy or scan</strong>
+            <p>Open your crypto wallet, paste the address or scan the QR code, then send the exact amount shown.</p>
+          </div>
+        </article>
+        <article>
+          <span class="guide-step-icon">3</span>
+          <div>
+            <strong>Confirm payment</strong>
+            <p>After sending, tap “I have sent the money” to refresh the payment status.</p>
+          </div>
+        </article>
+        <article>
+          <span class="guide-step-icon">4</span>
+          <div>
+            <strong>Balance update</strong>
+            <p>Your balance updates only after the payment is confirmed and meets the $30 minimum.</p>
+          </div>
+        </article>
       </div>
     </section>
   </section>

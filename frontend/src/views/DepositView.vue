@@ -69,7 +69,10 @@ const generateAddress = async () => {
       JSON.stringify({
         asset: result.data.asset,
         network: result.data.network,
-        amount: formattedAmount.value,
+        amount: Number(result.data.priceAmount || amount.value).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }),
         payAmount: result.data.payAmount,
         address: result.data.payAddress,
         qrCode: result.data.qrCode,
@@ -163,6 +166,44 @@ watch(selectedAsset, (asset) => {
       <div>
         <strong>Minimum deposit warning</strong>
         <p>Sending an amount less than $30 may result in permanent loss of funds.</p>
+      </div>
+    </section>
+
+    <section class="deposit-guide" aria-labelledby="deposit-guide-title">
+      <div class="guide-heading">
+        <span>Guide</span>
+        <h2 id="deposit-guide-title">How to deposit</h2>
+      </div>
+
+      <div class="guide-steps">
+        <article>
+          <span class="guide-step-icon">1</span>
+          <div>
+            <strong>Choose asset and network</strong>
+            <p>Select the coin you want to deposit, then choose the matching blockchain network.</p>
+          </div>
+        </article>
+        <article>
+          <span class="guide-step-icon">2</span>
+          <div>
+            <strong>Enter your amount</strong>
+            <p>Type an amount of at least $30, then generate your deposit address.</p>
+          </div>
+        </article>
+        <article>
+          <span class="guide-step-icon">3</span>
+          <div>
+            <strong>Send to the address</strong>
+            <p>Scan the QR code or copy the address, then send only through the selected network.</p>
+          </div>
+        </article>
+        <article>
+          <span class="guide-step-icon">4</span>
+          <div>
+            <strong>Wait for confirmation</strong>
+            <p>Your balance updates after the blockchain payment is confirmed and verified.</p>
+          </div>
+        </article>
       </div>
     </section>
   </section>

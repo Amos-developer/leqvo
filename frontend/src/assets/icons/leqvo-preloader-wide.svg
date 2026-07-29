@@ -1,0 +1,31 @@
+<svg width="760" height="300" viewBox="0 0 760 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="leqvoWideGradient" x1="106" y1="50" x2="612" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F94FA7"/>
+      <stop offset="0.55" stop-color="#E447C6"/>
+      <stop offset="1" stop-color="#8E35F1"/>
+    </linearGradient>
+    <filter id="wideShadow" x="54" y="20" width="656" height="252" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="10"/>
+      <feGaussianBlur stdDeviation="12"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.5 0 0 0 0 0.22 0 0 0 0 0.65 0 0 0 0.16 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+  </defs>
+  <rect x="24" y="20" width="712" height="260" rx="72" fill="white"/>
+  <rect x="24.8" y="20.8" width="710.4" height="258.4" rx="71.2" stroke="#F6C7EA" stroke-width="1.6"/>
+  <g filter="url(#wideShadow)">
+    <path d="M122 142V92C122 85 126 80 132 76L154 62C162 57 171 62 171 72V128C171 135 168 140 162 144L139 158C131 163 122 158 122 148V142Z" fill="url(#leqvoWideGradient)"/>
+    <path d="M186 132V67C186 60 190 55 196 51L220 36C228 31 237 36 237 46V143C237 150 234 155 228 159L204 175C196 180 186 175 186 164V132Z" fill="url(#leqvoWideGradient)"/>
+    <path d="M88 180L150 133L194 174L282 86" stroke="url(#leqvoWideGradient)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M248 85L286 77L278 115" stroke="url(#leqvoWideGradient)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M335 218V90H380V180H456V218H335Z" fill="url(#leqvoWideGradient)"/>
+    <path d="M505 221C467 221 440 195 440 159C440 123 468 97 506 97C543 97 570 124 570 160C570 166 566 171 559 171H486C490 183 499 190 512 190C523 190 531 187 539 181C545 176 552 176 558 182L565 188C571 194 571 201 565 207C552 216 532 221 505 221ZM487 145H527C524 134 517 129 506 129C496 129 490 134 487 145Z" fill="url(#leqvoWideGradient)"/>
+    <path d="M637 260C625 260 619 254 619 242V213C607 219 594 221 579 221C540 221 515 194 515 159C515 124 540 97 579 97C595 97 608 101 620 109V102H652C663 102 669 108 669 119V242C669 254 663 260 651 260H637ZM594 181C610 181 621 172 621 159C621 146 610 137 594 137C578 137 567 146 567 159C567 172 578 181 594 181Z" fill="url(#leqvoWideGradient)"/>
+    <path d="M690 218L649 102H690L713 173L737 102H778L736 218H690Z" fill="url(#leqvoWideGradient)" transform="translate(-34 0)"/>
+    <path d="M703 221C665 221 638 195 638 159C638 123 665 97 703 97C741 97 768 123 768 159C768 195 741 221 703 221ZM703 182C719 182 730 173 730 159C730 146 719 137 703 137C687 137 676 146 676 159C676 173 687 182 703 182Z" fill="url(#leqvoWideGradient)" transform="translate(-34 0)"/>
+  </g>
+</svg>
