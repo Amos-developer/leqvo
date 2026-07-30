@@ -1,4 +1,5 @@
 const database = require("../config/database");
+const leadershipModel = require("./leadership.model");
 
 const createTeamLinks = async ({ inviterId, memberId }) => {
   if (!inviterId || !memberId || inviterId === memberId) {
@@ -46,7 +47,7 @@ const createTeamLinks = async ({ inviterId, memberId }) => {
 const getTeamOverview = async (userId) => {
   const [userResult, summaryResult, levelResult, membersResult] = await Promise.all([
     database.query(
-      `SELECT id, referral_code AS "referralCode"
+      `SELECT id, username, referral_code AS "referralCode"
        FROM users
        WHERE id = $1`,
       [userId]
@@ -115,13 +116,26 @@ const getTeamOverview = async (userId) => {
   const totalTeam = Number(levelResult.rows[0]?.count || 0);
   const leaderLevel = totalTeam >= 500 ? 5 : totalTeam >= 200 ? 4 : totalTeam >= 80 ? 3 : totalTeam >= 20 ? 2 : 1;
   const teamDeposit = Number(summary.teamDeposit || 0);
+  const levelOneMembers = membersResult.rows.filter((member) => Number(member.level) === 1);
+  const levelTwoThreeMembers = membersResult.rows.filter((member) => [2, 3].includes(Number(member.level)));
+  const activeLevelOneMembers = levelOneMembers.filter((member) => member.isActive).length;
+  const levelOneDeposit = levelOneMembers.reduce((total, member) => total + Number(member.totalDeposit || 0), 0);
+  const levelTwoThreeDeposit = levelTwoThreeMembers.reduce((total, member) => total + Number(member.totalDeposit || 0), 0);
+  const leadership = await leadershipModel.upsertLeadershipRecord({
+    userId,
+    username: user?.username || "",
+    activeLevelOneMembers,
+    levelOneDeposit,
+    levelTwoThreeDeposit
+  });
 
   return {
     summary: {
       ...summary,
       referralCode: user?.referralCode,
       leaderLevel,
-      totalEarnings: (teamDeposit * 0.05).toFixed(2)
+      totalEarnings: (teamDeposit * 0.05).toFixed(2),
+      leadership
     },
     levels: [1, 2, 3].map((level) => ({
       level,

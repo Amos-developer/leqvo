@@ -63,6 +63,7 @@ const currentLevelInfo = computed(() => levels.find((item) => item.level === cur
 const nextLevelInfo = computed(() => levels.find((item) => item.level === achievedLevel.value + 1) || null);
 const teamMembers = computed(() => Number(summary.value.totalMembers || 0));
 const teamDeposit = computed(() => Number(summary.value.teamDeposit || 0));
+const leadershipRecord = computed(() => summary.value.leadership || null);
 
 const progress = computed(() => {
   if (!nextLevelInfo.value) {
@@ -103,9 +104,9 @@ const remainingLevelTwoThreeDeposit = computed(() => {
 });
 
 const stats = computed(() => [
-  { label: "Level 1 Members", value: levelOneMembers.value },
-  { label: "Level 1 Deposit", value: money(levelOneDeposit.value) },
-  { label: "L2 + L3 Deposit", value: money(levelTwoThreeDeposit.value) },
+  { label: "Level 1 Members", value: leadershipRecord.value?.activeLevelOneMembers ?? levelOneMembers.value },
+  { label: "Level 1 Deposit", value: money(leadershipRecord.value?.levelOneDeposit ?? levelOneDeposit.value) },
+  { label: "L2 + L3 Deposit", value: money(leadershipRecord.value?.levelTwoThreeDeposit ?? levelTwoThreeDeposit.value) },
   { label: "Total Earnings", value: money(summary.value.totalEarnings) }
 ]);
 

@@ -148,3 +148,17 @@ export const getAdminWithdrawals = () => {
     headers: getAdminHeaders()
   });
 };
+
+export const getAdminLeaders = () => {
+  return request("/admin/leaders", {
+    headers: getAdminHeaders()
+  });
+};
+
+export const grantAdminLeadershipReward = (userId, payload) => {
+  return request(`/admin/leaders/${userId}/rewards`, {
+    method: "POST",
+    headers: getAdminHeaders(),
+    body: JSON.stringify(payload)
+  });
+};

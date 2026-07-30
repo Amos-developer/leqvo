@@ -290,6 +290,60 @@ const getWithdrawals = async (req, res) => {
   });
 };
 
+const getLeaders = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const leaders = await adminModel.getLeaders();
+
+  return res.status(200).json({
+    success: true,
+    data: leaders
+  });
+};
+
+const grantLeadershipReward = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const amount = Number(req.body.amount);
+  const rewardType = req.body.rewardType || "custom";
+
+  if (!req.params.userId || !Number.isFinite(amount) || amount <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: "User and valid reward amount are required"
+    });
+  }
+
+  const result = await adminModel.grantLeadershipReward({
+    userId: req.params.userId,
+    rewardType,
+    amount,
+    note: req.body.note,
+    grantedBy: admin.id
+  });
+
+  if (!result) {
+    return res.status(404).json({
+      success: false,
+      message: "Leader user not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Leadership reward granted successfully",
+    data: result
+  });
+};
+
 module.exports = {
   getOverview,
   getUsers,
@@ -298,5 +352,7 @@ module.exports = {
   updateUser,
   deleteUser,
   getDeposits,
-  getWithdrawals
+  getWithdrawals,
+  getLeaders,
+  grantLeadershipReward
 };

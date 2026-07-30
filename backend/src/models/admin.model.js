@@ -1,4 +1,6 @@
 const database = require("../config/database");
+const leadershipModel = require("./leadership.model");
+const userModel = require("./user.model");
 
 const getOverview = async () => {
   const [
@@ -205,6 +207,162 @@ const getWithdrawals = async () => {
   return result.rows;
 };
 
+const refreshLeadershipRecords = async () => {
+  const usersResult = await database.query(`
+    SELECT id, username
+    FROM users
+    WHERE is_admin = FALSE
+  `);
+
+  const records = [];
+
+  for (const user of usersResult.rows) {
+    const membersResult = await database.query(
+      `SELECT
+         t.level,
+         EXISTS (
+           SELECT 1 FROM deposits d
+           WHERE d.user_id = t.member_id
+             AND d.credited_at IS NOT NULL
+         ) AS "isActive",
+         COALESCE((
+           SELECT SUM(price_amount)
+           FROM deposits d
+           WHERE d.user_id = t.member_id
+             AND d.credited_at IS NOT NULL
+         ), 0)::NUMERIC AS "totalDeposit"
+       FROM teams t
+       WHERE t.user_id = $1`,
+      [user.id]
+    );
+    const levelOneMembers = membersResult.rows.filter((member) => Number(member.level) === 1);
+    const levelTwoThreeMembers = membersResult.rows.filter((member) => [2, 3].includes(Number(member.level)));
+    const activeLevelOneMembers = levelOneMembers.filter((member) => member.isActive).length;
+    const levelOneDeposit = levelOneMembers.reduce((total, member) => total + Number(member.totalDeposit || 0), 0);
+    const levelTwoThreeDeposit = levelTwoThreeMembers.reduce((total, member) => total + Number(member.totalDeposit || 0), 0);
+
+    records.push(await leadershipModel.upsertLeadershipRecord({
+      userId: user.id,
+      username: user.username,
+      activeLevelOneMembers,
+      levelOneDeposit,
+      levelTwoThreeDeposit
+    }));
+  }
+
+  return records;
+};
+
+const getLeaders = async () => {
+  await refreshLeadershipRecords();
+
+  const [leadersResult, rewardsResult] = await Promise.all([
+    database.query(`
+      SELECT
+        l.id,
+        l.user_id AS "userId",
+        l.username,
+        u.email,
+        u.balance,
+        l.rank_level AS "rankLevel",
+        l.rank_name AS "rankName",
+        l.active_level_one_members AS "activeLevelOneMembers",
+        l.level_one_deposit AS "levelOneDeposit",
+        l.level_two_three_deposit AS "levelTwoThreeDeposit",
+        l.one_time_reward AS "oneTimeReward",
+        l.weekly_salary AS "weeklySalary",
+        l.is_qualified AS "isQualified",
+        l.next_rank_name AS "nextRankName",
+        l.members_needed AS "membersNeeded",
+        l.level_one_deposit_needed AS "levelOneDepositNeeded",
+        l.level_two_three_deposit_needed AS "levelTwoThreeDepositNeeded",
+        l.last_calculated_at AS "lastCalculatedAt",
+        COALESCE((
+          SELECT SUM(amount)
+          FROM leadership_rewards lr
+          WHERE lr.user_id = l.user_id
+        ), 0)::NUMERIC AS "totalGranted"
+      FROM leadership l
+      JOIN users u ON u.id = l.user_id
+      ORDER BY l.rank_level DESC, l.active_level_one_members DESC, l.level_one_deposit DESC
+    `),
+    database.query(`
+      SELECT
+        id,
+        user_id AS "userId",
+        username,
+        reward_type AS "rewardType",
+        amount,
+        note,
+        granted_by AS "grantedBy",
+        granted_at AS "grantedAt"
+      FROM leadership_rewards
+      ORDER BY granted_at DESC
+      LIMIT 40
+    `)
+  ]);
+
+  const summary = {
+    total: leadersResult.rows.length,
+    qualified: leadersResult.rows.filter((leader) => leader.isQualified).length,
+    totalGranted: leadersResult.rows.reduce((total, leader) => total + Number(leader.totalGranted || 0), 0),
+    topRank: leadersResult.rows[0]?.rankName || "No rank"
+  };
+
+  return {
+    leaders: leadersResult.rows,
+    rewards: rewardsResult.rows,
+    summary
+  };
+};
+
+const grantLeadershipReward = async ({ userId, rewardType, amount, note, grantedBy }) => {
+  const user = await userModel.findUserById(userId);
+
+  if (!user) {
+    return null;
+  }
+
+  const client = await database.pool.connect();
+
+  try {
+    await client.query("BEGIN");
+    const leadershipResult = await client.query(
+      `SELECT id
+       FROM leadership
+       WHERE user_id = $1`,
+      [userId]
+    );
+    const updatedUser = await userModel.incrementUserBalance(userId, amount, client);
+    const rewardResult = await client.query(
+      `INSERT INTO leadership_rewards (user_id, username, leadership_id, reward_type, amount, note, granted_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING
+         id,
+         user_id AS "userId",
+         username,
+         reward_type AS "rewardType",
+         amount,
+         note,
+         granted_by AS "grantedBy",
+         granted_at AS "grantedAt"`,
+      [userId, user.username, leadershipResult.rows[0]?.id || null, rewardType, amount, note || "", grantedBy]
+    );
+
+    await client.query("COMMIT");
+
+    return {
+      reward: rewardResult.rows[0],
+      user: updatedUser
+    };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 const getUserDetails = async (id) => {
   const [userResult, depositTotalsResult, withdrawalTotalsResult, depositsResult, withdrawalsResult] = await Promise.all([
     database.query(
@@ -329,5 +487,7 @@ module.exports = {
   deleteUser,
   getUserDetails,
   getDeposits,
-  getWithdrawals
+  getWithdrawals,
+  getLeaders,
+  grantLeadershipReward
 };

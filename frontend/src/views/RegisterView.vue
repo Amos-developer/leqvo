@@ -52,8 +52,8 @@ const validateForm = () => {
     return "Passwords do not match.";
   }
 
-  if (form.inviterCode && !validators.sixDigits.test(form.inviterCode.trim())) {
-    return "Invitation code must be exactly 6 numbers.";
+  if (!validators.sixDigits.test(form.inviterCode.trim())) {
+    return "Referral code is required and must be exactly 6 numbers.";
   }
 
   if (!form.agreed) {
@@ -177,16 +177,18 @@ const handleRegister = async () => {
           required
         />
       </label>
-      <label v-if="form.inviterCode">
-        Invitation code
+      <label>
+        Referral code
         <input
           v-model.trim="form.inviterCode"
           type="text"
           inputmode="numeric"
           maxlength="6"
           pattern="[0-9]{6}"
-          placeholder="482917"
-          readonly
+          placeholder="Enter referral code"
+          autocomplete="off"
+          required
+          :readonly="Boolean(route.query.ref)"
         />
       </label>
       <div class="register-options">

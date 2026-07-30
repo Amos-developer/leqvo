@@ -43,10 +43,17 @@ const createUser = async (req, res) => {
   const password = req.body.password;
   const inviterCode = req.body.inviterCode?.trim();
 
-  if (!username || !email || !password) {
+  if (!username || !email || !password || !inviterCode) {
     return res.status(400).json({
       success: false,
-      message: "Username, email, and password are required"
+      message: "Username, email, password, and referral code are required"
+    });
+  }
+
+  if (!/^\d{6}$/.test(inviterCode)) {
+    return res.status(400).json({
+      success: false,
+      message: "Referral code must be exactly 6 numbers"
     });
   }
 
@@ -61,7 +68,14 @@ const createUser = async (req, res) => {
 
   const id = await createUniqueUserId();
   const referralCode = await createUniqueReferralCode();
-  const inviter = inviterCode ? await userModel.findUserByReferralCode(inviterCode) : null;
+  const inviter = await userModel.findUserByReferralCode(inviterCode);
+
+  if (!inviter) {
+    return res.status(404).json({
+      success: false,
+      message: "Invalid referral code"
+    });
+  }
   const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
   const user = await userModel.createUser({
     id,

@@ -3,9 +3,11 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   getAdminDeposits,
+  getAdminLeaders,
   getAdminOverview,
   getAdminUsers,
-  getAdminWithdrawals
+  getAdminWithdrawals,
+  grantAdminLeadershipReward
 } from "../utils/api";
 import AdminUsersView from "./admin/AdminUsersView.vue";
 
@@ -19,6 +21,10 @@ const users = ref([]);
 const userSummary = ref({ total: 0, active: 0, inactive: 0, verified: 0 });
 const deposits = ref([]);
 const withdrawals = ref([]);
+const leaders = ref([]);
+const leaderRewards = ref([]);
+const leaderSummary = ref({ total: 0, qualified: 0, totalGranted: 0, topRank: "No rank" });
+const rewardLoadingId = ref("");
 
 const menuItems = [
   "Overview",
@@ -105,16 +111,24 @@ const reviewItems = computed(() => [
   { title: "Registered users", status: `${overview.value?.users?.total || 0} accounts`, accent: "amber" }
 ]);
 
+const leaderCards = computed(() => [
+  { label: "Tracked Leaders", value: leaderSummary.value.total || 0, note: "Leadership records" },
+  { label: "Qualified", value: leaderSummary.value.qualified || 0, note: "Unlocked ranks" },
+  { label: "Rewards Granted", value: `${money(leaderSummary.value.totalGranted)} USDT`, note: "Total paid" },
+  { label: "Top Rank", value: leaderSummary.value.topRank || "No rank", note: "Highest current tier" }
+]);
+
 const loadAdminData = async () => {
   isLoading.value = true;
   errorMessage.value = "";
 
   try {
-    const [overviewResult, usersResult, depositsResult, withdrawalsResult] = await Promise.all([
+    const [overviewResult, usersResult, depositsResult, withdrawalsResult, leadersResult] = await Promise.all([
       getAdminOverview(),
       getAdminUsers(),
       getAdminDeposits(),
-      getAdminWithdrawals()
+      getAdminWithdrawals(),
+      getAdminLeaders()
     ]);
 
     overview.value = overviewResult.data;
@@ -122,10 +136,31 @@ const loadAdminData = async () => {
     userSummary.value = usersResult.data.summary;
     deposits.value = depositsResult.data;
     withdrawals.value = withdrawalsResult.data;
+    leaders.value = leadersResult.data.leaders;
+    leaderRewards.value = leadersResult.data.rewards;
+    leaderSummary.value = leadersResult.data.summary;
   } catch (error) {
     errorMessage.value = error.message;
   } finally {
     isLoading.value = false;
+  }
+};
+
+const grantLeaderReward = async (leader, rewardType, amount) => {
+  rewardLoadingId.value = `${leader.userId}-${rewardType}`;
+  errorMessage.value = "";
+
+  try {
+    await grantAdminLeadershipReward(leader.userId, {
+      rewardType,
+      amount,
+      note: `${rewardType.replace("_", " ")} granted from admin Leaders panel`
+    });
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    rewardLoadingId.value = "";
   }
 };
 
@@ -217,7 +252,7 @@ onMounted(loadAdminData);
 
       <nav class="admin-mobile-nav" aria-label="Admin shortcuts">
         <button
-          v-for="item in menuItems.slice(0, 5)"
+          v-for="item in menuItems"
           :key="item"
           type="button"
           :class="{ active: item === activeTab }"
@@ -387,6 +422,117 @@ onMounted(loadAdminData);
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section v-else-if="activeTab === 'Leaders'" class="admin-view-stack leaders-admin-view">
+        <section class="admin-metrics leader-admin-metrics">
+          <article v-for="card in leaderCards" :key="card.label" class="admin-metric-card is-green">
+            <div>
+              <p>{{ card.label }}</p>
+              <strong>{{ card.value }}</strong>
+              <span>{{ card.note }}</span>
+            </div>
+            <i aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4ZM5 6H3v2a3 3 0 0 0 3 3h1M19 6h2v2a3 3 0 0 1-3 3h-1" /></svg>
+            </i>
+          </article>
+        </section>
+
+        <section class="admin-panel leaders-panel">
+          <div class="admin-panel-head">
+            <div>
+              <h2>Leader Performance</h2>
+              <p>Rank progress, deposits, qualification status, and reward controls</p>
+            </div>
+          </div>
+
+          <div class="leader-admin-list">
+            <article v-for="leader in leaders" :key="leader.userId" class="leader-admin-card">
+              <div class="leader-admin-head">
+                <div class="admin-user-mini">{{ leader.username.charAt(0).toUpperCase() }}</div>
+                <div>
+                  <strong>{{ leader.username }}</strong>
+                  <span>{{ leader.userId }} · {{ leader.email }}</span>
+                </div>
+                <b :class="{ qualified: leader.isQualified }">{{ leader.rankName }}</b>
+              </div>
+
+              <div class="leader-admin-grid">
+                <div>
+                  <span>Active L1</span>
+                  <strong>{{ leader.activeLevelOneMembers }}</strong>
+                </div>
+                <div>
+                  <span>L1 Deposit</span>
+                  <strong>{{ money(leader.levelOneDeposit) }}</strong>
+                </div>
+                <div>
+                  <span>L2 + L3 Deposit</span>
+                  <strong>{{ money(leader.levelTwoThreeDeposit) }}</strong>
+                </div>
+                <div>
+                  <span>Granted</span>
+                  <strong>{{ money(leader.totalGranted) }}</strong>
+                </div>
+              </div>
+
+              <div class="leader-admin-progress">
+                <span>Next: {{ leader.nextRankName || "Maximum rank" }}</span>
+                <small>{{ leader.membersNeeded }} members · {{ money(leader.levelOneDepositNeeded) }} L1 deposit needed</small>
+              </div>
+
+              <div class="leader-admin-actions">
+                <button
+                  type="button"
+                  :disabled="!leader.isQualified || rewardLoadingId === `${leader.userId}-one_time`"
+                  @click="grantLeaderReward(leader, 'one_time', Number(leader.oneTimeReward || 0))"
+                >
+                  Grant One-time {{ money(leader.oneTimeReward) }}
+                </button>
+                <button
+                  type="button"
+                  :disabled="!leader.isQualified || rewardLoadingId === `${leader.userId}-weekly`"
+                  @click="grantLeaderReward(leader, 'weekly', Number(leader.weeklySalary || 0))"
+                >
+                  Grant Weekly {{ money(leader.weeklySalary) }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="admin-panel admin-table-panel">
+          <div class="admin-panel-head">
+            <div>
+              <h2>Reward Audit</h2>
+              <p>Recently granted leadership rewards</p>
+            </div>
+          </div>
+          <div class="admin-table-scroll">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>User</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Granted By</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(reward, index) in leaderRewards" :key="reward.id">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ reward.username }}</td>
+                  <td>{{ reward.rewardType }}</td>
+                  <td>{{ money(reward.amount) }}</td>
+                  <td>{{ reward.grantedBy || "System" }}</td>
+                  <td>{{ formatDate(reward.grantedAt) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
       </section>
 
       <section v-else class="admin-panel admin-empty-state">

@@ -173,6 +173,54 @@ const connectDatabase = async () => {
         ON lucky_box (user_id, opened_at DESC);
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS leadership (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        rank_level INT NOT NULL DEFAULT 0 CHECK (rank_level BETWEEN 0 AND 5),
+        rank_name VARCHAR(60) NOT NULL DEFAULT 'No rank',
+        active_level_one_members INT NOT NULL DEFAULT 0,
+        level_one_deposit NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        level_two_three_deposit NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        one_time_reward NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        weekly_salary NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        is_qualified BOOLEAN NOT NULL DEFAULT FALSE,
+        next_rank_name VARCHAR(60),
+        members_needed INT NOT NULL DEFAULT 0,
+        level_one_deposit_needed NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        level_two_three_deposit_needed NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        last_calculated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS leadership_rank_level_index
+        ON leadership (rank_level);
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS leadership_rewards (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        leadership_id INT REFERENCES leadership(id) ON DELETE SET NULL,
+        reward_type VARCHAR(30) NOT NULL,
+        amount NUMERIC(18, 8) NOT NULL,
+        note TEXT,
+        granted_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
+        granted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS leadership_rewards_user_id_granted_at_index
+        ON leadership_rewards (user_id, granted_at DESC);
+    `);
+
     console.log("PostgreSQL database connection established");
   } finally {
     client.release();
