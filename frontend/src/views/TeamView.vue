@@ -80,14 +80,12 @@ onMounted(fetchTeam);
 <template>
   <section class="team-page phone-shell page-enter">
     <header class="team-header">
-      <button type="button" @click="router.back()">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
-      </button>
       <div>
         <p>Referral network</p>
         <h1>Team</h1>
       </div>
       <span>{{ leaderLevel }}</span>
+      <button type="button" aria-label="Go back" @click="router.back()">&larr;</button>
     </header>
 
     <section class="team-hero">

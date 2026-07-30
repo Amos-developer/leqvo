@@ -154,6 +154,25 @@ const connectDatabase = async () => {
         ON teams (user_id, level);
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS lucky_box (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        box_number INT NOT NULL CHECK (box_number BETWEEN 1 AND 9),
+        prize_amount NUMERIC(12, 2) NOT NULL,
+        opened_on DATE NOT NULL DEFAULT CURRENT_DATE,
+        opened_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (user_id, opened_on)
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS lucky_box_user_id_opened_at_index
+        ON lucky_box (user_id, opened_at DESC);
+    `);
+
     console.log("PostgreSQL database connection established");
   } finally {
     client.release();

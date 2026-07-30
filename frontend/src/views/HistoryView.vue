@@ -1,9 +1,10 @@
 <script setup>
 import { computed, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { getStoredTrades } from "../utils/tradeHistory";
 
 const route = useRoute();
+const router = useRouter();
 const activeTab = ref(String(route.query.tab || "all"));
 const trades = ref(getStoredTrades());
 
@@ -70,7 +71,7 @@ const statusLabel = (status) => {
         <p>Trade records</p>
         <h1>History</h1>
       </div>
-      <RouterLink to="/trade" class="history-action">Trade</RouterLink>
+      <button class="history-action" type="button" aria-label="Go back" @click="router.back()">&larr;</button>
     </header>
 
     <section class="history-summary">

@@ -46,14 +46,12 @@ const copyInviteLink = async () => {
 <template>
   <section class="invite-page phone-shell page-enter">
     <header class="invite-header">
-      <button type="button" @click="router.back()" aria-label="Go back">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
-      </button>
       <div>
         <p>Referral access</p>
         <h1>Invite</h1>
       </div>
       <RouterLink to="/team">Team</RouterLink>
+      <button type="button" @click="router.back()" aria-label="Go back">&larr;</button>
     </header>
 
     <section class="invite-hero">

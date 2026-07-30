@@ -1,0 +1,314 @@
+.lucky-page {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  background:
+    radial-gradient(circle at 85% 3%, rgba(169, 107, 245, 0.13), transparent 14rem),
+    linear-gradient(180deg, #fbfcff, #f4f6fb);
+}
+
+.lucky-header {
+  position: relative;
+  display: grid;
+  min-height: 52px;
+  place-items: center;
+  padding-top: 8px;
+  text-align: center;
+}
+
+.lucky-header p,
+.lucky-board-head p,
+.lucky-hero span,
+.lucky-status-card span,
+.lucky-result-card span {
+  margin: 0;
+  color: var(--pink);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.lucky-header h1 {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 1.24rem;
+  line-height: 1.15;
+}
+
+.lucky-header button {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 0;
+  border-radius: 15px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: white;
+  box-shadow: 0 16px 28px rgba(249, 79, 167, 0.28);
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.lucky-hero,
+.lucky-board-card,
+.lucky-status-card,
+.lucky-result-card,
+.lucky-prize-card {
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 16px 34px rgba(78, 83, 110, 0.09);
+  backdrop-filter: blur(14px);
+}
+
+.lucky-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 12px;
+  align-items: center;
+  overflow: hidden;
+  min-height: 154px;
+  padding: 18px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(246, 196, 83, 0.32), transparent 8rem),
+    linear-gradient(135deg, #211b32, #623c97 52%, #f94fa7);
+  color: white;
+}
+
+.lucky-hero span {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.lucky-hero strong {
+  display: block;
+  margin-top: 7px;
+  color: white;
+  font-size: 1.55rem;
+}
+
+.lucky-hero p {
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.lucky-box-visual {
+  position: relative;
+  display: grid;
+  width: 92px;
+  height: 92px;
+  place-items: center;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.14);
+  animation: luckyFloat 3.2s ease-in-out infinite;
+}
+
+.lucky-box-visual span:first-child {
+  width: 62px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f6c453, #ff7abf);
+}
+
+.lucky-box-visual span:last-child {
+  position: absolute;
+  top: 20px;
+  width: 74px;
+  height: 18px;
+  border-radius: 9px;
+  background: white;
+}
+
+.lucky-status-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.lucky-status-card div {
+  min-width: 0;
+  padding: 11px;
+  border-radius: 16px;
+  background: #f7f8fc;
+}
+
+.lucky-status-card span,
+.lucky-result-card span {
+  color: var(--muted);
+}
+
+.lucky-status-card strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+
+.lucky-board-card,
+.lucky-result-card,
+.lucky-prize-card {
+  display: grid;
+  gap: 13px;
+  padding: 15px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.lucky-board-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lucky-board-head h2 {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.lucky-board-head > span {
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: var(--violet-soft);
+  color: var(--violet);
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.lucky-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.lucky-grid button {
+  position: relative;
+  display: grid;
+  min-height: 92px;
+  place-items: center;
+  overflow: hidden;
+  border: 0;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fff8fc, #f1eefc);
+  color: var(--ink);
+  box-shadow: 0 12px 24px rgba(78, 83, 110, 0.08);
+  transition: transform 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
+}
+
+.lucky-grid button:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 30px rgba(249, 79, 167, 0.16);
+}
+
+.lucky-grid button.selected {
+  animation: luckyShake 560ms ease-in-out infinite;
+}
+
+.lucky-grid button.opened {
+  background: linear-gradient(135deg, var(--green), #80f0c2);
+  color: white;
+  animation: luckyReveal 420ms ease both;
+}
+
+.lucky-grid button.locked {
+  opacity: 0.62;
+}
+
+.box-lid {
+  position: absolute;
+  top: 24px;
+  width: 52px;
+  height: 17px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+}
+
+.box-body {
+  position: absolute;
+  top: 40px;
+  width: 44px;
+  height: 34px;
+  border-radius: 8px 8px 12px 12px;
+  background: linear-gradient(135deg, #f6c453, #ff8fc5);
+}
+
+.lucky-grid strong,
+.lucky-grid small {
+  position: relative;
+  z-index: 1;
+  margin-top: 48px;
+  font-weight: 950;
+}
+
+.lucky-grid strong {
+  color: white;
+  font-size: 1rem;
+}
+
+.lucky-grid small {
+  color: #6c6179;
+}
+
+.lucky-result-card {
+  background: linear-gradient(135deg, #e7faf2, #ffffff);
+}
+
+.lucky-result-card strong {
+  color: var(--green);
+  font-size: 1.45rem;
+}
+
+.lucky-result-card p,
+.lucky-state {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.lucky-prize-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lucky-prize-list span {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: var(--pink-soft);
+  color: var(--pink);
+  font-size: 0.76rem;
+  font-weight: 950;
+}
+
+@keyframes luckyFloat {
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+@keyframes luckyShake {
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes luckyReveal {
+  from {
+    transform: scale(0.92);
+  }
+  to {
+    transform: scale(1);
+  }
+}

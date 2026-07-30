@@ -59,7 +59,7 @@ const copyUserId = async () => {
         <p>Leqvo profile</p>
         <h1>Account</h1>
       </div>
-      <button aria-label="Account settings"><span class="icon-preferences"></span></button>
+      <button type="button" aria-label="Go back" @click="router.back()">&larr;</button>
     </header>
 
     <section class="premium-profile-card">

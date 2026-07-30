@@ -16,13 +16,13 @@
 
 .back-button {
   position: absolute;
-  left: 0;
+  right: 0;
   top: 8px;
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 15px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   box-shadow: 0 16px 28px rgba(249, 79, 167, 0.28);
@@ -40,7 +40,8 @@
 
 .deposit-header h1 {
   margin: 0;
-  font-size: 1.8rem;
+  font-size: 1.24rem;
+  line-height: 1.15;
 }
 
 .deposit-card {
@@ -99,7 +100,7 @@
   display: block;
   margin-top: 5px;
   color: white;
-  font-size: 2rem;
+  font-size: 1.55rem;
 }
 
 .deposit-hero p,

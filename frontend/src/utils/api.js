@@ -77,6 +77,17 @@ export const getTeamOverview = (userId) => {
   return request(`/teams/${userId}`);
 };
 
+export const getLuckyBoxStatus = () => {
+  return request("/lucky-box");
+};
+
+export const openLuckyBox = (boxNumber) => {
+  return request("/lucky-box/open", {
+    method: "POST",
+    body: JSON.stringify({ boxNumber })
+  });
+};
+
 const getAdminHeaders = () => {
   const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 

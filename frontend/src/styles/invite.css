@@ -6,7 +6,7 @@
 
 .invite-header {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto 42px;
   align-items: center;
   gap: 12px;
 }
@@ -24,6 +24,11 @@
   box-shadow: 0 14px 24px rgba(249, 79, 167, 0.22);
   font-size: 0.78rem;
   font-weight: 950;
+}
+
+.invite-header button {
+  font-size: 1.15rem;
+  font-weight: 900;
 }
 
 .invite-header svg,
@@ -55,7 +60,8 @@
 .invite-header h1 {
   margin: 3px 0 0;
   color: var(--ink);
-  font-size: 1.28rem;
+  font-size: 1.18rem;
+  line-height: 1.15;
 }
 
 .invite-hero {
@@ -86,7 +92,7 @@
 .invite-hero-copy h2 {
   margin: 9px 0 8px;
   color: white;
-  font-size: 1.7rem;
+  font-size: 1.35rem;
   line-height: 1.05;
 }
 
