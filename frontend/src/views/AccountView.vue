@@ -24,6 +24,7 @@ const balance = computed(() => {
 
 const handleLogout = () => {
   localStorage.removeItem("leqvoUser");
+  localStorage.removeItem("leqvoToken");
   router.push("/login");
 };
 

@@ -131,6 +131,7 @@ const loadAdminData = async () => {
 
 const handleLogout = () => {
   localStorage.removeItem("leqvoUser");
+  localStorage.removeItem("leqvoToken");
   router.push("/login");
 };
 

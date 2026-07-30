@@ -2,6 +2,13 @@ const teamModel = require("../models/team.model");
 const userModel = require("../models/user.model");
 
 const getTeam = async (req, res) => {
+  if (req.user.id !== req.params.userId && !req.user.isAdmin) {
+    return res.status(403).json({
+      success: false,
+      message: "You can only view your own team"
+    });
+  }
+
   const user = await userModel.findUserById(req.params.userId);
 
   if (!user) {

@@ -1,7 +1,10 @@
 const router = require("express").Router();
 
 const adminController = require("../controllers/admin.controller");
+const { requireAuth, requireAdmin } = require("../middlewares/auth");
 const asyncHandler = require("../utils/asyncHandler");
+
+router.use(requireAuth, requireAdmin);
 
 router.get("/overview", asyncHandler(adminController.getOverview));
 router.get("/users", asyncHandler(adminController.getUsers));

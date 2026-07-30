@@ -42,9 +42,21 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const savedUser = localStorage.getItem("leqvoUser");
-  const user = savedUser ? JSON.parse(savedUser) : null;
+  const savedToken = localStorage.getItem("leqvoToken");
+  let hasStoredSession = Boolean(savedUser && savedToken);
+  let user = null;
 
-  if (to.meta.requiresAuth && !savedUser) {
+  try {
+    user = savedUser ? JSON.parse(savedUser) : null;
+  } catch (error) {
+    localStorage.removeItem("leqvoUser");
+    localStorage.removeItem("leqvoToken");
+    hasStoredSession = false;
+  }
+
+  if (to.meta.requiresAuth && !hasStoredSession) {
+    localStorage.removeItem("leqvoUser");
+    localStorage.removeItem("leqvoToken");
     return "/login";
   }
 
@@ -52,7 +64,7 @@ router.beforeEach((to) => {
     return "/";
   }
 
-  if ((to.name === "login" || to.name === "register") && savedUser) {
+  if ((to.name === "login" || to.name === "register") && hasStoredSession) {
     return user?.isAdmin ? "/admin" : "/";
   }
 

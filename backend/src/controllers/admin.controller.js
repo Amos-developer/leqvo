@@ -33,6 +33,10 @@ const createUniqueReferralCode = async () => {
 };
 
 const requireAdmin = async (req, res) => {
+  if (req.user?.isAdmin) {
+    return req.user;
+  }
+
   const adminUserId = req.headers["x-user-id"];
 
   if (!adminUserId) {

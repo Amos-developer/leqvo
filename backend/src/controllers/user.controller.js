@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const userModel = require("../models/user.model");
 const teamModel = require("../models/team.model");
+const jwt = require("../utils/jwt");
 
 const PASSWORD_SALT_ROUNDS = 10;
 
@@ -78,7 +79,8 @@ const createUser = async (req, res) => {
   return res.status(201).json({
     success: true,
     message: "User created successfully",
-    data: user
+    data: user,
+    token: jwt.sign({ id: user.id, isAdmin: user.isAdmin })
   });
 };
 
@@ -116,7 +118,8 @@ const loginUser = async (req, res) => {
   return res.status(200).json({
     success: true,
     message: "Login successful",
-    data: user
+    data: user,
+    token: jwt.sign({ id: user.id, isAdmin: user.isAdmin })
   });
 };
 

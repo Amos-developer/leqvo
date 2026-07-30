@@ -12,10 +12,12 @@ const getDefaultApiUrl = () => {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || getDefaultApiUrl();
 
 const request = async (path, options = {}) => {
+  const token = localStorage.getItem("leqvoToken");
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers
     }
   });
@@ -25,6 +27,12 @@ const request = async (path, options = {}) => {
   }));
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem("leqvoUser");
+      localStorage.removeItem("leqvoToken");
+      localStorage.setItem("leqvoSessionMessage", result.message || "Your session expired. Please login again.");
+    }
+
     throw new Error(result.message || "Request failed");
   }
 

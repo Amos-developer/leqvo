@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { loginUser } from "../utils/api";
 import authLogo from "../assets/icons/leqvo-wordmark.svg";
@@ -34,6 +34,7 @@ const handleLogin = async () => {
     const result = await loginUser(payload);
 
     localStorage.setItem("leqvoUser", JSON.stringify(result.data));
+    localStorage.setItem("leqvoToken", result.token);
     successMessage.value = `Welcome back, ${result.data.username}.`;
     setTimeout(() => {
       router.push(result.data.isAdmin ? "/admin" : "/");
@@ -44,6 +45,15 @@ const handleLogin = async () => {
     isLoading.value = false;
   }
 };
+
+onMounted(() => {
+  const sessionMessage = localStorage.getItem("leqvoSessionMessage");
+
+  if (sessionMessage) {
+    errorMessage.value = sessionMessage;
+    localStorage.removeItem("leqvoSessionMessage");
+  }
+});
 </script>
 
 <template>

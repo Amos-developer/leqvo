@@ -17,6 +17,10 @@ const env = {
       .map((origin) => origin.trim())
       .filter(Boolean)
   },
+  jwt: {
+    secret: process.env.JWT_SECRET || "replace-this-secret-in-production",
+    expiresInSeconds: Number(process.env.JWT_EXPIRES_IN_SECONDS) || 86400
+  },
   nowpayments: {
     apiKey: process.env.NOWPAYMENTS_API_KEY,
     publicKey: process.env.NOWPAYMENTS_PUBLIC_KEY,

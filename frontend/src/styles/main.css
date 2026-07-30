@@ -54,6 +54,47 @@ a {
   text-decoration: none;
 }
 
+.session-warning {
+  position: fixed;
+  right: 16px;
+  bottom: 92px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(calc(100% - 32px), 390px);
+  padding: 14px 15px;
+  border: 1px solid rgba(249, 79, 167, 0.2);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 18px 42px rgba(45, 38, 64, 0.18);
+  backdrop-filter: blur(16px);
+  animation: pageEnter 260ms ease both;
+}
+
+.session-warning-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: #fff;
+  font-weight: 900;
+}
+
+.session-warning strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.session-warning p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
 .page-enter {
   animation: pageEnter 520ms ease both;
 }
