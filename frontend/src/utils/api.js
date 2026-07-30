@@ -30,7 +30,6 @@ const request = async (path, options = {}) => {
     if (response.status === 401) {
       localStorage.removeItem("leqvoUser");
       localStorage.removeItem("leqvoToken");
-      localStorage.setItem("leqvoSessionMessage", result.message || "Your session expired. Please login again.");
     }
 
     throw new Error(result.message || "Request failed");

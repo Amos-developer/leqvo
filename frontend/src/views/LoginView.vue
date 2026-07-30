@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from "vue";
+import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { loginUser } from "../utils/api";
 import authLogo from "../assets/icons/leqvo-wordmark.svg";
@@ -7,7 +7,6 @@ import authLogo from "../assets/icons/leqvo-wordmark.svg";
 const router = useRouter();
 const isLoading = ref(false);
 const errorMessage = ref("");
-const successMessage = ref("");
 
 const form = reactive({
   email: "",
@@ -16,7 +15,6 @@ const form = reactive({
 
 const handleLogin = async () => {
   errorMessage.value = "";
-  successMessage.value = "";
 
   const payload = {
     email: form.email.trim(),
@@ -35,25 +33,13 @@ const handleLogin = async () => {
 
     localStorage.setItem("leqvoUser", JSON.stringify(result.data));
     localStorage.setItem("leqvoToken", result.token);
-    successMessage.value = `Welcome back, ${result.data.username}.`;
-    setTimeout(() => {
-      router.push(result.data.isAdmin ? "/admin" : "/");
-    }, 700);
+    router.push(result.data.isAdmin ? "/admin" : "/");
   } catch (error) {
     errorMessage.value = error.message;
   } finally {
     isLoading.value = false;
   }
 };
-
-onMounted(() => {
-  const sessionMessage = localStorage.getItem("leqvoSessionMessage");
-
-  if (sessionMessage) {
-    errorMessage.value = sessionMessage;
-    localStorage.removeItem("leqvoSessionMessage");
-  }
-});
 </script>
 
 <template>
@@ -101,8 +87,6 @@ onMounted(() => {
         </div>
 
         <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
-        <p v-if="successMessage" class="form-message success">{{ successMessage }}</p>
-
         <button type="submit" class="primary-button" :disabled="isLoading">
           {{ isLoading ? "Signing in..." : "Login" }}
         </button>

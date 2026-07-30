@@ -2,11 +2,14 @@
   <div :class="{ 'admin-route-shell': route.name === 'admin' }">
     <RouterView />
     <AppFooter v-if="showFooter" />
-    <div v-if="showSessionWarning" class="session-warning" role="status" aria-live="polite">
-      <div class="session-warning-icon">!</div>
-      <div>
-        <strong>Your session will expire soon</strong>
-        <p>Move, tap, or type to keep your account active.</p>
+    <div v-if="showSessionWarning" class="session-modal" role="dialog" aria-modal="true" aria-labelledby="session-title">
+      <div class="session-modal-card">
+        <div class="session-warning-icon">!</div>
+        <div>
+          <strong id="session-title">Your session will expire soon</strong>
+          <p>You have been inactive. Tap continue or move anywhere to keep your account active.</p>
+        </div>
+        <button type="button" class="session-continue-button" @click="resetSessionTimer">Continue session</button>
       </div>
     </div>
   </div>
@@ -42,7 +45,6 @@ const expireSession = () => {
   showSessionWarning.value = false;
   localStorage.removeItem("leqvoUser");
   localStorage.removeItem("leqvoToken");
-  localStorage.setItem("leqvoSessionMessage", "Your session expired. Please login again.");
   router.push("/login");
 };
 
