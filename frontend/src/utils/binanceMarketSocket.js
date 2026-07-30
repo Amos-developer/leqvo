@@ -72,6 +72,168 @@ export const BINANCE_MARKETS = [
     stream: "trxusdt@ticker",
     image: "https://coin-images.coingecko.com/coins/images/1094/large/tron-logo.png?1696502193",
     marketCapRank: 12
+  },
+  {
+    id: "avalanche-2",
+    symbol: "AVAX",
+    name: "Avalanche",
+    pair: "AVAXUSDT",
+    stream: "avaxusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png?1696512369",
+    marketCapRank: 13
+  },
+  {
+    id: "chainlink",
+    symbol: "LINK",
+    name: "Chainlink",
+    pair: "LINKUSDT",
+    stream: "linkusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/877/large/chainlink-new-logo.png?1696502009",
+    marketCapRank: 14
+  },
+  {
+    id: "polkadot",
+    symbol: "DOT",
+    name: "Polkadot",
+    pair: "DOTUSDT",
+    stream: "dotusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/12171/large/polkadot.png?1696512008",
+    marketCapRank: 15
+  },
+  {
+    id: "matic-network",
+    symbol: "POL",
+    name: "Polygon",
+    pair: "POLUSDT",
+    stream: "polusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/32440/large/polygon.png?1698233684",
+    marketCapRank: 16
+  },
+  {
+    id: "litecoin",
+    symbol: "LTC",
+    name: "Litecoin",
+    pair: "LTCUSDT",
+    stream: "ltcusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/2/large/litecoin.png?1696501400",
+    marketCapRank: 17
+  },
+  {
+    id: "bitcoin-cash",
+    symbol: "BCH",
+    name: "Bitcoin Cash",
+    pair: "BCHUSDT",
+    stream: "bchusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/780/large/bitcoin-cash-circle.png?1696501932",
+    marketCapRank: 18
+  },
+  {
+    id: "near",
+    symbol: "NEAR",
+    name: "NEAR Protocol",
+    pair: "NEARUSDT",
+    stream: "nearusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/10365/large/near.jpg?1696510367",
+    marketCapRank: 19
+  },
+  {
+    id: "uniswap",
+    symbol: "UNI",
+    name: "Uniswap",
+    pair: "UNIUSDT",
+    stream: "uniusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/12504/large/uniswap-logo.png?1720676669",
+    marketCapRank: 20
+  },
+  {
+    id: "aptos",
+    symbol: "APT",
+    name: "Aptos",
+    pair: "APTUSDT",
+    stream: "aptusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/26455/large/aptos_round.png?1696525528",
+    marketCapRank: 21
+  },
+  {
+    id: "arbitrum",
+    symbol: "ARB",
+    name: "Arbitrum",
+    pair: "ARBUSDT",
+    stream: "arbusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/16547/large/arb.jpg?1721358242",
+    marketCapRank: 22
+  },
+  {
+    id: "optimism",
+    symbol: "OP",
+    name: "Optimism",
+    pair: "OPUSDT",
+    stream: "opusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/25244/large/Optimism.png?1696524385",
+    marketCapRank: 23
+  },
+  {
+    id: "stellar",
+    symbol: "XLM",
+    name: "Stellar",
+    pair: "XLMUSDT",
+    stream: "xlmusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/100/large/Stellar_symbol_black_RGB.png?1696501482",
+    marketCapRank: 24
+  },
+  {
+    id: "sui",
+    symbol: "SUI",
+    name: "Sui",
+    pair: "SUIUSDT",
+    stream: "suiusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/26375/large/sui_asset.jpeg?1696525453",
+    marketCapRank: 25
+  },
+  {
+    id: "the-open-network",
+    symbol: "TON",
+    name: "Toncoin",
+    pair: "TONUSDT",
+    stream: "tonusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/17980/large/ton_symbol.png?1696517498",
+    marketCapRank: 26
+  },
+  {
+    id: "pepe",
+    symbol: "PEPE",
+    name: "Pepe",
+    pair: "PEPEUSDT",
+    stream: "pepeusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/29850/large/pepe-token.jpeg?1696528776",
+    marketCapRank: 27
+  },
+  {
+    id: "shiba-inu",
+    symbol: "SHIB",
+    name: "Shiba Inu",
+    pair: "SHIBUSDT",
+    stream: "shibusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/11939/large/shiba.png?1696511800",
+    marketCapRank: 28
+  },
+  {
+    id: "render-token",
+    symbol: "RENDER",
+    name: "Render",
+    pair: "RENDERUSDT",
+    stream: "renderusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/11636/large/rndr.png?1696511529",
+    marketCapRank: 29
+  },
+  {
+    id: "cosmos",
+    symbol: "ATOM",
+    name: "Cosmos",
+    pair: "ATOMUSDT",
+    stream: "atomusdt@ticker",
+    image: "https://coin-images.coingecko.com/coins/images/1481/large/cosmos_hub.png?1696502525",
+    marketCapRank: 30
   }
 ];
 

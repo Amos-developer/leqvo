@@ -82,6 +82,17 @@ const marketLeader = computed(() => {
   return [...markets.value].sort((first, second) => second.change24h - first.change24h)[0];
 });
 
+const marketPulse = computed(() => {
+  const gainers = markets.value.filter((coin) => coin.change24h >= 0).length;
+  const losers = markets.value.length - gainers;
+
+  return {
+    gainers,
+    losers,
+    total: markets.value.length
+  };
+});
+
 const getTradeRoute = (coin) => {
   return {
     name: "trade",
@@ -148,13 +159,50 @@ onUnmounted(() => {
     </header>
 
     <section class="market-trend-card">
-      <div>
-        <span>Top mover</span>
-        <strong>{{ marketLeader ? marketLeader.symbol : "..." }}</strong>
-        <p>{{ marketLeader ? marketLeader.name : "Loading live market data" }}</p>
+      <div class="trend-hero-main">
+        <div class="trend-live-row">
+          <span class="trend-live-dot"></span>
+          <span>{{ socketStatus }}</span>
+        </div>
+        <div class="trend-coin-row">
+          <img v-if="marketLeader" :src="marketLeader.image" :alt="marketLeader.name" />
+          <div>
+            <span>Top mover</span>
+            <strong>{{ marketLeader ? marketLeader.symbol + "/USDT" : "..." }}</strong>
+            <p>{{ marketLeader ? marketLeader.name : "Loading live market data" }}</p>
+          </div>
+        </div>
       </div>
-      <div class="trend-change" :class="marketLeader?.change24h >= 0 ? 'up' : 'down'">
-        {{ marketLeader ? formatChange(marketLeader.change24h) : "--" }}
+
+      <div class="trend-price-panel">
+        <span>Last price</span>
+        <strong>{{ marketLeader ? formatPrice(marketLeader.price) : "--" }}</strong>
+        <div class="trend-change" :class="marketLeader?.change24h >= 0 ? 'up' : 'down'">
+          {{ marketLeader ? formatChange(marketLeader.change24h) : "--" }}
+        </div>
+      </div>
+
+      <div class="trend-metric-grid">
+        <div>
+          <span>24h Volume</span>
+          <strong>{{ marketLeader ? formatVolume(marketLeader.volume24h) : "--" }}</strong>
+        </div>
+        <div>
+          <span>24h High</span>
+          <strong>{{ marketLeader ? formatPrice(marketLeader.high24h) : "--" }}</strong>
+        </div>
+        <div>
+          <span>24h Low</span>
+          <strong>{{ marketLeader ? formatPrice(marketLeader.low24h) : "--" }}</strong>
+        </div>
+      </div>
+
+      <div class="trend-footer-row">
+        <div>
+          <span>{{ marketPulse.gainers }} gainers</span>
+          <span>{{ marketPulse.losers }} losers</span>
+        </div>
+        <RouterLink v-if="marketLeader" :to="getTradeRoute(marketLeader)">Trade</RouterLink>
       </div>
     </section>
 
