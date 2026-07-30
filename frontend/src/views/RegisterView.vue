@@ -139,7 +139,7 @@ const handleRegister = async () => {
       </label>
       <div class="register-code-row">
         <label>
-          Email code <span class="optional-label">Optional</span>
+          Email code <span class="optional-label"></span>
           <input
             v-model.trim="form.emailCode"
             type="text"
