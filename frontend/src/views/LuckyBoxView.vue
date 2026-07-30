@@ -15,6 +15,11 @@ const canOpen = ref(false);
 const todayReward = ref(null);
 const history = ref([]);
 const prizes = ref([0.5, 1, 3, 5, 8, 10, 15, 17, 20]);
+const instructions = [
+  "You can open only one lucky box per day.",
+  "After opening, your reward is credited instantly to your balance.",
+  "Your next chance becomes available tomorrow."
+];
 
 const boxes = computed(() => Array.from({ length: 9 }, (_, index) => index + 1));
 const balance = computed(() => Number(user.value.balance || 0).toLocaleString("en-US", {
@@ -135,10 +140,12 @@ onMounted(loadStatus);
           }"
           @click="chooseBox(box)"
         >
+          <span class="box-shine"></span>
           <span class="box-lid"></span>
+          <span class="box-ribbon"></span>
           <span class="box-body"></span>
           <strong v-if="openedBox === box && lastPrize">{{ formatPrize(lastPrize.prizeAmount) }}</strong>
-          <small v-else>Box {{ box }}</small>
+          <small v-else aria-hidden="true"></small>
         </button>
       </div>
     </section>
@@ -158,6 +165,21 @@ onMounted(loadStatus);
       </div>
       <div class="lucky-prize-list">
         <span v-for="prize in prizes" :key="prize">{{ formatPrize(prize) }}</span>
+      </div>
+    </section>
+
+    <section class="lucky-instruction-card">
+      <div class="lucky-board-head">
+        <div>
+          <p>Daily rule</p>
+          <h2>How Lucky Box Works</h2>
+        </div>
+      </div>
+      <div class="lucky-instruction-list">
+        <article v-for="(instruction, index) in instructions" :key="instruction">
+          <span>{{ index + 1 }}</span>
+          <p>{{ instruction }}</p>
+        </article>
       </div>
     </section>
   </section>

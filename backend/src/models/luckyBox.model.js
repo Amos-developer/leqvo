@@ -3,6 +3,16 @@ const userModel = require("./user.model");
 
 const prizes = [0.5, 1, 3, 5, 8, 10, 15, 17, 20];
 
+const drawPrize = () => {
+  if (Math.random() < 0.98) {
+    return 0.5;
+  }
+
+  const rarePrizes = prizes.filter((prize) => prize !== 0.5);
+
+  return rarePrizes[Math.floor(Math.random() * rarePrizes.length)];
+};
+
 const getStatus = async (userId) => {
   const result = await database.query(
     `SELECT
@@ -71,7 +81,7 @@ const openBox = async ({ user, boxNumber }) => {
       };
     }
 
-    const prizeAmount = prizes[Math.floor(Math.random() * prizes.length)];
+    const prizeAmount = drawPrize();
     const rewardResult = await client.query(
       `INSERT INTO lucky_box (user_id, username, box_number, prize_amount)
        VALUES ($1, $2, $3, $4)
