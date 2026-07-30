@@ -30,7 +30,7 @@ const quickActions = [
   { label: "Invite", to: "/invite", icon: inviteIcon, tone: "amber" },
   { label: "Team", to: "/team", icon: teamIcon, tone: "blue" },
   { label: "Lucky-box", to: "/lucky-box", icon: luckyBoxIcon, tone: "violet" },
-  { label: "Leadership", icon: leadershipIcon, tone: "teal" },
+  { label: "Leadership", to: "/leadership", icon: leadershipIcon, tone: "teal" },
   { label: "Rewards", icon: rewardsIcon, tone: "rose" },
   { label: "Daily-spin", icon: dailySpinIcon, tone: "indigo" }
 ];

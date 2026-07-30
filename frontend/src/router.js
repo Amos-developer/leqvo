@@ -13,6 +13,7 @@ import WithdrawalView from "./views/WithdrawalView.vue";
 import TeamView from "./views/TeamView.vue";
 import InviteView from "./views/InviteView.vue";
 import LuckyBoxView from "./views/LuckyBoxView.vue";
+import LeadershipView from "./views/LeadershipView.vue";
 import AdminView from "./views/AdminView.vue";
 
 const routes = [
@@ -27,6 +28,7 @@ const routes = [
   { path: "/withdrawal", name: "withdrawal", component: WithdrawalView, meta: { requiresAuth: true } },
   { path: "/invite", name: "invite", component: InviteView, meta: { requiresAuth: true } },
   { path: "/lucky-box", name: "lucky-box", component: LuckyBoxView, meta: { requiresAuth: true } },
+  { path: "/leadership", name: "leadership", component: LeadershipView, meta: { requiresAuth: true } },
   { path: "/team", name: "team", component: TeamView, meta: { requiresAuth: true } },
   {
     path: "/admin/:section?",
