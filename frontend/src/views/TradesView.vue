@@ -221,14 +221,14 @@ onUnmounted(() => {
       </div>
 
       <div class="trade-pair-strip" aria-label="Select market pair">
-        <button
+        <!-- <button
           v-for="market in markets"
           :key="market.id"
           :class="{ active: selectedSymbol === market.symbol }"
           @click="selectedSymbol = market.symbol"
         >
           {{ market.symbol }}/USDT
-        </button>
+        </button> -->
       </div>
 
       <div class="trade-chart real-chart" aria-label="Real Binance candlestick chart">
