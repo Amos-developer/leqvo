@@ -11,6 +11,7 @@ import DepositView from "./views/DepositView.vue";
 import DepositAddressView from "./views/DepositAddressView.vue";
 import WithdrawalView from "./views/WithdrawalView.vue";
 import TeamView from "./views/TeamView.vue";
+import InviteView from "./views/InviteView.vue";
 import AdminView from "./views/AdminView.vue";
 
 const routes = [
@@ -23,6 +24,7 @@ const routes = [
   { path: "/deposit", name: "deposit", component: DepositView, meta: { requiresAuth: true } },
   { path: "/deposit/address", name: "deposit-address", component: DepositAddressView, meta: { requiresAuth: true } },
   { path: "/withdrawal", name: "withdrawal", component: WithdrawalView, meta: { requiresAuth: true } },
+  { path: "/invite", name: "invite", component: InviteView, meta: { requiresAuth: true } },
   { path: "/team", name: "team", component: TeamView, meta: { requiresAuth: true } },
   {
     path: "/admin/:section?",

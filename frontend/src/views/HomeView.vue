@@ -27,7 +27,7 @@ let marketSocket = null;
 const quickActions = [
   { label: "Deposit", to: "/deposit", icon: depositIcon, tone: "pink" },
   { label: "Withdrawal", to: "/withdrawal", icon: withdrawalIcon, tone: "green" },
-  { label: "Invite", icon: inviteIcon, tone: "amber" },
+  { label: "Invite", to: "/invite", icon: inviteIcon, tone: "amber" },
   { label: "Team", to: "/team", icon: teamIcon, tone: "blue" },
   { label: "Lucky-box", icon: luckyBoxIcon, tone: "violet" },
   { label: "Leadership", icon: leadershipIcon, tone: "teal" },

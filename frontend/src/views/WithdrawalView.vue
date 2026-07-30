@@ -190,14 +190,6 @@ const submitWithdrawal = () => {
       <p v-if="formMessage" class="withdrawal-message success">{{ formMessage }}</p>
     </section>
 
-    <section class="withdrawal-limit-card">
-      <span class="limit-icon">1x</span>
-      <div>
-        <strong>Withdrawal once per day</strong>
-        <p>You can submit one withdrawal request every 24 hours. Review your asset, network, and address before sending.</p>
-      </div>
-    </section>
-
     <section class="withdrawal-guide" aria-labelledby="withdrawal-guide-title">
       <div class="withdrawal-guide-heading">
         <span>Guide</span>
