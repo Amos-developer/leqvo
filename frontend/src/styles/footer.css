@@ -68,6 +68,8 @@
   .app-footer {
     position: fixed;
     right: 50%;
+    width: min(calc(100% - 60px), 1180px);
+    border-radius: 22px 22px 0 0;
     transform: translateX(50%);
   }
 }
