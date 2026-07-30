@@ -61,13 +61,13 @@ const handleLogin = async () => {
       </div>
 
       <div class="login-welcome-copy">
-        <h1>Trade with confidence</h1>
-        <p>Access your Leqvo market workspace and continue your next signal session.</p>
+        <h1>Sign in to your account</h1>
+        <p>Manage your Leqvo wallet, team, deposits, withdrawals, and trading activity securely.</p>
       </div>
 
       <form class="login-form" @submit.prevent="handleLogin">
         <div class="login-card-header">
-          <span class="secure-badge">Secure login</span>
+          <span class="secure-badge">Protected access</span>
           <span class="pulse-dot"></span>
         </div>
 
@@ -88,7 +88,7 @@ const handleLogin = async () => {
 
         <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
         <button type="submit" class="primary-button" :disabled="isLoading">
-          {{ isLoading ? "Signing in..." : "Login" }}
+          {{ isLoading ? "Signing in..." : "Sign in" }}
         </button>
       </form>
 
@@ -103,7 +103,7 @@ const handleLogin = async () => {
         </div>
         <div>
           <strong>Security tip</strong>
-          <p>Always confirm you are signing in from the official Leqvo domain before entering your password.</p>
+          <p>Never share your email or password with anyone. Leqvo admin will never ask for your login details.</p>
         </div>
       </div>
     </div>
