@@ -7,12 +7,15 @@ import { registerUser } from "../utils/api";
 const router = useRouter();
 const route = useRoute();
 const isLoading = ref(false);
+const isRequestingCode = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
+const codeMessage = ref("");
 
 const form = reactive({
   username: "",
   email: "",
+  emailCode: "",
   password: "",
   confirmPassword: "",
   inviterCode: String(route.query.ref || ""),
@@ -37,6 +40,10 @@ const validateForm = () => {
     return "Enter a valid email address.";
   }
 
+  if (form.emailCode && !validators.sixDigits.test(form.emailCode.trim())) {
+    return "Email code must be 6 numbers when provided.";
+  }
+
   if (!validators.password.test(form.password)) {
     return "Password must be at least 8 characters and include letters and numbers.";
   }
@@ -56,6 +63,23 @@ const validateForm = () => {
   return "";
 };
 
+const handleRequestCode = () => {
+  errorMessage.value = "";
+  codeMessage.value = "";
+
+  if (!validators.email.test(form.email.trim())) {
+    errorMessage.value = "Enter a valid email address before requesting a code.";
+    return;
+  }
+
+  isRequestingCode.value = true;
+
+  window.setTimeout(() => {
+    isRequestingCode.value = false;
+    codeMessage.value = "Email code request is ready. Verification will be enabled soon.";
+  }, 650);
+};
+
 const handleRegister = async () => {
   errorMessage.value = "";
   successMessage.value = "";
@@ -73,6 +97,7 @@ const handleRegister = async () => {
       username: form.username.trim(),
       email: form.email.trim(),
       password: form.password,
+      emailCode: form.emailCode.trim(),
       inviterCode: form.inviterCode.trim()
     });
 
@@ -112,6 +137,24 @@ const handleRegister = async () => {
         Email
         <input v-model.trim="form.email" type="email" placeholder="amos@example.com" autocomplete="email" required />
       </label>
+      <div class="register-code-row">
+        <label>
+          Email code <span class="optional-label">Optional</span>
+          <input
+            v-model.trim="form.emailCode"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            placeholder="Enter code"
+            autocomplete="one-time-code"
+          />
+        </label>
+        <button type="button" :disabled="isRequestingCode" @click="handleRequestCode">
+          {{ isRequestingCode ? "Sending..." : "Get Code" }}
+        </button>
+      </div>
+      <p v-if="codeMessage" class="code-helper-message">{{ codeMessage }}</p>
       <label>
         Password
         <input
