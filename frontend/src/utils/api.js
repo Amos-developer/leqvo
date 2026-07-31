@@ -98,6 +98,10 @@ export const runDailySpin = () => {
   });
 };
 
+export const getMyRewards = () => {
+  return request("/rewards");
+};
+
 const getAdminHeaders = () => {
   const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 

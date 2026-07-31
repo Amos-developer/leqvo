@@ -15,6 +15,7 @@ import InviteView from "./views/InviteView.vue";
 import LuckyBoxView from "./views/LuckyBoxView.vue";
 import LeadershipView from "./views/LeadershipView.vue";
 import DailySpinView from "./views/DailySpinView.vue";
+import RewardsView from "./views/RewardsView.vue";
 import AdminView from "./views/AdminView.vue";
 
 const routes = [
@@ -30,6 +31,7 @@ const routes = [
   { path: "/invite", name: "invite", component: InviteView, meta: { requiresAuth: true } },
   { path: "/lucky-box", name: "lucky-box", component: LuckyBoxView, meta: { requiresAuth: true } },
   { path: "/daily-spin", name: "daily-spin", component: DailySpinView, meta: { requiresAuth: true } },
+  { path: "/rewards", name: "rewards", component: RewardsView, meta: { requiresAuth: true } },
   { path: "/leadership", name: "leadership", component: LeadershipView, meta: { requiresAuth: true } },
   { path: "/team", name: "team", component: TeamView, meta: { requiresAuth: true } },
   {

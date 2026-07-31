@@ -8,6 +8,7 @@ const adminRoutes = require("./admin.routes");
 const teamRoutes = require("./team.routes");
 const luckyBoxRoutes = require("./luckyBox.routes");
 const dailySpinRoutes = require("./dailySpin.routes");
+const rewardRoutes = require("./reward.routes");
 
 router.use("/health", healthRoutes);
 router.use("/users", userRoutes);
@@ -17,5 +18,6 @@ router.use("/admin", adminRoutes);
 router.use("/teams", teamRoutes);
 router.use("/lucky-box", luckyBoxRoutes);
 router.use("/daily-spin", dailySpinRoutes);
+router.use("/rewards", rewardRoutes);
 
 module.exports = router;
