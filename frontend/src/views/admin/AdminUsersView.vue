@@ -173,11 +173,11 @@ const removeUser = async (user) => {
     <form v-if="showForm" class="admin-user-form" @submit.prevent="saveUser">
       <label>
         Username
-        <input v-model.trim="form.username" type="text" placeholder="Amos" required />
+        <input v-model.trim="form.username" type="text" placeholder="Enter username" required />
       </label>
       <label>
         Email
-        <input v-model.trim="form.email" type="email" placeholder="user@leqvo.com" required />
+        <input v-model.trim="form.email" type="email" placeholder="Enter email" required />
       </label>
       <label>
         Password
@@ -194,7 +194,7 @@ const removeUser = async (user) => {
       </label>
       <label>
         Inviter code
-        <input v-model.trim="form.inviterCode" type="text" maxlength="6" placeholder="Optional" :disabled="Boolean(editingUserId)" />
+        <input v-model.trim="form.inviterCode" type="text" maxlength="6" placeholder="Enter referral code" :disabled="Boolean(editingUserId)" />
       </label>
       <label>
         Balance

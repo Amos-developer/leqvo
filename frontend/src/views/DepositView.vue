@@ -149,7 +149,7 @@ watch(selectedAsset, (asset) => {
       <label class="amount-field">
         Amount
         <div>
-          <input v-model="amount" type="number" min="1" step="0.01" placeholder="50.00" />
+          <input v-model="amount" type="number" min="1" step="0.01" placeholder="Enter amount" />
           <span>{{ selectedAsset.label }}</span>
         </div>
       </label>

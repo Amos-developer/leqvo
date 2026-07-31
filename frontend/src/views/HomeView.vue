@@ -235,7 +235,7 @@ onUnmounted(() => {
       <div class="search-row">
         <label>
           <span class="icon-search"></span>
-          <input v-model="cryptoSearch" type="search" placeholder="Search crypto..." />
+          <input v-model="cryptoSearch" type="search" placeholder="Search crypto" />
         </label>
         <button class="filter-button" aria-label="Filter"><span class="icon-filter"></span></button>
       </div>

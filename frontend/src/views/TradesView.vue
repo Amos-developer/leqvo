@@ -253,7 +253,7 @@ onUnmounted(() => {
 
       <label class="trade-field">
         <span>Signal Code</span>
-        <input v-model.trim="signalCode" type="text" placeholder="Enter provided signal code" />
+        <input v-model.trim="signalCode" type="text" placeholder="Enter signal code" />
       </label>
 
       <div class="allocation-panel">

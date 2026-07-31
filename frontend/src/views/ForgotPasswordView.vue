@@ -14,7 +14,7 @@ import AuthLayout from "../components/AuthLayout.vue";
       </div>
       <label>
         Email
-        <input type="email" placeholder="amos@example.com" />
+        <input type="email" placeholder="Enter email" />
       </label>
       <button type="button" class="primary-button">Continue</button>
     </form>

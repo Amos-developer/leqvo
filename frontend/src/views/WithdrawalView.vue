@@ -137,7 +137,7 @@ const submitWithdrawal = () => {
       <label class="withdrawal-field">
         Amount
         <div>
-          <input v-model="amount" type="number" min="1" step="0.01" placeholder="50.00" />
+          <input v-model="amount" type="number" min="1" step="0.01" placeholder="Enter amount" />
           <span>{{ selectedAsset.label }}</span>
         </div>
       </label>
@@ -146,7 +146,7 @@ const submitWithdrawal = () => {
       <label class="withdrawal-field">
         Withdrawal address
         <div>
-          <input v-model.trim="address" type="text" placeholder="Paste wallet address" />
+          <input v-model.trim="address" type="text" placeholder="Enter wallet address" />
         </div>
       </label>
 
@@ -154,7 +154,7 @@ const submitWithdrawal = () => {
         <label class="withdrawal-field">
           Email code
           <div>
-            <input v-model.trim="emailCode" type="text" placeholder="6-digit code" />
+            <input v-model.trim="emailCode" type="text" placeholder="Enter email code" />
           </div>
         </label>
         <button @click="requestEmailCode">{{ codeRequested ? "Resend" : "Get code" }}</button>
@@ -163,7 +163,7 @@ const submitWithdrawal = () => {
       <label class="withdrawal-field">
         Withdrawal PIN
         <div>
-          <input v-model.trim="withdrawalPin" type="password" inputmode="numeric" placeholder="Enter PIN" />
+          <input v-model.trim="withdrawalPin" type="password" inputmode="numeric" placeholder="Enter withdrawal PIN" />
         </div>
       </label>
 

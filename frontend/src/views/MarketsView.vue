@@ -209,7 +209,7 @@ onUnmounted(() => {
     <section class="market-controls">
       <label class="market-search">
         <span class="icon-search"></span>
-        <input v-model="search" type="search" placeholder="Search coin or symbol..." />
+        <input v-model="search" type="search" placeholder="Search market" />
       </label>
 
       <div class="market-filter-row">
