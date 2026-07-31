@@ -7,13 +7,13 @@
         <div class="session-warning-icon">!</div>
         <div>
           <strong id="session-title">Your session will expire soon</strong>
-          <p>You have been inactive. Tap continue or move anywhere to keep your account active.</p>
+          <p>You have been inactive. Tap continue before the countdown ends to keep your account active.</p>
         </div>
         <div class="session-countdown" aria-label="Session countdown">
           <span>{{ countdownSeconds }}</span>
           <small>seconds left</small>
         </div>
-        <button type="button" class="session-continue-button" @click="resetSessionTimer">Continue session</button>
+        <button type="button" class="session-continue-button" @click="continueSession">Continue session</button>
       </div>
     </div>
   </div>
@@ -58,6 +58,10 @@ const expireSession = () => {
 };
 
 const resetSessionTimer = () => {
+  if (showSessionWarning.value) {
+    return;
+  }
+
   clearSessionTimers();
   showSessionWarning.value = false;
 
@@ -74,6 +78,13 @@ const resetSessionTimer = () => {
   }, SESSION_WARNING_MS);
 
   logoutTimer = window.setTimeout(expireSession, SESSION_TIMEOUT_MS);
+};
+
+const continueSession = () => {
+  clearSessionTimers();
+  showSessionWarning.value = false;
+  countdownSeconds.value = SESSION_WARNING_SECONDS;
+  resetSessionTimer();
 };
 
 onMounted(() => {
