@@ -73,12 +73,12 @@ const handleLogin = async () => {
 
         <label>
           Email
-          <input v-model.trim="form.email" type="email" placeholder="amos@example.com" required />
+          <input v-model.trim="form.email" type="email" required />
         </label>
 
         <label>
           Password
-          <input v-model="form.password" type="password" placeholder="Enter password" required />
+          <input v-model="form.password" type="password" required />
         </label>
 
         <div class="form-row">

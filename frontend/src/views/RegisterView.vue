@@ -124,7 +124,6 @@ const handleRegister = async () => {
         <input
           v-model.trim="form.username"
           type="text"
-          placeholder="Amos"
           minlength="3"
           maxlength="20"
           pattern="[A-Za-z]{3,20}"
@@ -135,7 +134,7 @@ const handleRegister = async () => {
       </label>
       <label>
         Email
-        <input v-model.trim="form.email" type="email" placeholder="amos@example.com" autocomplete="email" required />
+        <input v-model.trim="form.email" type="email" autocomplete="email" required />
       </label>
       <div class="register-code-row">
         <label>
@@ -146,7 +145,6 @@ const handleRegister = async () => {
             inputmode="numeric"
             maxlength="6"
             pattern="[0-9]{6}"
-            placeholder="Enter code"
             autocomplete="one-time-code"
           />
         </label>
@@ -161,7 +159,6 @@ const handleRegister = async () => {
           v-model="form.password"
           type="password"
           minlength="8"
-          placeholder="Create password"
           autocomplete="new-password"
           required
         />
@@ -172,7 +169,6 @@ const handleRegister = async () => {
           v-model="form.confirmPassword"
           type="password"
           minlength="8"
-          placeholder="Repeat password"
           autocomplete="new-password"
           required
         />
@@ -185,7 +181,6 @@ const handleRegister = async () => {
           inputmode="numeric"
           maxlength="6"
           pattern="[0-9]{6}"
-          placeholder="Enter referral code"
           autocomplete="off"
           required
           :readonly="Boolean(route.query.ref)"
