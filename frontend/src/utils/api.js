@@ -88,6 +88,16 @@ export const openLuckyBox = (boxNumber) => {
   });
 };
 
+export const getDailySpinStatus = () => {
+  return request("/daily-spin");
+};
+
+export const runDailySpin = () => {
+  return request("/daily-spin/spin", {
+    method: "POST"
+  });
+};
+
 const getAdminHeaders = () => {
   const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 

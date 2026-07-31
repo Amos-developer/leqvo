@@ -221,6 +221,27 @@ const connectDatabase = async () => {
         ON leadership_rewards (user_id, granted_at DESC);
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS daily_spin (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        spin_date DATE NOT NULL DEFAULT CURRENT_DATE,
+        streak_day INT NOT NULL DEFAULT 1,
+        prize_label VARCHAR(80) NOT NULL,
+        prize_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
+        segment_index INT NOT NULL DEFAULT 0,
+        spun_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (user_id, spin_date)
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS daily_spin_user_id_spun_at_index
+        ON daily_spin (user_id, spun_at DESC);
+    `);
+
     console.log("PostgreSQL database connection established");
   } finally {
     client.release();

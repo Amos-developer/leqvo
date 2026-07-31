@@ -32,7 +32,7 @@ const quickActions = [
   { label: "Lucky-box", to: "/lucky-box", icon: luckyBoxIcon, tone: "violet" },
   { label: "Leadership", to: "/leadership", icon: leadershipIcon, tone: "teal" },
   { label: "Rewards", icon: rewardsIcon, tone: "rose" },
-  { label: "Daily-spin", icon: dailySpinIcon, tone: "indigo" }
+  { label: "Daily-spin", to: "/daily-spin", icon: dailySpinIcon, tone: "indigo" }
 ];
 
 const username = computed(() => user.value.username || "Member");
