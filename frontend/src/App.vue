@@ -9,6 +9,10 @@
           <strong id="session-title">Your session will expire soon</strong>
           <p>You have been inactive. Tap continue or move anywhere to keep your account active.</p>
         </div>
+        <div class="session-countdown" aria-label="Session countdown">
+          <span>{{ countdownSeconds }}</span>
+          <small>seconds left</small>
+        </div>
         <button type="button" class="session-continue-button" @click="resetSessionTimer">Continue session</button>
       </div>
     </div>
@@ -24,12 +28,15 @@ const route = useRoute();
 const router = useRouter();
 const showFooter = computed(() => route.meta.requiresAuth && !route.meta.hideFooter);
 const showSessionWarning = ref(false);
+const countdownSeconds = ref(60);
 
 const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 const SESSION_WARNING_MS = 4 * 60 * 1000;
+const SESSION_WARNING_SECONDS = Math.ceil((SESSION_TIMEOUT_MS - SESSION_WARNING_MS) / 1000);
 const activityEvents = ["click", "keydown", "mousemove", "scroll", "touchstart"];
 let warningTimer = null;
 let logoutTimer = null;
+let countdownTimer = null;
 
 const hasActiveSession = () => {
   return Boolean(localStorage.getItem("leqvoUser") && localStorage.getItem("leqvoToken"));
@@ -38,11 +45,13 @@ const hasActiveSession = () => {
 const clearSessionTimers = () => {
   window.clearTimeout(warningTimer);
   window.clearTimeout(logoutTimer);
+  window.clearInterval(countdownTimer);
 };
 
 const expireSession = () => {
   clearSessionTimers();
   showSessionWarning.value = false;
+  countdownSeconds.value = SESSION_WARNING_SECONDS;
   localStorage.removeItem("leqvoUser");
   localStorage.removeItem("leqvoToken");
   router.push("/login");
@@ -57,7 +66,11 @@ const resetSessionTimer = () => {
   }
 
   warningTimer = window.setTimeout(() => {
+    countdownSeconds.value = SESSION_WARNING_SECONDS;
     showSessionWarning.value = true;
+    countdownTimer = window.setInterval(() => {
+      countdownSeconds.value = Math.max(countdownSeconds.value - 1, 0);
+    }, 1000);
   }, SESSION_WARNING_MS);
 
   logoutTimer = window.setTimeout(expireSession, SESSION_TIMEOUT_MS);

@@ -111,6 +111,32 @@ a {
   line-height: 1.45;
 }
 
+.session-countdown {
+  display: grid;
+  width: 96px;
+  height: 96px;
+  place-items: center;
+  border: 8px solid rgba(249, 79, 167, 0.14);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, white 58%, transparent 59%),
+    conic-gradient(var(--pink) 0 75%, #f1e8f4 75% 100%);
+}
+
+.session-countdown span {
+  color: var(--pink);
+  font-size: 1.7rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.session-countdown small {
+  margin-top: -20px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
 .session-continue-button {
   width: 100%;
   height: 46px;
