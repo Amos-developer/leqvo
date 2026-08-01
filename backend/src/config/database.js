@@ -23,6 +23,9 @@ const connectDatabase = async () => {
         referral_code CHAR(6) NOT NULL UNIQUE,
         referred_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
         balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+        trading_balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+        trading_started_at TIMESTAMPTZ,
+        trading_unlocks_at TIMESTAMPTZ,
         is_admin BOOLEAN NOT NULL DEFAULT FALSE,
         email_verified BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -46,8 +49,59 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS trading_balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS trading_started_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS trading_unlocks_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
       CREATE INDEX IF NOT EXISTS users_is_admin_index
         ON users (is_admin);
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS account_transfers (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        from_account VARCHAR(20) NOT NULL,
+        to_account VARCHAR(20) NOT NULL,
+        amount NUMERIC(18, 8) NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        CONSTRAINT account_transfers_account_check
+          CHECK (from_account IN ('main', 'trading') AND to_account IN ('main', 'trading')),
+        CONSTRAINT account_transfers_direction_check CHECK (from_account <> to_account),
+        CONSTRAINT account_transfers_amount_check CHECK (amount > 0)
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS account_transfers_user_id_created_at_index
+        ON account_transfers (user_id, created_at DESC);
+    `);
+
+    await client.query(`
+      UPDATE users u
+      SET trading_started_at = first_transfer.first_trading_entry,
+          trading_unlocks_at = first_transfer.first_trading_entry + INTERVAL '10 days'
+      FROM (
+        SELECT user_id, MIN(created_at) AS first_trading_entry
+        FROM account_transfers
+        WHERE from_account = 'main'
+          AND to_account = 'trading'
+        GROUP BY user_id
+      ) first_transfer
+      WHERE u.id = first_transfer.user_id
+        AND u.trading_started_at IS NULL;
     `);
 
     await client.query(`

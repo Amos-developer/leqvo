@@ -8,8 +8,8 @@ import depositIcon from "../assets/icons/deposit.svg";
 import inviteIcon from "../assets/icons/invite.svg";
 import leadershipIcon from "../assets/icons/leadership.svg";
 import luckyBoxIcon from "../assets/icons/lucky-box.svg";
-import rewardsIcon from "../assets/icons/rewards.svg";
 import teamIcon from "../assets/icons/team.svg";
+import transferIcon from "../assets/icons/transfer.svg";
 import withdrawalIcon from "../assets/icons/withdrawal.svg";
 
 const router = useRouter();
@@ -31,7 +31,7 @@ const quickActions = [
   { label: "Team", to: "/team", icon: teamIcon, tone: "blue" },
   { label: "Lucky-box", to: "/lucky-box", icon: luckyBoxIcon, tone: "violet" },
   { label: "Leadership", to: "/leadership", icon: leadershipIcon, tone: "teal" },
-  { label: "Rewards", to: "/rewards", icon: rewardsIcon, tone: "rose" },
+  { label: "Transfer", to: "/transfer", icon: transferIcon, tone: "rose" },
   { label: "Daily-spin", to: "/daily-spin", icon: dailySpinIcon, tone: "indigo" }
 ];
 
@@ -40,6 +40,15 @@ const balance = computed(() => {
   const userBalance = Number(user.value.balance || 0);
 
   return userBalance.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD"
+  });
+});
+
+const tradingBalance = computed(() => {
+  const userTradingBalance = Number(user.value.tradingBalance || 0);
+
+  return userTradingBalance.toLocaleString("en-US", {
     style: "currency",
     currency: "USD"
   });
@@ -176,8 +185,9 @@ onUnmounted(() => {
       <div class="balance-copy">
         <h1>Hi {{ username }}</h1>
         <p>Welcome back to your account</p>
-        <span class="muted-label">Total Balance</span>
+        <span class="muted-label">Main account</span>
         <strong>{{ balance }}</strong>
+        <span class="trading-balance-pill">Trading: {{ tradingBalance }}</span>
         <span class="account-id">ID: {{ user.id }}</span>
       </div>
       <div class="hero-asset" aria-hidden="true">

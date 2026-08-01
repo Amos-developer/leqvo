@@ -1,6 +1,7 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { getAccountTransfers } from "../utils/api";
 
 const router = useRouter();
 const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
@@ -23,6 +24,11 @@ const withdrawalPin = ref("");
 const codeRequested = ref(false);
 const formMessage = ref("");
 const formError = ref("");
+const eligibility = ref({
+  hasTradingEntry: false,
+  canWithdraw: false,
+  remainingDays: 10
+});
 
 const hasWithdrawalPin = computed(() => Boolean(user.withdrawalPinSet || user.hasWithdrawalPin));
 const availableBalance = computed(() => Number(user.balance || 0));
@@ -30,7 +36,13 @@ const feeAmount = computed(() => (Number(amount.value || 0) * WITHDRAWAL_FEE_PER
 const receiveAmount = computed(() => Math.max(Number(amount.value || 0) - feeAmount.value, 0));
 const isMinimumMet = computed(() => Number(amount.value || 0) >= MINIMUM_WITHDRAWAL);
 const canSubmit = computed(() => {
-  return isMinimumMet.value && address.value.trim() && emailCode.value.trim() && withdrawalPin.value.trim();
+  return (
+    eligibility.value.canWithdraw &&
+    isMinimumMet.value &&
+    address.value.trim() &&
+    emailCode.value.trim() &&
+    withdrawalPin.value.trim()
+  );
 });
 
 const formatCurrency = (value) => {
@@ -52,6 +64,15 @@ const requestEmailCode = () => {
   formMessage.value = `Verification code requested for ${user.email || "your email"}.`;
 };
 
+const loadWithdrawalEligibility = async () => {
+  try {
+    const result = await getAccountTransfers();
+    eligibility.value = result.data?.eligibility || eligibility.value;
+  } catch (error) {
+    formError.value = error.message || "Could not check withdrawal eligibility.";
+  }
+};
+
 const goToSetPin = () => {
   router.push({ name: "account", query: { section: "withdrawal-pin" } });
 };
@@ -65,6 +86,13 @@ const submitWithdrawal = () => {
     return;
   }
 
+  if (!eligibility.value.canWithdraw) {
+    formError.value = eligibility.value.hasTradingEntry
+      ? `Withdrawal unlocks after ${eligibility.value.remainingDays} more day(s) of trading.`
+      : "Transfer at least 30 USDT to your trading account before withdrawal can be unlocked.";
+    return;
+  }
+
   if (!canSubmit.value) {
     formError.value = "Complete all withdrawal details first.";
     return;
@@ -72,6 +100,8 @@ const submitWithdrawal = () => {
 
   formMessage.value = "Withdrawal request submitted for review.";
 };
+
+onMounted(loadWithdrawalEligibility);
 </script>
 
 <template>
@@ -102,6 +132,21 @@ const submitWithdrawal = () => {
         <strong>Withdrawal PIN required</strong>
         <p>You need to set a withdrawal PIN before you can submit a payout request.</p>
         <button @click="goToSetPin">Set withdrawal PIN</button>
+      </div>
+    </section>
+
+    <section v-if="!eligibility.canWithdraw" class="withdrawal-limit-card">
+      <span class="limit-icon">10</span>
+      <div>
+        <strong>Trading period required</strong>
+        <p v-if="eligibility.hasTradingEntry">
+          Withdrawals unlock after {{ eligibility.remainingDays }} more day(s). Trading funds can return to main account
+          after 10 trading days.
+        </p>
+        <p v-else>
+          Transfer at least 30 USDT from main account to trading account first. Withdrawals unlock after 10 trading days.
+        </p>
+        <RouterLink to="/transfer">Go to Transfer</RouterLink>
       </div>
     </section>
 

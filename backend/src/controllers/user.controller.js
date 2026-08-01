@@ -162,9 +162,67 @@ const getUserById = async (req, res) => {
   });
 };
 
+const transferBalance = async (req, res) => {
+  const fromAccount = req.body.fromAccount?.trim().toLowerCase();
+  const toAccount = req.body.toAccount?.trim().toLowerCase();
+  const amount = Number(req.body.amount);
+  const allowedAccounts = ["main", "trading"];
+
+  if (!allowedAccounts.includes(fromAccount) || !allowedAccounts.includes(toAccount)) {
+    return res.status(400).json({
+      success: false,
+      message: "Choose a valid source and destination account"
+    });
+  }
+
+  if (fromAccount === toAccount) {
+    return res.status(400).json({
+      success: false,
+      message: "Source and destination account must be different"
+    });
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Enter a valid transfer amount"
+    });
+  }
+
+  const result = await userModel.transferBalance({
+    userId: req.user.id,
+    fromAccount,
+    toAccount,
+    amount
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Transfer completed successfully",
+    data: result
+  });
+};
+
+const getMyTransfers = async (req, res) => {
+  const [transfers, eligibility] = await Promise.all([
+    userModel.findTransfersByUserId(req.user.id),
+    userModel.getTradingEligibility(req.user.id)
+  ]);
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      transfers,
+      eligibility
+    }
+  });
+};
+
 module.exports = {
   createUser,
   loginUser,
   getUsers,
-  getUserById
+  getUserById,
+  transferBalance,
+  getMyTransfers
 };

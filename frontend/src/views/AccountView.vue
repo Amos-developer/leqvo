@@ -146,6 +146,14 @@ const copyUserId = async () => {
           </div>
           <i></i>
         </button>
+        <button @click="router.push('/rewards')">
+          <span class="settings-icon icon-rewards"></span>
+          <div>
+            <strong>Rewards</strong>
+            <p>View lucky box, daily spin, and leadership reward records</p>
+          </div>
+          <i></i>
+        </button>
       </div>
     </section>
 

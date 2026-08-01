@@ -4,17 +4,23 @@ import { useRoute, useRouter } from "vue-router";
 import { CandlestickSeries, createChart } from "lightweight-charts";
 import { createBinanceKlineSocket, fetchBinanceKlines } from "../utils/binanceKlineSocket";
 import { createBinanceMarketSocket, createInitialBinanceMarkets } from "../utils/binanceMarketSocket";
+import { transferAccountBalance } from "../utils/api";
 import { saveTradeRecord } from "../utils/tradeHistory";
 
 const route = useRoute();
 const router = useRouter();
 const storedUser = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
-const userBalance = ref(Number(storedUser.balance || 0));
+const mainBalance = ref(Number(storedUser.balance || 0));
+const userBalance = ref(Number(storedUser.tradingBalance || 0));
 const markets = ref(createInitialBinanceMarkets());
 const routePair = String(route.query.pair || "BTCUSDT").toUpperCase();
 const selectedSymbol = ref(routePair.replace("USDT", "") || "BTC");
 const signalCode = ref("");
 const selectedPercent = ref(20);
+const transferAmount = ref("");
+const isTransferring = ref(false);
+const transferMessage = ref("");
+const transferError = ref("");
 const tradeStatus = ref("");
 const tradeError = ref("");
 const chartContainer = ref(null);
@@ -60,6 +66,46 @@ const formatChange = (value) => {
   return `${sign}${numberValue.toFixed(2)}%`;
 };
 
+const syncUserBalances = (updatedUser) => {
+  mainBalance.value = Number(updatedUser.balance || 0);
+  userBalance.value = Number(updatedUser.tradingBalance || 0);
+  localStorage.setItem("leqvoUser", JSON.stringify(updatedUser));
+};
+
+const transferToTrading = async () => {
+  const amount = Number(transferAmount.value);
+  transferError.value = "";
+  transferMessage.value = "";
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    transferError.value = "Enter a valid amount to transfer.";
+    return;
+  }
+
+  if (amount > mainBalance.value) {
+    transferError.value = "Your main account balance is not enough.";
+    return;
+  }
+
+  isTransferring.value = true;
+
+  try {
+    const result = await transferAccountBalance({
+      fromAccount: "main",
+      toAccount: "trading",
+      amount
+    });
+
+    syncUserBalances(result.data.user);
+    transferAmount.value = "";
+    transferMessage.value = "Funds moved to your trading account.";
+  } catch (error) {
+    transferError.value = error.message || "Could not transfer funds.";
+  } finally {
+    isTransferring.value = false;
+  }
+};
+
 const completeTrade = () => {
   tradeError.value = "";
   tradeStatus.value = "";
@@ -70,7 +116,7 @@ const completeTrade = () => {
   }
 
   if (investmentAmount.value <= 0) {
-    tradeError.value = "Your available investment balance is too low.";
+    tradeError.value = "Transfer funds to your trading account before completing a trade.";
     return;
   }
 
@@ -251,6 +297,30 @@ onUnmounted(() => {
         <span>{{ selectedPercent }}%</span>
       </div>
 
+      <div class="trade-account-panel">
+        <div>
+          <span>Main account</span>
+          <strong>{{ formatCurrency(mainBalance) }}</strong>
+        </div>
+        <div>
+          <span>Trading account</span>
+          <strong>{{ formatCurrency(userBalance) }}</strong>
+        </div>
+      </div>
+
+      <div class="trade-transfer-card">
+        <label class="trade-field">
+          <span>Move funds to trading</span>
+          <input v-model.number="transferAmount" type="number" inputmode="decimal" min="0" placeholder="Enter amount" />
+        </label>
+        <button class="transfer-button" :disabled="isTransferring" @click="transferToTrading">
+          {{ isTransferring ? "Moving..." : "Transfer" }}
+        </button>
+      </div>
+
+      <p v-if="transferError" class="trade-message error">{{ transferError }}</p>
+      <p v-if="transferMessage" class="trade-message success">{{ transferMessage }}</p>
+
       <label class="trade-field">
         <span>Signal Code</span>
         <input v-model.trim="signalCode" type="text" placeholder="Enter signal code" />
@@ -258,7 +328,7 @@ onUnmounted(() => {
 
       <div class="allocation-panel">
         <div class="allocation-copy">
-          <span>Available investment</span>
+          <span>Trading balance</span>
           <strong>{{ formatCurrency(userBalance) }}</strong>
         </div>
         <div class="allocation-copy right">

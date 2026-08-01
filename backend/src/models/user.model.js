@@ -7,6 +7,9 @@ const userFields = `
   referral_code AS "referralCode",
   referred_by AS "referredBy",
   balance,
+  trading_balance AS "tradingBalance",
+  trading_started_at AS "tradingStartedAt",
+  trading_unlocks_at AS "tradingUnlocksAt",
   is_admin AS "isAdmin",
   email_verified AS "emailVerified",
   created_at AS "createdAt",
@@ -93,6 +96,201 @@ const incrementUserBalance = async (id, amount, client = database) => {
   return result.rows[0] || null;
 };
 
+const transferBalance = async ({ userId, fromAccount, toAccount, amount }) => {
+  const client = await database.pool.connect();
+  const transferAmount = Number(amount);
+
+  try {
+    await client.query("BEGIN");
+
+    const userResult = await client.query(
+      `SELECT id, username, balance, trading_balance, trading_started_at, trading_unlocks_at
+       FROM users
+       WHERE id = $1
+       FOR UPDATE`,
+      [userId]
+    );
+    const user = userResult.rows[0];
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const mainBalance = Number(user.balance || 0);
+    const tradingBalance = Number(user.trading_balance || 0);
+    const sourceBalance = fromAccount === "main" ? mainBalance : tradingBalance;
+
+    if (fromAccount === "main" && toAccount === "trading" && transferAmount < 30) {
+      const error = new Error("Minimum transfer from main to trading is 30 USDT");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (fromAccount === "trading" && toAccount === "main") {
+      const eligibility = await getTradingEligibility(userId, client);
+
+      if (!eligibility.canMoveTradingToMain) {
+        const error = new Error(
+          `Trading funds can move back to main account after ${eligibility.remainingDays} more day(s)`
+        );
+        error.statusCode = 400;
+        throw error;
+      }
+    }
+
+    if (sourceBalance < transferAmount) {
+      const error = new Error(`Insufficient ${fromAccount} account balance`);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const updateResult = await client.query(
+      `UPDATE users
+       SET balance = balance + $1,
+           trading_balance = trading_balance + $2,
+           trading_started_at = CASE
+             WHEN $4 = 'main' AND $5 = 'trading' AND trading_started_at IS NULL THEN NOW()
+             ELSE trading_started_at
+           END,
+           trading_unlocks_at = CASE
+             WHEN $4 = 'main' AND $5 = 'trading' AND trading_unlocks_at IS NULL THEN NOW() + INTERVAL '10 days'
+             ELSE trading_unlocks_at
+           END,
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING ${userFields}`,
+      [
+        fromAccount === "main" ? -transferAmount : transferAmount,
+        fromAccount === "trading" ? -transferAmount : transferAmount,
+        userId,
+        fromAccount,
+        toAccount
+      ]
+    );
+
+    const transferResult = await client.query(
+      `INSERT INTO account_transfers (user_id, username, from_account, to_account, amount)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING
+         id,
+         user_id AS "userId",
+         username,
+         from_account AS "fromAccount",
+         to_account AS "toAccount",
+         amount,
+         created_at AS "createdAt"`,
+      [user.id, user.username, fromAccount, toAccount, transferAmount]
+    );
+
+    await client.query("COMMIT");
+
+    return {
+      user: updateResult.rows[0],
+      transfer: transferResult.rows[0]
+    };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const findTransfersByUserId = async (userId) => {
+  const result = await database.query(
+    `SELECT
+       id,
+       user_id AS "userId",
+       username,
+       from_account AS "fromAccount",
+       to_account AS "toAccount",
+       amount,
+       created_at AS "createdAt"
+     FROM account_transfers
+     WHERE user_id = $1
+     ORDER BY created_at DESC
+     LIMIT 30`,
+    [userId]
+  );
+
+  return result.rows;
+};
+
+const getTradingEligibility = async (userId, client = database) => {
+  const userResult = await client.query(
+    `SELECT trading_started_at, trading_unlocks_at
+     FROM users
+     WHERE id = $1`,
+    [userId]
+  );
+  const user = userResult.rows[0];
+
+  if (user?.trading_started_at && user?.trading_unlocks_at) {
+    const remainingResult = await client.query(
+      `SELECT GREATEST(
+         0,
+         CEIL(EXTRACT(EPOCH FROM ($1::timestamptz - NOW())) / 86400)
+       )::INT AS remaining_days`,
+      [user.trading_unlocks_at]
+    );
+    const remainingDays = Number(remainingResult.rows[0]?.remaining_days || 0);
+    const isUnlocked = remainingDays <= 0;
+
+    return {
+      hasTradingEntry: true,
+      canMoveTradingToMain: isUnlocked,
+      canWithdraw: isUnlocked,
+      tradingEntryAt: user.trading_started_at,
+      unlocksAt: user.trading_unlocks_at,
+      remainingDays
+    };
+  }
+
+  const result = await client.query(
+    `SELECT
+       created_at,
+       GREATEST(
+         0,
+         CEIL(EXTRACT(EPOCH FROM (created_at + INTERVAL '10 days' - NOW())) / 86400)
+       )::INT AS remaining_days
+     FROM account_transfers
+     WHERE user_id = $1
+       AND from_account = 'main'
+       AND to_account = 'trading'
+     ORDER BY created_at ASC
+     LIMIT 1`,
+    [userId]
+  );
+  const firstTradingEntry = result.rows[0];
+
+  if (!firstTradingEntry) {
+    return {
+      hasTradingEntry: false,
+      canMoveTradingToMain: false,
+      canWithdraw: false,
+      tradingEntryAt: null,
+      unlocksAt: null,
+      remainingDays: 10
+    };
+  }
+
+  const remainingDays = Number(firstTradingEntry.remaining_days || 0);
+  const tradingEntryAt = new Date(firstTradingEntry.created_at);
+  const unlocksAt = new Date(tradingEntryAt.getTime() + 10 * 24 * 60 * 60 * 1000);
+  const isUnlocked = remainingDays <= 0;
+
+  return {
+    hasTradingEntry: true,
+    canMoveTradingToMain: isUnlocked,
+    canWithdraw: isUnlocked,
+    tradingEntryAt: firstTradingEntry.created_at,
+    unlocksAt,
+    remainingDays
+  };
+};
+
 module.exports = {
   createUser,
   findAllUsers,
@@ -100,5 +298,8 @@ module.exports = {
   findUserByEmail,
   findUserWithPasswordByEmail,
   findUserByReferralCode,
-  incrementUserBalance
+  incrementUserBalance,
+  transferBalance,
+  findTransfersByUserId,
+  getTradingEligibility
 };

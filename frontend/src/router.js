@@ -16,6 +16,7 @@ import LuckyBoxView from "./views/LuckyBoxView.vue";
 import LeadershipView from "./views/LeadershipView.vue";
 import DailySpinView from "./views/DailySpinView.vue";
 import RewardsView from "./views/RewardsView.vue";
+import TransferView from "./views/TransferView.vue";
 import AdminView from "./views/AdminView.vue";
 
 const routes = [
@@ -32,6 +33,7 @@ const routes = [
   { path: "/lucky-box", name: "lucky-box", component: LuckyBoxView, meta: { requiresAuth: true } },
   { path: "/daily-spin", name: "daily-spin", component: DailySpinView, meta: { requiresAuth: true } },
   { path: "/rewards", name: "rewards", component: RewardsView, meta: { requiresAuth: true } },
+  { path: "/transfer", name: "transfer", component: TransferView, meta: { requiresAuth: true } },
   { path: "/leadership", name: "leadership", component: LeadershipView, meta: { requiresAuth: true } },
   { path: "/team", name: "team", component: TeamView, meta: { requiresAuth: true } },
   {

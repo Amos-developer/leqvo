@@ -360,6 +360,20 @@
   color: white;
 }
 
+.withdrawal-limit-card a {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 36px;
+  align-items: center;
+  margin-top: 12px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
 .withdrawal-guide-steps {
   display: grid;
   gap: 11px;

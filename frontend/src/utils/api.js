@@ -56,6 +56,17 @@ export const getUserById = (id) => {
   return request(`/users/${id}`);
 };
 
+export const transferAccountBalance = (payload) => {
+  return request("/users/transfer", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const getAccountTransfers = () => {
+  return request("/users/transfers");
+};
+
 export const createDeposit = (payload) => {
   return request("/deposits/create", {
     method: "POST",
