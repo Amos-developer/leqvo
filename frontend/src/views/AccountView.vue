@@ -285,6 +285,14 @@ onMounted(() => {
           </div>
           <i></i>
         </button>
+        <button @click="router.push('/support')">
+          <span class="settings-icon icon-preferences"></span>
+          <div>
+            <strong>Help / Online support</strong>
+            <p>Chat live with a Leqvo support agent</p>
+          </div>
+          <i></i>
+        </button>
       </div>
     </section>
 
