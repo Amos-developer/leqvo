@@ -162,6 +162,152 @@ const getUserById = async (req, res) => {
   });
 };
 
+const updateMyProfile = async (req, res) => {
+  const username = req.body.username?.trim();
+
+  if (!username) {
+    return res.status(400).json({
+      success: false,
+      message: "Username is required"
+    });
+  }
+
+  if (!/^[A-Za-z]{3,20}$/.test(username)) {
+    return res.status(400).json({
+      success: false,
+      message: "Username must be 3-20 English letters only"
+    });
+  }
+
+  const existingUser = await userModel.findUserByUsername(username);
+
+  if (existingUser && existingUser.id !== req.user.id) {
+    return res.status(409).json({
+      success: false,
+      message: "This username is already taken"
+    });
+  }
+
+  const user = await userModel.updateUserProfile({
+    id: req.user.id,
+    username
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Profile updated successfully",
+    data: user
+  });
+};
+
+const generateSixDigitCode = () => String(Math.floor(100000 + Math.random() * 900000));
+
+const requestPasswordChangeCode = async (req, res) => {
+  const user = await userModel.findUserById(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found"
+    });
+  }
+
+  const code = generateSixDigitCode();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  const record = await userModel.createPasswordChangeCode({
+    userId: user.id,
+    code,
+    expiresAt
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: `Verification code requested for ${user.email}`,
+    data: {
+      email: user.email,
+      expiresAt: record.expiresAt,
+      code: process.env.NODE_ENV === "production" ? undefined : code
+    }
+  });
+};
+
+const changeMyPassword = async (req, res) => {
+  const oldPassword = req.body.oldPassword;
+  const newPassword = req.body.newPassword;
+  const confirmPassword = req.body.confirmPassword;
+  const code = req.body.code?.trim();
+
+  if (!oldPassword || !newPassword || !confirmPassword || !code) {
+    return res.status(400).json({
+      success: false,
+      message: "Code, old password, new password, and confirmation are required"
+    });
+  }
+
+  if (!/^\d{6}$/.test(code)) {
+    return res.status(400).json({
+      success: false,
+      message: "Email code must be exactly 6 numbers"
+    });
+  }
+
+  if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(newPassword)) {
+    return res.status(400).json({
+      success: false,
+      message: "New password must be at least 8 characters and include a letter and number"
+    });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "New password and confirmation do not match"
+    });
+  }
+
+  if (oldPassword === newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "New password must be different from old password"
+    });
+  }
+
+  const user = await userModel.findUserWithPasswordByEmail(req.user.email);
+  const passwordMatches = user ? await bcrypt.compare(oldPassword, user.password) : false;
+
+  if (!passwordMatches) {
+    return res.status(401).json({
+      success: false,
+      message: "Old password is incorrect"
+    });
+  }
+
+  const codeRecord = await userModel.findValidPasswordChangeCode({
+    userId: req.user.id,
+    code
+  });
+
+  if (!codeRecord) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or expired email code"
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS);
+  const updatedUser = await userModel.changePassword({
+    userId: req.user.id,
+    password: hashedPassword,
+    codeId: codeRecord.id
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Password changed successfully",
+    data: updatedUser
+  });
+};
+
 const transferBalance = async (req, res) => {
   const fromAccount = req.body.fromAccount?.trim().toLowerCase();
   const toAccount = req.body.toAccount?.trim().toLowerCase();
@@ -223,6 +369,9 @@ module.exports = {
   loginUser,
   getUsers,
   getUserById,
+  updateMyProfile,
+  requestPasswordChangeCode,
+  changeMyPassword,
   transferBalance,
   getMyTransfers
 };

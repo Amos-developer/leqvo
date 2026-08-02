@@ -56,6 +56,26 @@ export const getUserById = (id) => {
   return request(`/users/${id}`);
 };
 
+export const updateMyProfile = (payload) => {
+  return request("/users/me/profile", {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const requestPasswordChangeCode = () => {
+  return request("/users/me/password/code", {
+    method: "POST"
+  });
+};
+
+export const changeMyPassword = (payload) => {
+  return request("/users/me/password", {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+};
+
 export const transferAccountBalance = (payload) => {
   return request("/users/transfer", {
     method: "POST",

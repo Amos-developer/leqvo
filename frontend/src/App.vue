@@ -30,8 +30,8 @@ const showFooter = computed(() => route.meta.requiresAuth && !route.meta.hideFoo
 const showSessionWarning = ref(false);
 const countdownSeconds = ref(60);
 
-const SESSION_TIMEOUT_MS = 5 * 60 * 1000;
-const SESSION_WARNING_MS = 4 * 60 * 1000;
+const SESSION_TIMEOUT_MS = 60 * 60 * 1000;
+const SESSION_WARNING_MS = 59 * 60 * 1000;
 const SESSION_WARNING_SECONDS = Math.ceil((SESSION_TIMEOUT_MS - SESSION_WARNING_MS) / 1000);
 const activityEvents = ["click", "keydown", "mousemove", "scroll", "touchstart"];
 let warningTimer = null;

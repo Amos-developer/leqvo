@@ -25,9 +25,15 @@ const tradingBalance = computed(() => Number(user.value.tradingBalance || 0));
 const fromAccount = computed(() => (direction.value === "main-to-trading" ? "main" : "trading"));
 const toAccount = computed(() => (direction.value === "main-to-trading" ? "trading" : "main"));
 const availableBalance = computed(() => (fromAccount.value === "main" ? mainBalance.value : tradingBalance.value));
-const isTradingLocked = computed(() => {
-  return direction.value === "trading-to-main" && !eligibility.value.canMoveTradingToMain;
+const isEarlyTradingExit = computed(() => {
+  return (
+    direction.value === "trading-to-main" &&
+    eligibility.value.hasTradingEntry &&
+    !eligibility.value.canMoveTradingToMain
+  );
 });
+const earlyExitFee = computed(() => (isEarlyTradingExit.value ? Number(amount.value || 0) * 0.3 : 0));
+const netTransferAmount = computed(() => Math.max(Number(amount.value || 0) - earlyExitFee.value, 0));
 
 const money = (value) => {
   return Number(value || 0).toLocaleString("en-US", {
@@ -86,11 +92,6 @@ const submitTransfer = async () => {
 
   if (fromAccount.value === "main" && toAccount.value === "trading" && transferAmount < 30) {
     errorMessage.value = "Minimum trading entry is 30 USDT.";
-    return;
-  }
-
-  if (isTradingLocked.value) {
-    errorMessage.value = `Trading funds can move back to main after ${eligibility.value.remainingDays} more day(s).`;
     return;
   }
 
@@ -208,11 +209,11 @@ onMounted(loadTransferPage);
       <p v-if="direction === 'main-to-trading'" class="transfer-rule-note">
         Minimum trading entry is 30 USDT.
       </p>
-      <p v-if="isTradingLocked" class="transfer-rule-note locked">
-        Trading to main unlocks after {{ eligibility.remainingDays }} more day(s).
+      <p v-if="isEarlyTradingExit" class="transfer-rule-note locked">
+        Early transfer is allowed, but 30% will be deducted. You receive {{ money(netTransferAmount) }}.
       </p>
 
-      <button class="transfer-submit" type="button" :disabled="isSubmitting || isTradingLocked" @click="submitTransfer">
+      <button class="transfer-submit" type="button" :disabled="isSubmitting" @click="submitTransfer">
         {{ isSubmitting ? "Processing..." : "Confirm Transfer" }}
       </button>
 
@@ -232,9 +233,14 @@ onMounted(loadTransferPage);
         <article v-for="transfer in transfers" :key="transfer.id" class="transfer-row">
           <div>
             <strong>{{ accountLabel(transfer.fromAccount) }} to {{ accountLabel(transfer.toAccount) }}</strong>
-            <p>{{ new Date(transfer.createdAt).toLocaleString() }}</p>
+            <p>
+              {{ new Date(transfer.createdAt).toLocaleString() }}
+              <span v-if="Number(transfer.feeAmount || 0) > 0">
+                - Fee {{ money(transfer.feeAmount) }}, received {{ money(transfer.netAmount) }}
+              </span>
+            </p>
           </div>
-          <span>{{ money(transfer.amount) }}</span>
+        <span>{{ money(transfer.amount) }}</span>
         </article>
       </template>
     </section>

@@ -646,7 +646,9 @@
 }
 
 .portfolio-card {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
   justify-content: space-between;
   padding: 18px;
@@ -668,6 +670,13 @@
   font-size: 1.7rem;
 }
 
+.portfolio-card p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .portfolio-ring {
   display: grid;
   width: 62px;
@@ -683,6 +692,94 @@
   color: var(--pink);
   font-size: 0.78rem;
   font-weight: 900;
+}
+
+.trading-countdown {
+  position: relative;
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 14px;
+  border: 1px solid rgba(249, 79, 167, 0.14);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(249, 79, 167, 0.16), transparent 5rem),
+    linear-gradient(135deg, #fff8fc, #f5f7ff);
+  box-shadow: 0 14px 28px rgba(78, 83, 110, 0.08);
+}
+
+.countdown-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.countdown-status-row span,
+.trading-countdown > span {
+  color: var(--pink);
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.countdown-status-row b {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #151925;
+  color: white;
+  font-size: 0.66rem;
+  font-weight: 950;
+}
+
+.trading-countdown div {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.trading-countdown div > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 7px 4px;
+  border: 1px solid #eceef7;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.trading-countdown div strong,
+.trading-countdown div small {
+  display: block;
+  min-width: 0;
+  text-align: center;
+}
+
+.trading-countdown div strong {
+  margin: 0;
+  color: #151925;
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.trading-countdown div small {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.trading-countdown > strong {
+  color: #0a8f5e;
+  font-size: 1.15rem;
+}
+
+.trading-countdown.ready {
+  background: var(--green-soft);
 }
 
 .finance-grid {
@@ -810,6 +907,22 @@
 .premium-settings {
   display: grid;
   gap: 11px;
+}
+
+.personal-section {
+  order: 1;
+}
+
+.finance-section {
+  order: 2;
+}
+
+.preferences-section {
+  order: 3;
+}
+
+.account-logout-section {
+  order: 4;
 }
 
 .premium-settings h2 {

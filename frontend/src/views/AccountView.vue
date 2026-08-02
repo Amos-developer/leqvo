@@ -1,13 +1,16 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { getUserById } from "../utils/api";
 
 const router = useRouter();
-const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
+const user = ref(JSON.parse(localStorage.getItem("leqvoUser") || "{}"));
 const copiedId = ref(false);
+const now = ref(Date.now());
+let countdownTimer = null;
 
 const initials = computed(() => {
-  return (user.username || "Member")
+  return (user.value.username || "Member")
     .split(" ")
     .map((part) => part[0])
     .join("")
@@ -16,11 +19,57 @@ const initials = computed(() => {
 });
 
 const balance = computed(() => {
-  return Number(user.balance || 0).toLocaleString("en-US", {
+  return Number(user.value.balance || 0).toLocaleString("en-US", {
     style: "currency",
     currency: "USD"
   });
 });
+
+const tradingBalance = computed(() => {
+  return Number(user.value.tradingBalance || 0).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD"
+  });
+});
+
+const unlockTime = computed(() => {
+  return user.value.tradingUnlocksAt ? new Date(user.value.tradingUnlocksAt).getTime() : 0;
+});
+
+const remainingMs = computed(() => Math.max(unlockTime.value - now.value, 0));
+const hasTradingCountdown = computed(() => {
+  return Boolean(unlockTime.value && remainingMs.value > 0 && Number(user.value.tradingBalance || 0) > 0);
+});
+const countdownParts = computed(() => {
+  const totalSeconds = Math.floor(remainingMs.value / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return { days, hours, minutes, seconds };
+});
+
+const earlyExitFeeText = computed(() => {
+  return Number(Number(user.value.tradingBalance || 0) * 0.3).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD"
+  });
+});
+
+const refreshUser = async () => {
+  if (!user.value.id) {
+    return;
+  }
+
+  try {
+    const result = await getUserById(user.value.id);
+    user.value = result.data;
+    localStorage.setItem("leqvoUser", JSON.stringify(result.data));
+  } catch (error) {
+    console.warn("Could not refresh account details", error);
+  }
+};
 
 const handleLogout = () => {
   localStorage.removeItem("leqvoUser");
@@ -29,15 +78,15 @@ const handleLogout = () => {
 };
 
 const copyUserId = async () => {
-  if (!user.id) {
+  if (!user.value.id) {
     return;
   }
 
   if (navigator.clipboard) {
-    await navigator.clipboard.writeText(user.id);
+    await navigator.clipboard.writeText(user.value.id);
   } else {
     const input = document.createElement("input");
-    input.value = user.id;
+    input.value = user.value.id;
     document.body.appendChild(input);
     input.select();
     document.execCommand("copy");
@@ -50,6 +99,17 @@ const copyUserId = async () => {
     copiedId.value = false;
   }, 1400);
 };
+
+onMounted(() => {
+  refreshUser();
+  countdownTimer = setInterval(() => {
+    now.value = Date.now();
+  }, 1000);
+});
+
+onUnmounted(() => {
+  clearInterval(countdownTimer);
+});
 </script>
 
 <template>
@@ -95,15 +155,31 @@ const copyUserId = async () => {
 
     <section class="portfolio-card">
       <div>
-        <span>Available balance</span>
+        <span>Main balance</span>
         <strong>{{ balance }}</strong>
+        <p>Trading balance: {{ tradingBalance }}</p>
       </div>
-      <div class="portfolio-ring">
-        <span>98%</span>
+      <div v-if="hasTradingCountdown" class="trading-countdown">
+        <div class="countdown-status-row">
+          <span>Trading lock</span>
+          <b>Active</b>
+        </div>
+        <div>
+          <span><strong>{{ countdownParts.days }}</strong><small>Days</small></span>
+          <span><strong>{{ countdownParts.hours }}</strong><small>Hrs</small></span>
+          <span><strong>{{ countdownParts.minutes }}</strong><small>Min</small></span>
+          <span><strong>{{ countdownParts.seconds }}</strong><small>Sec</small></span>
+        </div>
+        <p>Early move to main deducts 30% now: {{ earlyExitFeeText }}</p>
+      </div>
+      <div v-else class="trading-countdown ready">
+        <span>Trading funds</span>
+        <strong>Unlocked</strong>
+        <p>You can move trading funds to main without extra deduction.</p>
       </div>
     </section>
 
-    <section class="premium-settings">
+    <section class="premium-settings finance-section">
       <h2>Finance</h2>
       <div class="premium-list">
         <button>
@@ -157,18 +233,18 @@ const copyUserId = async () => {
       </div>
     </section>
 
-    <section class="premium-settings">
+    <section class="premium-settings personal-section">
       <h2>Personal Details</h2>
       <div class="premium-list">
-        <button>
+        <button @click="router.push('/account/profile')">
           <span class="settings-icon icon-profile"></span>
           <div>
             <strong>Profile information</strong>
-            <p>Update avatar, username, email, and account data</p>
+            <p>Update username and review protected account details</p>
           </div>
           <i></i>
         </button>
-        <button>
+        <button @click="router.push('/account/change-password')">
           <span class="settings-icon icon-shield"></span>
           <div>
             <strong>Change password</strong>
@@ -187,7 +263,7 @@ const copyUserId = async () => {
       </div>
     </section>
 
-    <section class="premium-settings">
+    <section class="premium-settings preferences-section">
       <h2>Preferences</h2>
       <div class="premium-list">
         <button>
@@ -217,6 +293,6 @@ const copyUserId = async () => {
       </div>
     </section>
 
-    <button class="logout-action premium" @click="handleLogout">Logout</button>
+    <button class="logout-action premium account-logout-section" @click="handleLogout">Logout</button>
   </section>
 </template>

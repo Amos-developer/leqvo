@@ -59,6 +59,17 @@ const findUserByEmail = async (email) => {
   return result.rows[0] || null;
 };
 
+const findUserByUsername = async (username) => {
+  const result = await database.query(
+    `SELECT ${userFields}
+     FROM users
+     WHERE username = $1`,
+    [username]
+  );
+
+  return result.rows[0] || null;
+};
+
 const findUserWithPasswordByEmail = async (email) => {
   const result = await database.query(
     `SELECT
@@ -81,6 +92,97 @@ const findUserByReferralCode = async (referralCode) => {
   );
 
   return result.rows[0] || null;
+};
+
+const updateUserProfile = async ({ id, username }) => {
+  const result = await database.query(
+    `UPDATE users
+     SET username = COALESCE($2, username),
+         updated_at = NOW()
+     WHERE id = $1
+     RETURNING ${userFields}`,
+    [id, username]
+  );
+
+  return result.rows[0] || null;
+};
+
+const createPasswordChangeCode = async ({ userId, code, expiresAt }) => {
+  await database.query(
+    `UPDATE password_change_codes
+     SET used_at = NOW()
+     WHERE user_id = $1
+       AND used_at IS NULL`,
+    [userId]
+  );
+
+  const result = await database.query(
+    `INSERT INTO password_change_codes (user_id, code, expires_at)
+     VALUES ($1, $2, $3)
+     RETURNING
+       id,
+       user_id AS "userId",
+       code,
+       expires_at AS "expiresAt",
+       created_at AS "createdAt"`,
+    [userId, code, expiresAt]
+  );
+
+  return result.rows[0];
+};
+
+const findValidPasswordChangeCode = async ({ userId, code }) => {
+  const result = await database.query(
+    `SELECT
+       id,
+       user_id AS "userId",
+       code,
+       expires_at AS "expiresAt",
+       used_at AS "usedAt",
+       created_at AS "createdAt"
+     FROM password_change_codes
+     WHERE user_id = $1
+       AND code = $2
+       AND used_at IS NULL
+       AND expires_at > NOW()
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [userId, code]
+  );
+
+  return result.rows[0] || null;
+};
+
+const changePassword = async ({ userId, password, codeId }) => {
+  const client = await database.pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    await client.query(
+      `UPDATE users
+       SET password = $1,
+           updated_at = NOW()
+       WHERE id = $2`,
+      [password, userId]
+    );
+
+    await client.query(
+      `UPDATE password_change_codes
+       SET used_at = NOW()
+       WHERE id = $1`,
+      [codeId]
+    );
+
+    await client.query("COMMIT");
+
+    return findUserById(userId);
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 const incrementUserBalance = async (id, amount, client = database) => {
@@ -121,23 +223,16 @@ const transferBalance = async ({ userId, fromAccount, toAccount, amount }) => {
     const mainBalance = Number(user.balance || 0);
     const tradingBalance = Number(user.trading_balance || 0);
     const sourceBalance = fromAccount === "main" ? mainBalance : tradingBalance;
+    const eligibility = await getTradingEligibility(userId, client);
+    const isEarlyTradingExit =
+      fromAccount === "trading" && toAccount === "main" && eligibility.hasTradingEntry && !eligibility.canMoveTradingToMain;
+    const feeAmount = isEarlyTradingExit ? transferAmount * 0.3 : 0;
+    const netAmount = transferAmount - feeAmount;
 
     if (fromAccount === "main" && toAccount === "trading" && transferAmount < 30) {
       const error = new Error("Minimum transfer from main to trading is 30 USDT");
       error.statusCode = 400;
       throw error;
-    }
-
-    if (fromAccount === "trading" && toAccount === "main") {
-      const eligibility = await getTradingEligibility(userId, client);
-
-      if (!eligibility.canMoveTradingToMain) {
-        const error = new Error(
-          `Trading funds can move back to main account after ${eligibility.remainingDays} more day(s)`
-        );
-        error.statusCode = 400;
-        throw error;
-      }
     }
 
     if (sourceBalance < transferAmount) {
@@ -162,7 +257,7 @@ const transferBalance = async ({ userId, fromAccount, toAccount, amount }) => {
        WHERE id = $3
        RETURNING ${userFields}`,
       [
-        fromAccount === "main" ? -transferAmount : transferAmount,
+        fromAccount === "main" ? -transferAmount : netAmount,
         fromAccount === "trading" ? -transferAmount : transferAmount,
         userId,
         fromAccount,
@@ -171,8 +266,8 @@ const transferBalance = async ({ userId, fromAccount, toAccount, amount }) => {
     );
 
     const transferResult = await client.query(
-      `INSERT INTO account_transfers (user_id, username, from_account, to_account, amount)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO account_transfers (user_id, username, from_account, to_account, amount, fee_amount, net_amount)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING
          id,
          user_id AS "userId",
@@ -180,8 +275,10 @@ const transferBalance = async ({ userId, fromAccount, toAccount, amount }) => {
          from_account AS "fromAccount",
          to_account AS "toAccount",
          amount,
+         fee_amount AS "feeAmount",
+         net_amount AS "netAmount",
          created_at AS "createdAt"`,
-      [user.id, user.username, fromAccount, toAccount, transferAmount]
+      [user.id, user.username, fromAccount, toAccount, transferAmount, feeAmount, netAmount]
     );
 
     await client.query("COMMIT");
@@ -207,6 +304,8 @@ const findTransfersByUserId = async (userId) => {
        from_account AS "fromAccount",
        to_account AS "toAccount",
        amount,
+       fee_amount AS "feeAmount",
+       net_amount AS "netAmount",
        created_at AS "createdAt"
      FROM account_transfers
      WHERE user_id = $1
@@ -296,8 +395,13 @@ module.exports = {
   findAllUsers,
   findUserById,
   findUserByEmail,
+  findUserByUsername,
   findUserWithPasswordByEmail,
   findUserByReferralCode,
+  updateUserProfile,
+  createPasswordChangeCode,
+  findValidPasswordChangeCode,
+  changePassword,
   incrementUserBalance,
   transferBalance,
   findTransfersByUserId,

@@ -76,6 +76,8 @@ const connectDatabase = async () => {
         from_account VARCHAR(20) NOT NULL,
         to_account VARCHAR(20) NOT NULL,
         amount NUMERIC(18, 8) NOT NULL,
+        fee_amount NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        net_amount NUMERIC(18, 8) NOT NULL DEFAULT 0,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         CONSTRAINT account_transfers_account_check
           CHECK (from_account IN ('main', 'trading') AND to_account IN ('main', 'trading')),
@@ -87,6 +89,22 @@ const connectDatabase = async () => {
     await client.query(`
       CREATE INDEX IF NOT EXISTS account_transfers_user_id_created_at_index
         ON account_transfers (user_id, created_at DESC);
+    `);
+
+    await client.query(`
+      ALTER TABLE account_transfers
+        ADD COLUMN IF NOT EXISTS fee_amount NUMERIC(18, 8) NOT NULL DEFAULT 0;
+    `);
+
+    await client.query(`
+      ALTER TABLE account_transfers
+        ADD COLUMN IF NOT EXISTS net_amount NUMERIC(18, 8) NOT NULL DEFAULT 0;
+    `);
+
+    await client.query(`
+      UPDATE account_transfers
+      SET net_amount = amount
+      WHERE net_amount = 0;
     `);
 
     await client.query(`
@@ -320,6 +338,22 @@ const connectDatabase = async () => {
     await client.query(`
       CREATE INDEX IF NOT EXISTS rewards_user_id_awarded_at_index
         ON rewards (user_id, awarded_at DESC);
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS password_change_codes (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        code CHAR(6) NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        used_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS password_change_codes_user_id_created_at_index
+        ON password_change_codes (user_id, created_at DESC);
     `);
 
     console.log("PostgreSQL database connection established");
