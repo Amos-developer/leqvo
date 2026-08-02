@@ -9,6 +9,7 @@ import HistoryView from "./views/HistoryView.vue";
 import AccountView from "./views/AccountView.vue";
 import ProfileInformationView from "./views/ProfileInformationView.vue";
 import ChangePasswordView from "./views/ChangePasswordView.vue";
+import KycVerificationView from "./views/KycVerificationView.vue";
 import DepositView from "./views/DepositView.vue";
 import DepositAddressView from "./views/DepositAddressView.vue";
 import WithdrawalView from "./views/WithdrawalView.vue";
@@ -30,6 +31,7 @@ const routes = [
   { path: "/account", name: "account", component: AccountView, meta: { requiresAuth: true } },
   { path: "/account/profile", name: "profile-information", component: ProfileInformationView, meta: { requiresAuth: true } },
   { path: "/account/change-password", name: "change-password", component: ChangePasswordView, meta: { requiresAuth: true } },
+  { path: "/account/kyc", name: "kyc-verification", component: KycVerificationView, meta: { requiresAuth: true } },
   { path: "/deposit", name: "deposit", component: DepositView, meta: { requiresAuth: true } },
   { path: "/deposit/address", name: "deposit-address", component: DepositAddressView, meta: { requiresAuth: true } },
   { path: "/withdrawal", name: "withdrawal", component: WithdrawalView, meta: { requiresAuth: true } },

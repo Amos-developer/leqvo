@@ -252,7 +252,7 @@ onUnmounted(() => {
           </div>
           <i></i>
         </button>
-        <button>
+        <button @click="router.push('/account/kyc')">
           <span class="settings-icon icon-shield"></span>
           <div>
             <strong>Verification</strong>

@@ -76,6 +76,28 @@ export const changeMyPassword = (payload) => {
   });
 };
 
+export const getMyKyc = () => {
+  return request("/kyc");
+};
+
+export const submitKyc = (payload) => {
+  return request("/kyc", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const getAdminKyc = () => {
+  return request("/kyc/admin");
+};
+
+export const updateAdminKycStatus = (id, payload) => {
+  return request(`/kyc/admin/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+};
+
 export const transferAccountBalance = (payload) => {
   return request("/users/transfer", {
     method: "POST",

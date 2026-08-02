@@ -4,10 +4,12 @@ import { useRoute, useRouter } from "vue-router";
 import {
   getAdminDeposits,
   getAdminLeaders,
+  getAdminKyc,
   getAdminOverview,
   getAdminUsers,
   getAdminWithdrawals,
-  grantAdminLeadershipReward
+  grantAdminLeadershipReward,
+  updateAdminKycStatus
 } from "../utils/api";
 import AdminUsersView from "./admin/AdminUsersView.vue";
 
@@ -25,6 +27,8 @@ const leaders = ref([]);
 const leaderRewards = ref([]);
 const leaderSummary = ref({ total: 0, qualified: 0, totalGranted: 0, topRank: "No rank" });
 const rewardLoadingId = ref("");
+const kycSubmissions = ref([]);
+const kycReviewId = ref("");
 
 const menuItems = [
   "Overview",
@@ -95,8 +99,8 @@ const stats = computed(() => {
     },
     {
       label: "KYC Queue",
-      value: 0,
-      note: "Verification module pending",
+      value: kycSubmissions.value.filter((item) => item.status === "pending").length,
+      note: `${kycSubmissions.value.length} submissions`,
       tone: "amber"
     }
   ];
@@ -123,12 +127,13 @@ const loadAdminData = async () => {
   errorMessage.value = "";
 
   try {
-    const [overviewResult, usersResult, depositsResult, withdrawalsResult, leadersResult] = await Promise.all([
+    const [overviewResult, usersResult, depositsResult, withdrawalsResult, leadersResult, kycResult] = await Promise.all([
       getAdminOverview(),
       getAdminUsers(),
       getAdminDeposits(),
       getAdminWithdrawals(),
-      getAdminLeaders()
+      getAdminLeaders(),
+      getAdminKyc()
     ]);
 
     overview.value = overviewResult.data;
@@ -139,10 +144,28 @@ const loadAdminData = async () => {
     leaders.value = leadersResult.data.leaders;
     leaderRewards.value = leadersResult.data.rewards;
     leaderSummary.value = leadersResult.data.summary;
+    kycSubmissions.value = kycResult.data;
   } catch (error) {
     errorMessage.value = error.message;
   } finally {
     isLoading.value = false;
+  }
+};
+
+const reviewKyc = async (submission, status) => {
+  kycReviewId.value = `${submission.id}-${status}`;
+  errorMessage.value = "";
+
+  try {
+    await updateAdminKycStatus(submission.id, {
+      status,
+      note: status === "approved" ? "Approved by admin" : "Rejected by admin"
+    });
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    kycReviewId.value = "";
   }
 };
 
@@ -422,6 +445,72 @@ onMounted(loadAdminData);
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section v-else-if="activeTab === 'KYC'" class="admin-view-stack">
+        <section class="admin-panel kyc-admin-panel">
+          <div class="admin-panel-head">
+            <div>
+              <h2>KYC Review</h2>
+              <p>Approve or reject identity documents submitted by users</p>
+            </div>
+          </div>
+
+          <article v-if="!kycSubmissions.length" class="admin-empty-state">
+            <h2>No KYC submissions</h2>
+            <p>New verification requests will appear here.</p>
+          </article>
+
+          <div v-else class="kyc-admin-list">
+            <article v-for="submission in kycSubmissions" :key="submission.id" class="kyc-admin-card">
+              <div class="kyc-admin-head">
+                <div class="admin-user-mini">{{ submission.username.charAt(0).toUpperCase() }}</div>
+                <div>
+                  <strong>{{ submission.username }}</strong>
+                  <span>{{ submission.email }} · {{ submission.userId }}</span>
+                </div>
+                <b :class="submission.status">{{ submission.status }}</b>
+              </div>
+
+              <div class="kyc-admin-docs">
+                <a :href="submission.idFront" target="_blank" rel="noreferrer">
+                  <img :src="submission.idFront" alt="ID front" />
+                  <span>ID Front</span>
+                </a>
+                <a :href="submission.idBack" target="_blank" rel="noreferrer">
+                  <img :src="submission.idBack" alt="ID back" />
+                  <span>ID Back</span>
+                </a>
+                <a :href="submission.selfie" target="_blank" rel="noreferrer">
+                  <img :src="submission.selfie" alt="Selfie" />
+                  <span>Selfie</span>
+                </a>
+              </div>
+
+              <div class="kyc-admin-meta">
+                <span>Submitted {{ formatDate(submission.submittedAt) }}</span>
+                <span v-if="submission.reviewedAt">Reviewed {{ formatDate(submission.reviewedAt) }}</span>
+              </div>
+
+              <div class="kyc-admin-actions">
+                <button
+                  type="button"
+                  :disabled="submission.status === 'approved' || kycReviewId === `${submission.id}-approved`"
+                  @click="reviewKyc(submission, 'approved')"
+                >
+                  Approve
+                </button>
+                <button
+                  type="button"
+                  :disabled="submission.status === 'rejected' || kycReviewId === `${submission.id}-rejected`"
+                  @click="reviewKyc(submission, 'rejected')"
+                >
+                  Reject
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
       </section>
 
       <section v-else-if="activeTab === 'Leaders'" class="admin-view-stack leaders-admin-view">

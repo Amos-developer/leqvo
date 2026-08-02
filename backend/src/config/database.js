@@ -356,6 +356,35 @@ const connectDatabase = async () => {
         ON password_change_codes (user_id, created_at DESC);
     `);
 
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS kyc_submissions (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        email VARCHAR(160) NOT NULL,
+        id_front TEXT NOT NULL,
+        id_back TEXT NOT NULL,
+        selfie TEXT NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        note TEXT,
+        reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
+        reviewed_at TIMESTAMPTZ,
+        submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        CONSTRAINT kyc_submissions_status_check CHECK (status IN ('pending', 'approved', 'rejected'))
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS kyc_submissions_user_id_status_index
+        ON kyc_submissions (user_id, status);
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS kyc_submissions_status_submitted_at_index
+        ON kyc_submissions (status, submitted_at DESC);
+    `);
+
     console.log("PostgreSQL database connection established");
   } finally {
     client.release();
