@@ -1,13 +1,18 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getUserById } from "../utils/api";
+import { getAccountTransfers, getUserById } from "../utils/api";
 
 const router = useRouter();
 const user = ref(JSON.parse(localStorage.getItem("leqvoUser") || "{}"));
 const copiedId = ref(false);
-const now = ref(Date.now());
-let countdownTimer = null;
+const eligibility = ref({
+  hasTradingEntry: false,
+  canMoveTradingToMain: false,
+  completedTradingDays: 0,
+  remainingTradingDays: 10,
+  requiredTradingDays: 10
+});
 
 const initials = computed(() => {
   return (user.value.username || "Member")
@@ -32,22 +37,12 @@ const tradingBalance = computed(() => {
   });
 });
 
-const unlockTime = computed(() => {
-  return user.value.tradingUnlocksAt ? new Date(user.value.tradingUnlocksAt).getTime() : 0;
-});
-
-const remainingMs = computed(() => Math.max(unlockTime.value - now.value, 0));
 const hasTradingCountdown = computed(() => {
-  return Boolean(unlockTime.value && remainingMs.value > 0 && Number(user.value.tradingBalance || 0) > 0);
-});
-const countdownParts = computed(() => {
-  const totalSeconds = Math.floor(remainingMs.value / 1000);
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return { days, hours, minutes, seconds };
+  return Boolean(
+    eligibility.value.hasTradingEntry &&
+      !eligibility.value.canMoveTradingToMain &&
+      Number(user.value.tradingBalance || 0) > 0
+  );
 });
 
 const earlyExitFeeText = computed(() => {
@@ -66,6 +61,9 @@ const refreshUser = async () => {
     const result = await getUserById(user.value.id);
     user.value = result.data;
     localStorage.setItem("leqvoUser", JSON.stringify(result.data));
+
+    const transferResult = await getAccountTransfers();
+    eligibility.value = transferResult.data?.eligibility || eligibility.value;
   } catch (error) {
     console.warn("Could not refresh account details", error);
   }
@@ -102,13 +100,6 @@ const copyUserId = async () => {
 
 onMounted(() => {
   refreshUser();
-  countdownTimer = setInterval(() => {
-    now.value = Date.now();
-  }, 1000);
-});
-
-onUnmounted(() => {
-  clearInterval(countdownTimer);
 });
 </script>
 
@@ -165,12 +156,12 @@ onUnmounted(() => {
           <b>Active</b>
         </div>
         <div>
-          <span><strong>{{ countdownParts.days }}</strong><small>Days</small></span>
-          <span><strong>{{ countdownParts.hours }}</strong><small>Hrs</small></span>
-          <span><strong>{{ countdownParts.minutes }}</strong><small>Min</small></span>
-          <span><strong>{{ countdownParts.seconds }}</strong><small>Sec</small></span>
+          <span><strong>{{ eligibility.completedTradingDays || 0 }}</strong><small>Traded</small></span>
+          <span><strong>{{ eligibility.remainingTradingDays || eligibility.remainingDays || 10 }}</strong><small>Left</small></span>
+          <span><strong>{{ eligibility.requiredTradingDays || 10 }}</strong><small>Required</small></span>
+          <span><strong>30%</strong><small>Early fee</small></span>
         </div>
-        <p>Early move to main deducts 30% now: {{ earlyExitFeeText }}</p>
+        <p>Only days with a completed trade count. Early move to main deducts {{ earlyExitFeeText }} now.</p>
       </div>
       <div v-else class="trading-countdown ready">
         <span>Trading funds</span>

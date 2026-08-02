@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { CandlestickSeries, createChart } from "lightweight-charts";
 import { createBinanceKlineSocket, fetchBinanceKlines } from "../utils/binanceKlineSocket";
 import { createBinanceMarketSocket, createInitialBinanceMarkets } from "../utils/binanceMarketSocket";
-import { transferAccountBalance } from "../utils/api";
+import { createTrade, transferAccountBalance } from "../utils/api";
 import { saveTradeRecord } from "../utils/tradeHistory";
 
 const route = useRoute();
@@ -106,7 +106,7 @@ const transferToTrading = async () => {
   }
 };
 
-const completeTrade = () => {
+const completeTrade = async () => {
   tradeError.value = "";
   tradeStatus.value = "";
 
@@ -120,7 +120,7 @@ const completeTrade = () => {
     return;
   }
 
-  saveTradeRecord({
+  const tradePayload = {
     pair: selectedPairLabel.value,
     symbol: selectedMarket.value.symbol,
     signalCode: signalCode.value.trim().toUpperCase(),
@@ -128,7 +128,15 @@ const completeTrade = () => {
     amount: Number(investmentAmount.value.toFixed(2)),
     entryPrice: Number(selectedMarket.value.price || 0),
     change24h: Number(selectedMarket.value.change24h || 0)
-  });
+  };
+
+  try {
+    await createTrade(tradePayload);
+    saveTradeRecord(tradePayload);
+  } catch (error) {
+    tradeError.value = error.message || "Could not complete trade.";
+    return;
+  }
 
   router.push({ name: "history", query: { tab: "active" } });
 };

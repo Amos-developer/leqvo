@@ -130,6 +130,13 @@ export const getMyWithdrawals = () => {
   return request("/withdrawals/my");
 };
 
+export const createTrade = (payload) => {
+  return request("/trades", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
 export const getPopularCrypto = () => {
   return request("/markets/popular");
 };

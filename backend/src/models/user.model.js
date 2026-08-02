@@ -328,14 +328,15 @@ const getTradingEligibility = async (userId, client = database) => {
 
   if (user?.trading_started_at && user?.trading_unlocks_at) {
     const remainingResult = await client.query(
-      `SELECT GREATEST(
-         0,
-         CEIL(EXTRACT(EPOCH FROM ($1::timestamptz - NOW())) / 86400)
-       )::INT AS remaining_days`,
-      [user.trading_unlocks_at]
+      `SELECT COUNT(DISTINCT opened_at::DATE)::INT AS completed_days
+       FROM trades
+       WHERE user_id = $1
+         AND opened_at >= $2`,
+      [userId, user.trading_started_at]
     );
-    const remainingDays = Number(remainingResult.rows[0]?.remaining_days || 0);
-    const isUnlocked = remainingDays <= 0;
+    const completedTradingDays = Number(remainingResult.rows[0]?.completed_days || 0);
+    const remainingTradingDays = Math.max(10 - completedTradingDays, 0);
+    const isUnlocked = remainingTradingDays <= 0;
 
     return {
       hasTradingEntry: true,
@@ -343,7 +344,10 @@ const getTradingEligibility = async (userId, client = database) => {
       canWithdraw: isUnlocked,
       tradingEntryAt: user.trading_started_at,
       unlocksAt: user.trading_unlocks_at,
-      remainingDays
+      remainingDays: remainingTradingDays,
+      completedTradingDays,
+      remainingTradingDays,
+      requiredTradingDays: 10
     };
   }
 
@@ -376,9 +380,11 @@ const getTradingEligibility = async (userId, client = database) => {
   }
 
   const remainingDays = Number(firstTradingEntry.remaining_days || 0);
+  const completedTradingDays = 0;
+  const remainingTradingDays = 10;
   const tradingEntryAt = new Date(firstTradingEntry.created_at);
   const unlocksAt = new Date(tradingEntryAt.getTime() + 10 * 24 * 60 * 60 * 1000);
-  const isUnlocked = remainingDays <= 0;
+  const isUnlocked = false;
 
   return {
     hasTradingEntry: true,
@@ -386,7 +392,10 @@ const getTradingEligibility = async (userId, client = database) => {
     canWithdraw: isUnlocked,
     tradingEntryAt: firstTradingEntry.created_at,
     unlocksAt,
-    remainingDays
+    remainingDays: remainingTradingDays,
+    completedTradingDays,
+    remainingTradingDays,
+    requiredTradingDays: 10
   };
 };
 

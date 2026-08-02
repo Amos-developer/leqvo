@@ -138,7 +138,7 @@ onMounted(loadTransferPage);
       <div>
         <span>Total available</span>
         <strong>{{ money(mainBalance + tradingBalance) }}</strong>
-        <p>Main to trading starts from 30 USDT. Trading funds unlock after 10 trading days.</p>
+        <p>Main to trading starts from 30 USDT. Only days with completed trades count toward unlock.</p>
       </div>
       <div class="transfer-orbit" aria-hidden="true">
         <i></i>
@@ -210,7 +210,7 @@ onMounted(loadTransferPage);
         Minimum trading entry is 30 USDT.
       </p>
       <p v-if="isEarlyTradingExit" class="transfer-rule-note locked">
-        Early transfer is allowed, but 30% will be deducted. You receive {{ money(netTransferAmount) }}.
+        Early transfer is allowed before 10 completed trading days, but 30% will be deducted. You receive {{ money(netTransferAmount) }}.
       </p>
 
       <button class="transfer-submit" type="button" :disabled="isSubmitting" @click="submitTransfer">

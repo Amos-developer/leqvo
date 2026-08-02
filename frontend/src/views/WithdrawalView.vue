@@ -88,7 +88,7 @@ const submitWithdrawal = () => {
 
   if (!eligibility.value.canWithdraw) {
     formError.value = eligibility.value.hasTradingEntry
-      ? `Withdrawal unlocks after ${eligibility.value.remainingDays} more day(s) of trading.`
+      ? `Withdrawal unlocks after ${eligibility.value.remainingTradingDays || eligibility.value.remainingDays} more trading day(s).`
       : "Transfer at least 30 USDT to your trading account before withdrawal can be unlocked.";
     return;
   }
@@ -140,8 +140,8 @@ onMounted(loadWithdrawalEligibility);
       <div>
         <strong>Trading period required</strong>
         <p v-if="eligibility.hasTradingEntry">
-          Withdrawals unlock after {{ eligibility.remainingDays }} more day(s). Trading funds can return to main account
-          after 10 trading days.
+          Withdrawals unlock after {{ eligibility.remainingTradingDays || eligibility.remainingDays }} more trading day(s).
+          Skipped days do not count toward the 10 required trading days.
         </p>
         <p v-else>
           Transfer at least 30 USDT from main account to trading account first. Withdrawals unlock after 10 trading days.

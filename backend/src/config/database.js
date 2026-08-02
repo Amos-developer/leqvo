@@ -183,6 +183,11 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
+      CREATE INDEX IF NOT EXISTS trades_user_id_opened_at_index
+        ON trades (user_id, opened_at DESC);
+    `);
+
+    await client.query(`
       CREATE TABLE IF NOT EXISTS withdrawals (
         id SERIAL PRIMARY KEY,
         user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
