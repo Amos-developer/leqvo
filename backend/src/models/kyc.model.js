@@ -68,9 +68,21 @@ const updateStatus = async ({ id, status, note, reviewedBy }) => {
   return result.rows[0] || null;
 };
 
+const deleteSubmission = async (id) => {
+  const result = await database.query(
+    `DELETE FROM kyc_submissions
+     WHERE id = $1
+     RETURNING ${kycFields}`,
+    [id]
+  );
+
+  return result.rows[0] || null;
+};
+
 module.exports = {
   getLatestByUserId,
   createSubmission,
   getAll,
-  updateStatus
+  updateStatus,
+  deleteSubmission
 };

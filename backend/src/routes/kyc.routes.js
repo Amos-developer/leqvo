@@ -8,5 +8,6 @@ router.get("/", requireAuth, asyncHandler(kycController.getMyKyc));
 router.post("/", requireAuth, asyncHandler(kycController.submitKyc));
 router.get("/admin", requireAuth, requireAdmin, asyncHandler(kycController.getAdminKyc));
 router.patch("/admin/:id", requireAuth, requireAdmin, asyncHandler(kycController.updateKycStatus));
+router.delete("/admin/:id", requireAuth, requireAdmin, asyncHandler(kycController.deleteKycSubmission));
 
 module.exports = router;

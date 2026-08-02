@@ -9,6 +9,7 @@ import {
   getAdminUsers,
   getAdminWithdrawals,
   grantAdminLeadershipReward,
+  deleteAdminKyc,
   updateAdminKycStatus
 } from "../utils/api";
 import AdminUsersView from "./admin/AdminUsersView.vue";
@@ -32,6 +33,7 @@ const kycReviewId = ref("");
 const previewDocument = ref(null);
 const rejectingKyc = ref(null);
 const rejectionNote = ref("");
+const deletingKycId = ref("");
 
 const menuItems = [
   "Overview",
@@ -199,6 +201,24 @@ const submitKycRejection = async () => {
     errorMessage.value = error.message;
   } finally {
     kycReviewId.value = "";
+  }
+};
+
+const deleteKyc = async (submission) => {
+  if (!window.confirm(`Delete KYC submission for ${submission.username}?`)) {
+    return;
+  }
+
+  deletingKycId.value = submission.id;
+  errorMessage.value = "";
+
+  try {
+    await deleteAdminKyc(submission.id);
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    deletingKycId.value = "";
   }
 };
 
@@ -548,6 +568,13 @@ onMounted(loadAdminData);
                   @click="startRejectKyc(submission)"
                 >
                   Reject
+                </button>
+                <button
+                  type="button"
+                  :disabled="deletingKycId === submission.id"
+                  @click="deleteKyc(submission)"
+                >
+                  {{ deletingKycId === submission.id ? "Deleting..." : "Delete" }}
                 </button>
               </div>
             </article>

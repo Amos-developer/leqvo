@@ -98,6 +98,12 @@ export const updateAdminKycStatus = (id, payload) => {
   });
 };
 
+export const deleteAdminKyc = (id) => {
+  return request(`/kyc/admin/${id}`, {
+    method: "DELETE"
+  });
+};
+
 export const transferAccountBalance = (payload) => {
   return request("/users/transfer", {
     method: "POST",

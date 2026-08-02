@@ -902,6 +902,11 @@
 }
 
 .kyc-admin-actions button:last-child {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.kyc-admin-actions button:nth-child(2) {
   background: #ffe4e6;
   color: #be123c;
 }

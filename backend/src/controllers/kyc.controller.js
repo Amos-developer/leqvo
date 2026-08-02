@@ -97,9 +97,27 @@ const updateKycStatus = async (req, res) => {
   });
 };
 
+const deleteKycSubmission = async (req, res) => {
+  const submission = await kycModel.deleteSubmission(req.params.id);
+
+  if (!submission) {
+    return res.status(404).json({
+      success: false,
+      message: "KYC submission not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "KYC submission deleted successfully",
+    data: submission
+  });
+};
+
 module.exports = {
   getMyKyc,
   submitKyc,
   getAdminKyc,
-  updateKycStatus
+  updateKycStatus,
+  deleteKycSubmission
 };
