@@ -30,6 +30,8 @@ const rewardLoadingId = ref("");
 const kycSubmissions = ref([]);
 const kycReviewId = ref("");
 const previewDocument = ref(null);
+const rejectingKyc = ref(null);
+const rejectionNote = ref("");
 
 const menuItems = [
   "Overview",
@@ -162,6 +164,36 @@ const reviewKyc = async (submission, status) => {
       status,
       note: status === "approved" ? "Approved by admin" : "Rejected by admin"
     });
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    kycReviewId.value = "";
+  }
+};
+
+const startRejectKyc = (submission) => {
+  rejectingKyc.value = submission;
+  rejectionNote.value = "";
+  errorMessage.value = "";
+};
+
+const submitKycRejection = async () => {
+  if (!rejectionNote.value.trim()) {
+    errorMessage.value = "Enter a rejection reason before rejecting KYC.";
+    return;
+  }
+
+  kycReviewId.value = `${rejectingKyc.value.id}-rejected`;
+  errorMessage.value = "";
+
+  try {
+    await updateAdminKycStatus(rejectingKyc.value.id, {
+      status: "rejected",
+      note: rejectionNote.value.trim()
+    });
+    rejectingKyc.value = null;
+    rejectionNote.value = "";
     await loadAdminData();
   } catch (error) {
     errorMessage.value = error.message;
@@ -513,7 +545,7 @@ onMounted(loadAdminData);
                 <button
                   type="button"
                   :disabled="submission.status === 'rejected' || kycReviewId === `${submission.id}-rejected`"
-                  @click="reviewKyc(submission, 'rejected')"
+                  @click="startRejectKyc(submission)"
                 >
                   Reject
                 </button>
@@ -651,6 +683,32 @@ onMounted(loadAdminData);
             <button type="button" aria-label="Close preview" @click="previewDocument = null">×</button>
           </div>
           <img :src="previewDocument.image" :alt="previewDocument.label" />
+        </div>
+      </div>
+
+      <div v-if="rejectingKyc" class="kyc-preview-modal" role="dialog" aria-modal="true">
+        <div class="kyc-reject-card">
+          <div class="kyc-preview-head">
+            <div>
+              <span>{{ rejectingKyc.username }} · {{ rejectingKyc.userId }}</span>
+              <strong>Reject KYC</strong>
+            </div>
+            <button type="button" aria-label="Close rejection form" @click="rejectingKyc = null">×</button>
+          </div>
+          <label>
+            <span>Reason for rejection</span>
+            <textarea v-model.trim="rejectionNote" rows="5" placeholder="Explain what the user must fix"></textarea>
+          </label>
+          <div class="kyc-reject-actions">
+            <button type="button" @click="rejectingKyc = null">Cancel</button>
+            <button
+              type="button"
+              :disabled="kycReviewId === `${rejectingKyc.id}-rejected`"
+              @click="submitKycRejection"
+            >
+              {{ kycReviewId === `${rejectingKyc.id}-rejected` ? "Rejecting..." : "Reject KYC" }}
+            </button>
+          </div>
         </div>
       </div>
     </section>

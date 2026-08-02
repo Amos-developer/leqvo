@@ -125,6 +125,14 @@
   background: var(--green-soft);
 }
 
+.kyc-status-card.rejected {
+  background: #fff0f5;
+}
+
+.kyc-status-card.rejected strong {
+  color: #c2255c;
+}
+
 .kyc-status-card strong,
 .kyc-guide strong,
 .kyc-upload-card strong {
@@ -139,6 +147,30 @@
   color: var(--muted);
   font-size: 0.78rem;
   line-height: 1.45;
+}
+
+.kyc-time-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 7px 10px;
+  margin-top: 4px;
+  padding: 11px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.kyc-time-grid span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.kyc-time-grid strong {
+  overflow: hidden;
+  color: #151925;
+  font-size: 0.76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .kyc-upload-grid {

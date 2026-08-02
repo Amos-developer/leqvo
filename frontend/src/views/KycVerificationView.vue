@@ -40,6 +40,20 @@ const statusLabel = computed(() => {
   return currentKyc.value.status;
 });
 
+const formatDateTime = (date) => {
+  if (!date) {
+    return "Pending review";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(date));
+};
+
 const readFileAsDataUrl = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -140,14 +154,35 @@ onMounted(loadKyc);
     <section v-if="currentKyc?.status === 'pending'" class="kyc-status-card">
       <strong>Review in progress</strong>
       <p>Your documents are waiting for admin approval. You can submit again only if rejected.</p>
+      <div class="kyc-time-grid">
+        <span>Submitted at</span>
+        <strong>{{ formatDateTime(currentKyc.submittedAt) }}</strong>
+      </div>
     </section>
 
     <section v-else-if="currentKyc?.status === 'approved'" class="kyc-status-card approved">
       <strong>KYC approved</strong>
       <p>Your account verification is complete.</p>
+      <div class="kyc-time-grid">
+        <span>Submitted at</span>
+        <strong>{{ formatDateTime(currentKyc.submittedAt) }}</strong>
+        <span>Approved at</span>
+        <strong>{{ formatDateTime(currentKyc.reviewedAt) }}</strong>
+      </div>
     </section>
 
-    <section v-else class="kyc-upload-grid">
+    <section v-else-if="currentKyc?.status === 'rejected'" class="kyc-status-card rejected">
+      <strong>KYC rejected</strong>
+      <p>{{ currentKyc.note || "Your documents could not be approved. Please upload clear documents and try again." }}</p>
+      <div class="kyc-time-grid">
+        <span>Submitted at</span>
+        <strong>{{ formatDateTime(currentKyc.submittedAt) }}</strong>
+        <span>Rejected at</span>
+        <strong>{{ formatDateTime(currentKyc.reviewedAt) }}</strong>
+      </div>
+    </section>
+
+    <section v-if="currentKyc?.status !== 'pending' && currentKyc?.status !== 'approved'" class="kyc-upload-grid">
       <article v-for="card in documentCards" :key="card.key" class="kyc-upload-card">
         <div class="kyc-preview">
           <img v-if="previews[card.key]" :src="previews[card.key]" :alt="card.title" />

@@ -776,6 +776,71 @@
   box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
 }
 
+.kyc-reject-card {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 520px);
+  padding: 16px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
+}
+
+.kyc-reject-card label {
+  display: grid;
+  gap: 8px;
+}
+
+.kyc-reject-card label span {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.kyc-reject-card textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #dbe4ef;
+  border-radius: 16px;
+  outline: 0;
+  padding: 12px;
+  background: #f8fafc;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.84rem;
+}
+
+.kyc-reject-card textarea:focus {
+  border-color: #64748b;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.12);
+}
+
+.kyc-reject-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.kyc-reject-actions button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 14px;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.kyc-reject-actions button:last-child {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.kyc-reject-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .kyc-preview-head {
   display: flex;
   align-items: center;
