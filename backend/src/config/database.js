@@ -228,6 +228,50 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
+      CREATE TABLE IF NOT EXISTS withdrawal_addresses (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        asset VARCHAR(20) NOT NULL,
+        network VARCHAR(40) NOT NULL,
+        address TEXT NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending',
+        note TEXT,
+        reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
+        reviewed_at TIMESTAMPTZ,
+        submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        CONSTRAINT withdrawal_addresses_status_check CHECK (status IN ('pending', 'approved', 'rejected'))
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS withdrawal_addresses_user_id_status_index
+        ON withdrawal_addresses (user_id, status);
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS withdrawal_addresses_status_submitted_at_index
+        ON withdrawal_addresses (status, submitted_at DESC);
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS withdrawal_address_codes (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        code CHAR(6) NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        used_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS withdrawal_address_codes_user_id_created_at_index
+        ON withdrawal_address_codes (user_id, created_at DESC);
+    `);
+
+    await client.query(`
       CREATE TABLE IF NOT EXISTS teams (
         id SERIAL PRIMARY KEY,
         user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,

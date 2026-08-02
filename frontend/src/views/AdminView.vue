@@ -7,10 +7,12 @@ import {
   getAdminKyc,
   getAdminOverview,
   getAdminUsers,
+  getAdminWithdrawalAddresses,
   getAdminWithdrawals,
   grantAdminLeadershipReward,
   deleteAdminKyc,
-  updateAdminKycStatus
+  updateAdminKycStatus,
+  updateAdminWithdrawalAddressStatus
 } from "../utils/api";
 import AdminUsersView from "./admin/AdminUsersView.vue";
 
@@ -24,6 +26,8 @@ const users = ref([]);
 const userSummary = ref({ total: 0, active: 0, inactive: 0, verified: 0 });
 const deposits = ref([]);
 const withdrawals = ref([]);
+const withdrawalAddresses = ref([]);
+const addressReviewId = ref("");
 const leaders = ref([]);
 const leaderRewards = ref([]);
 const leaderSummary = ref({ total: 0, qualified: 0, totalGranted: 0, topRank: "No rank" });
@@ -132,13 +136,14 @@ const loadAdminData = async () => {
   errorMessage.value = "";
 
   try {
-    const [overviewResult, usersResult, depositsResult, withdrawalsResult, leadersResult, kycResult] = await Promise.all([
+    const [overviewResult, usersResult, depositsResult, withdrawalsResult, leadersResult, kycResult, addressesResult] = await Promise.all([
       getAdminOverview(),
       getAdminUsers(),
       getAdminDeposits(),
       getAdminWithdrawals(),
       getAdminLeaders(),
-      getAdminKyc()
+      getAdminKyc(),
+      getAdminWithdrawalAddresses()
     ]);
 
     overview.value = overviewResult.data;
@@ -150,10 +155,28 @@ const loadAdminData = async () => {
     leaderRewards.value = leadersResult.data.rewards;
     leaderSummary.value = leadersResult.data.summary;
     kycSubmissions.value = kycResult.data;
+    withdrawalAddresses.value = addressesResult.data;
   } catch (error) {
     errorMessage.value = error.message;
   } finally {
     isLoading.value = false;
+  }
+};
+
+const reviewWithdrawalAddress = async (address, status) => {
+  addressReviewId.value = `${address.id}-${status}`;
+  errorMessage.value = "";
+
+  try {
+    await updateAdminWithdrawalAddressStatus(address.id, {
+      status,
+      note: status === "approved" ? "Approved by admin" : "Rejected by admin"
+    });
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    addressReviewId.value = "";
   }
 };
 
@@ -506,6 +529,47 @@ onMounted(loadAdminData);
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="admin-panel-head withdrawal-address-admin-head">
+          <div>
+            <h2>Withdrawal Addresses</h2>
+            <p>Review payout wallet addresses submitted by users</p>
+          </div>
+        </div>
+
+        <div class="withdrawal-address-admin-list">
+          <article v-if="!withdrawalAddresses.length" class="admin-empty-state">
+            <h2>No address submissions</h2>
+            <p>User payout wallet requests will appear here.</p>
+          </article>
+          <article v-for="address in withdrawalAddresses" :key="address.id" class="withdrawal-address-admin-card">
+            <div class="withdrawal-address-admin-top">
+              <div>
+                <strong>{{ address.username }}</strong>
+                <span>{{ address.userId }} · {{ address.asset }} / {{ address.network }}</span>
+              </div>
+              <b :class="address.status">{{ address.status }}</b>
+            </div>
+            <p>{{ address.address }}</p>
+            <small>Submitted {{ formatDate(address.submittedAt) }}</small>
+            <div class="withdrawal-address-admin-actions">
+              <button
+                type="button"
+                :disabled="address.status === 'approved' || addressReviewId === `${address.id}-approved`"
+                @click="reviewWithdrawalAddress(address, 'approved')"
+              >
+                Approve
+              </button>
+              <button
+                type="button"
+                :disabled="address.status === 'rejected' || addressReviewId === `${address.id}-rejected`"
+                @click="reviewWithdrawalAddress(address, 'rejected')"
+              >
+                Reject
+              </button>
+            </div>
+          </article>
         </div>
       </section>
 

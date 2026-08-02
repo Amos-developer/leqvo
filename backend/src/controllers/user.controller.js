@@ -394,6 +394,92 @@ const setWithdrawalPin = async (req, res) => {
   });
 };
 
+const changeWithdrawalPin = async (req, res) => {
+  const code = req.body.code?.trim();
+  const currentPin = req.body.currentPin?.trim();
+  const newPin = req.body.newPin?.trim();
+  const confirmPin = req.body.confirmPin?.trim();
+
+  if (!req.user.hasWithdrawalPin) {
+    return res.status(409).json({
+      success: false,
+      message: "Set a withdrawal PIN before changing it"
+    });
+  }
+
+  if (!code || !currentPin || !newPin || !confirmPin) {
+    return res.status(400).json({
+      success: false,
+      message: "Email code, current PIN, new PIN, and confirmation are required"
+    });
+  }
+
+  if (!/^\d{6}$/.test(code)) {
+    return res.status(400).json({
+      success: false,
+      message: "Email code must be exactly 6 numbers"
+    });
+  }
+
+  if (!/^\d{4}$/.test(currentPin) || !/^\d{4}$/.test(newPin)) {
+    return res.status(400).json({
+      success: false,
+      message: "Withdrawal PIN must be exactly 4 digits"
+    });
+  }
+
+  if (newPin !== confirmPin) {
+    return res.status(400).json({
+      success: false,
+      message: "New PIN and confirmation do not match"
+    });
+  }
+
+  if (currentPin === newPin) {
+    return res.status(400).json({
+      success: false,
+      message: "New PIN must be different from current PIN"
+    });
+  }
+
+  const userWithPin = await userModel.findUserWithWithdrawalPinById(req.user.id);
+  const pinMatches = userWithPin?.withdrawalPin
+    ? await bcrypt.compare(currentPin, userWithPin.withdrawalPin)
+    : false;
+
+  if (!pinMatches) {
+    return res.status(401).json({
+      success: false,
+      message: "Current withdrawal PIN is incorrect"
+    });
+  }
+
+  const codeRecord = await userModel.findValidWithdrawalPinCode({
+    userId: req.user.id,
+    code
+  });
+
+  if (!codeRecord) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or expired email code"
+    });
+  }
+
+  const hashedPin = await bcrypt.hash(newPin, PASSWORD_SALT_ROUNDS);
+  const user = await userModel.changeWithdrawalPin({
+    userId: req.user.id,
+    withdrawalPin: hashedPin,
+    codeId: codeRecord.id
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Withdrawal PIN changed successfully",
+    data: user
+  });
+};
+
 const transferBalance = async (req, res) => {
   const fromAccount = req.body.fromAccount?.trim().toLowerCase();
   const toAccount = req.body.toAccount?.trim().toLowerCase();
@@ -460,6 +546,7 @@ module.exports = {
   changeMyPassword,
   requestWithdrawalPinCode,
   setWithdrawalPin,
+  changeWithdrawalPin,
   transferBalance,
   getMyTransfers
 };

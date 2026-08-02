@@ -85,6 +85,19 @@ const findUserWithPasswordByEmail = async (email) => {
   return result.rows[0] || null;
 };
 
+const findUserWithWithdrawalPinById = async (id) => {
+  const result = await database.query(
+    `SELECT
+       ${userFields},
+       withdrawal_pin AS "withdrawalPin"
+     FROM users
+     WHERE id = $1`,
+    [id]
+  );
+
+  return result.rows[0] || null;
+};
+
 const findUserByReferralCode = async (referralCode) => {
   const result = await database.query(
     `SELECT ${userFields}
@@ -265,6 +278,10 @@ const setWithdrawalPin = async ({ userId, withdrawalPin, codeId }) => {
   } finally {
     client.release();
   }
+};
+
+const changeWithdrawalPin = async ({ userId, withdrawalPin, codeId }) => {
+  return setWithdrawalPin({ userId, withdrawalPin, codeId });
 };
 
 const incrementUserBalance = async (id, amount, client = database) => {
@@ -488,6 +505,7 @@ module.exports = {
   findUserByEmail,
   findUserByUsername,
   findUserWithPasswordByEmail,
+  findUserWithWithdrawalPinById,
   findUserByReferralCode,
   updateUserProfile,
   createPasswordChangeCode,
@@ -496,6 +514,7 @@ module.exports = {
   createWithdrawalPinCode,
   findValidWithdrawalPinCode,
   setWithdrawalPin,
+  changeWithdrawalPin,
   incrementUserBalance,
   transferBalance,
   findTransfersByUserId,

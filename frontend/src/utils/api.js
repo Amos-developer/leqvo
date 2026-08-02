@@ -89,6 +89,41 @@ export const setWithdrawalPin = (payload) => {
   });
 };
 
+export const changeWithdrawalPin = (payload) => {
+  return request("/users/me/withdrawal-pin/change", {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const getMyWithdrawalAddress = () => {
+  return request("/withdrawal-addresses");
+};
+
+export const submitWithdrawalAddress = (payload) => {
+  return request("/withdrawal-addresses", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const requestWithdrawalAddressCode = () => {
+  return request("/withdrawal-addresses/code", {
+    method: "POST"
+  });
+};
+
+export const getAdminWithdrawalAddresses = () => {
+  return request("/withdrawal-addresses/admin");
+};
+
+export const updateAdminWithdrawalAddressStatus = (id, payload) => {
+  return request(`/withdrawal-addresses/admin/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+};
+
 export const getMyKyc = () => {
   return request("/kyc");
 };

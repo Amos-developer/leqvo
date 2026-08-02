@@ -841,6 +841,97 @@
   opacity: 0.55;
 }
 
+.withdrawal-address-admin-head {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.withdrawal-address-admin-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.withdrawal-address-admin-card {
+  display: grid;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid #e7edf5;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.withdrawal-address-admin-top,
+.withdrawal-address-admin-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.withdrawal-address-admin-top strong,
+.withdrawal-address-admin-top span {
+  display: block;
+}
+
+.withdrawal-address-admin-top span,
+.withdrawal-address-admin-card small {
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.withdrawal-address-admin-top b {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 0.7rem;
+  text-transform: capitalize;
+}
+
+.withdrawal-address-admin-top b.approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.withdrawal-address-admin-top b.rejected {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.withdrawal-address-admin-card p {
+  overflow-wrap: anywhere;
+  margin: 0;
+  padding: 10px;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.withdrawal-address-admin-actions button {
+  flex: 1;
+  min-height: 38px;
+  border: 0;
+  border-radius: 13px;
+  background: #0f172a;
+  color: white;
+  font-weight: 900;
+}
+
+.withdrawal-address-admin-actions button:last-child {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.withdrawal-address-admin-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .kyc-preview-head {
   display: flex;
   align-items: center;

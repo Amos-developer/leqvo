@@ -11,6 +11,7 @@ router.post("/me/password/code", requireAuth, asyncHandler(userController.reques
 router.patch("/me/password", requireAuth, asyncHandler(userController.changeMyPassword));
 router.post("/me/withdrawal-pin/code", requireAuth, asyncHandler(userController.requestWithdrawalPinCode));
 router.patch("/me/withdrawal-pin", requireAuth, asyncHandler(userController.setWithdrawalPin));
+router.patch("/me/withdrawal-pin/change", requireAuth, asyncHandler(userController.changeWithdrawalPin));
 router.post("/transfer", requireAuth, asyncHandler(userController.transferBalance));
 router.get("/transfers", requireAuth, asyncHandler(userController.getMyTransfers));
 router.get("/", asyncHandler(userController.getUsers));

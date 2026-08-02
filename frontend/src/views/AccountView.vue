@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getAccountTransfers, getUserById } from "../utils/api";
+import { getAccountTransfers, getMyWithdrawalAddress, getUserById } from "../utils/api";
 
 const router = useRouter();
 const user = ref(JSON.parse(localStorage.getItem("leqvoUser") || "{}"));
@@ -13,6 +13,7 @@ const eligibility = ref({
   remainingTradingDays: 10,
   requiredTradingDays: 10
 });
+const withdrawalAddress = ref(null);
 
 const initials = computed(() => {
   return (user.value.username || "Member")
@@ -64,6 +65,9 @@ const refreshUser = async () => {
 
     const transferResult = await getAccountTransfers();
     eligibility.value = transferResult.data?.eligibility || eligibility.value;
+
+    const addressResult = await getMyWithdrawalAddress();
+    withdrawalAddress.value = addressResult.data;
   } catch (error) {
     console.warn("Could not refresh account details", error);
   }
@@ -227,7 +231,7 @@ onMounted(() => {
           </div>
           <i></i>
         </button>
-        <button v-else>
+        <button v-else @click="router.push('/withdrawal/pin/change')">
           <span class="settings-icon icon-pin"></span>
           <div>
             <strong>Change withdrawal PIN</strong>
@@ -235,11 +239,11 @@ onMounted(() => {
           </div>
           <i></i>
         </button>
-        <button>
+        <button @click="router.push('/withdrawal/address')">
           <span class="settings-icon icon-address"></span>
           <div>
-            <strong>Set withdrawal address</strong>
-            <p>Add or change your payout wallet address</p>
+            <strong>{{ withdrawalAddress ? "Change withdrawal address" : "Set withdrawal address" }}</strong>
+            <p>{{ withdrawalAddress ? "Update your approved or pending payout wallet" : "Add your payout wallet for admin approval" }}</p>
           </div>
           <i></i>
         </button>
