@@ -122,6 +122,14 @@ export const refreshDepositStatus = (paymentId) => {
   });
 };
 
+export const getMyDeposits = () => {
+  return request("/deposits/my");
+};
+
+export const getMyWithdrawals = () => {
+  return request("/withdrawals/my");
+};
+
 export const getPopularCrypto = () => {
   return request("/markets/popular");
 };

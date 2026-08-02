@@ -212,7 +212,7 @@ onUnmounted(() => {
     <section class="premium-settings finance-section">
       <h2>Finance</h2>
       <div class="premium-list">
-        <button>
+        <button @click="router.push('/deposit/history')">
           <span class="settings-icon icon-deposits"></span>
           <div>
             <strong>Deposit history</strong>
@@ -220,7 +220,7 @@ onUnmounted(() => {
           </div>
           <i></i>
         </button>
-        <button>
+        <button @click="router.push('/withdrawal/history')">
           <span class="settings-icon icon-withdrawals"></span>
           <div>
             <strong>Withdrawal history</strong>

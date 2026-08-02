@@ -116,8 +116,18 @@ const refreshDepositStatus = async (req, res) => {
   });
 };
 
+const getMyDeposits = async (req, res) => {
+  const deposits = await depositModel.findDepositsByUserId(req.user.id);
+
+  return res.status(200).json({
+    success: true,
+    data: deposits
+  });
+};
+
 module.exports = {
   createDeposit,
   handleNowPaymentsIpn,
-  refreshDepositStatus
+  refreshDepositStatus,
+  getMyDeposits
 };

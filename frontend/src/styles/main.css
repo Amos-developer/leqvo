@@ -4,9 +4,11 @@
 @import "./brand.css";
 @import "./login.css";
 @import "./deposit.css";
+@import "./deposit-history.css";
 @import "./trade.css";
 @import "./history.css";
 @import "./withdrawal.css";
+@import "./withdrawal-history.css";
 @import "./team.css";
 @import "./invite.css";
 @import "./lucky-box.css";

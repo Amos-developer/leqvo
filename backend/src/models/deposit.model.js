@@ -292,6 +292,18 @@ const findDepositByPaymentId = async (paymentId, client = database) => {
   return result.rows[0] || null;
 };
 
+const findDepositsByUserId = async (userId) => {
+  const result = await database.query(
+    `SELECT ${depositFields}
+     FROM deposits
+     WHERE user_id = $1
+     ORDER BY created_at DESC`,
+    [userId]
+  );
+
+  return result.rows;
+};
+
 const shouldCreditDeposit = (deposit) => {
   const status = deposit.status;
   const expectedUsd = Number(deposit.priceAmount || 0);
@@ -389,6 +401,7 @@ module.exports = {
   getPayCurrency,
   findActiveDeposit,
   findDepositByPaymentId,
+  findDepositsByUserId,
   createNowPaymentsPayment,
   applyPaymentUpdate,
   refreshDepositStatus
