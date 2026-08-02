@@ -179,6 +179,36 @@ onUnmounted(() => {
       </div>
     </section>
 
+    <section class="premium-settings personal-section">
+      <h2>Personal Details</h2>
+      <div class="premium-list">
+        <button @click="router.push('/account/profile')">
+          <span class="settings-icon icon-profile"></span>
+          <div>
+            <strong>Profile information</strong>
+            <p>Update username and review protected account details</p>
+          </div>
+          <i></i>
+        </button>
+        <button @click="router.push('/account/change-password')">
+          <span class="settings-icon icon-shield"></span>
+          <div>
+            <strong>Change password</strong>
+            <p>Protect your account with a new password</p>
+          </div>
+          <i></i>
+        </button>
+        <button @click="router.push('/account/kyc')">
+          <span class="settings-icon icon-shield"></span>
+          <div>
+            <strong>Verification</strong>
+            <p>Identity status and account trust level</p>
+          </div>
+          <i></i>
+        </button>
+      </div>
+    </section>
+
     <section class="premium-settings finance-section">
       <h2>Finance</h2>
       <div class="premium-list">
@@ -227,36 +257,6 @@ onUnmounted(() => {
           <div>
             <strong>Rewards</strong>
             <p>View lucky box, daily spin, and leadership reward records</p>
-          </div>
-          <i></i>
-        </button>
-      </div>
-    </section>
-
-    <section class="premium-settings personal-section">
-      <h2>Personal Details</h2>
-      <div class="premium-list">
-        <button @click="router.push('/account/profile')">
-          <span class="settings-icon icon-profile"></span>
-          <div>
-            <strong>Profile information</strong>
-            <p>Update username and review protected account details</p>
-          </div>
-          <i></i>
-        </button>
-        <button @click="router.push('/account/change-password')">
-          <span class="settings-icon icon-shield"></span>
-          <div>
-            <strong>Change password</strong>
-            <p>Protect your account with a new password</p>
-          </div>
-          <i></i>
-        </button>
-        <button @click="router.push('/account/kyc')">
-          <span class="settings-icon icon-shield"></span>
-          <div>
-            <strong>Verification</strong>
-            <p>Identity status and account trust level</p>
           </div>
           <i></i>
         </button>
