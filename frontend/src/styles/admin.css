@@ -722,33 +722,103 @@
   gap: 9px;
 }
 
-.kyc-admin-docs a {
-  position: relative;
-  min-width: 0;
+.kyc-admin-docs button {
+  display: grid;
+  gap: 4px;
+  min-height: 74px;
+  align-content: center;
+  border: 1px solid #e7edf5;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f8fafc, #ffffff);
+  color: #0f172a;
+  text-align: center;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.kyc-admin-docs button:hover {
+  transform: translateY(-1px);
+  border-color: #94a3b8;
+  box-shadow: 0 12px 22px rgba(15, 23, 42, 0.08);
+}
+
+.kyc-admin-docs button span {
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.kyc-admin-docs button small {
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.kyc-preview-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(10px);
+}
+
+.kyc-preview-card {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 760px);
+  max-height: 88vh;
   overflow: hidden;
+  padding: 14px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
+}
+
+.kyc-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kyc-preview-head span,
+.kyc-preview-head strong {
+  display: block;
+}
+
+.kyc-preview-head span {
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.kyc-preview-head strong {
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.kyc-preview-head button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  border-radius: 13px;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.kyc-preview-card img {
+  width: 100%;
+  max-height: calc(88vh - 92px);
+  object-fit: contain;
   border-radius: 16px;
   background: #f8fafc;
-  color: white;
-}
-
-.kyc-admin-docs img {
-  display: block;
-  width: 100%;
-  height: 116px;
-  object-fit: cover;
-}
-
-.kyc-admin-docs span {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  left: 8px;
-  padding: 6px 8px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.72);
-  font-size: 0.68rem;
-  font-weight: 900;
-  text-align: center;
 }
 
 .kyc-admin-meta {
@@ -779,10 +849,6 @@
 @media (max-width: 560px) {
   .kyc-admin-docs {
     grid-template-columns: 1fr;
-  }
-
-  .kyc-admin-docs img {
-    height: 180px;
   }
 }
 

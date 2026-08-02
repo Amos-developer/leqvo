@@ -29,6 +29,7 @@ const leaderSummary = ref({ total: 0, qualified: 0, totalGranted: 0, topRank: "N
 const rewardLoadingId = ref("");
 const kycSubmissions = ref([]);
 const kycReviewId = ref("");
+const previewDocument = ref(null);
 
 const menuItems = [
   "Overview",
@@ -167,6 +168,15 @@ const reviewKyc = async (submission, status) => {
   } finally {
     kycReviewId.value = "";
   }
+};
+
+const openKycPreview = (submission, label, image) => {
+  previewDocument.value = {
+    label,
+    image,
+    username: submission.username,
+    userId: submission.userId
+  };
 };
 
 const grantLeaderReward = async (leader, rewardType, amount) => {
@@ -473,18 +483,18 @@ onMounted(loadAdminData);
               </div>
 
               <div class="kyc-admin-docs">
-                <a :href="submission.idFront" target="_blank" rel="noreferrer">
-                  <img :src="submission.idFront" alt="ID front" />
+                <button type="button" @click="openKycPreview(submission, 'ID Front', submission.idFront)">
                   <span>ID Front</span>
-                </a>
-                <a :href="submission.idBack" target="_blank" rel="noreferrer">
-                  <img :src="submission.idBack" alt="ID back" />
+                  <small>Preview document</small>
+                </button>
+                <button type="button" @click="openKycPreview(submission, 'ID Back', submission.idBack)">
                   <span>ID Back</span>
-                </a>
-                <a :href="submission.selfie" target="_blank" rel="noreferrer">
-                  <img :src="submission.selfie" alt="Selfie" />
+                  <small>Preview document</small>
+                </button>
+                <button type="button" @click="openKycPreview(submission, 'Selfie', submission.selfie)">
                   <span>Selfie</span>
-                </a>
+                  <small>Preview image</small>
+                </button>
               </div>
 
               <div class="kyc-admin-meta">
@@ -630,6 +640,19 @@ onMounted(loadAdminData);
       </section>
 
       <div v-if="isLoading" class="admin-loading">Loading admin data...</div>
+
+      <div v-if="previewDocument" class="kyc-preview-modal" role="dialog" aria-modal="true">
+        <div class="kyc-preview-card">
+          <div class="kyc-preview-head">
+            <div>
+              <span>{{ previewDocument.username }} · {{ previewDocument.userId }}</span>
+              <strong>{{ previewDocument.label }}</strong>
+            </div>
+            <button type="button" aria-label="Close preview" @click="previewDocument = null">×</button>
+          </div>
+          <img :src="previewDocument.image" :alt="previewDocument.label" />
+        </div>
+      </div>
     </section>
   </main>
 </template>
