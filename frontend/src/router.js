@@ -15,6 +15,7 @@ import DepositAddressView from "./views/DepositAddressView.vue";
 import DepositHistoryView from "./views/DepositHistoryView.vue";
 import WithdrawalView from "./views/WithdrawalView.vue";
 import WithdrawalHistoryView from "./views/WithdrawalHistoryView.vue";
+import SetWithdrawalPinView from "./views/SetWithdrawalPinView.vue";
 import TeamView from "./views/TeamView.vue";
 import InviteView from "./views/InviteView.vue";
 import LuckyBoxView from "./views/LuckyBoxView.vue";
@@ -39,6 +40,7 @@ const routes = [
   { path: "/deposit/address", name: "deposit-address", component: DepositAddressView, meta: { requiresAuth: true } },
   { path: "/withdrawal", name: "withdrawal", component: WithdrawalView, meta: { requiresAuth: true } },
   { path: "/withdrawal/history", name: "withdrawal-history", component: WithdrawalHistoryView, meta: { requiresAuth: true } },
+  { path: "/withdrawal/pin/set", name: "set-withdrawal-pin", component: SetWithdrawalPinView, meta: { requiresAuth: true } },
   { path: "/invite", name: "invite", component: InviteView, meta: { requiresAuth: true } },
   { path: "/lucky-box", name: "lucky-box", component: LuckyBoxView, meta: { requiresAuth: true } },
   { path: "/daily-spin", name: "daily-spin", component: DailySpinView, meta: { requiresAuth: true } },

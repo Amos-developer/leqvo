@@ -219,7 +219,7 @@ onMounted(() => {
           </div>
           <i></i>
         </button>
-        <button>
+        <button v-if="!user.hasWithdrawalPin" @click="router.push('/withdrawal/pin/set')">
           <span class="settings-icon icon-pin"></span>
           <div>
             <strong>Set withdrawal PIN</strong>
@@ -227,7 +227,7 @@ onMounted(() => {
           </div>
           <i></i>
         </button>
-        <button>
+        <button v-else>
           <span class="settings-icon icon-pin"></span>
           <div>
             <strong>Change withdrawal PIN</strong>

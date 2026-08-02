@@ -26,6 +26,8 @@ const connectDatabase = async () => {
         trading_balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
         trading_started_at TIMESTAMPTZ,
         trading_unlocks_at TIMESTAMPTZ,
+        withdrawal_pin TEXT,
+        withdrawal_pin_set_at TIMESTAMPTZ,
         is_admin BOOLEAN NOT NULL DEFAULT FALSE,
         email_verified BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -61,6 +63,16 @@ const connectDatabase = async () => {
     await client.query(`
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS trading_unlocks_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_pin TEXT;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_pin_set_at TIMESTAMPTZ;
     `);
 
     await client.query(`
@@ -359,6 +371,22 @@ const connectDatabase = async () => {
     await client.query(`
       CREATE INDEX IF NOT EXISTS password_change_codes_user_id_created_at_index
         ON password_change_codes (user_id, created_at DESC);
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS withdrawal_pin_codes (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        code CHAR(6) NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL,
+        used_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS withdrawal_pin_codes_user_id_created_at_index
+        ON withdrawal_pin_codes (user_id, created_at DESC);
     `);
 
     await client.query(`

@@ -308,6 +308,92 @@ const changeMyPassword = async (req, res) => {
   });
 };
 
+const requestWithdrawalPinCode = async (req, res) => {
+  const code = generateSixDigitCode();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  const record = await userModel.createWithdrawalPinCode({
+    userId: req.user.id,
+    code,
+    expiresAt
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: `Verification code requested for ${req.user.email}`,
+    data: {
+      email: req.user.email,
+      expiresAt: record.expiresAt,
+      code: process.env.NODE_ENV === "production" ? undefined : code
+    }
+  });
+};
+
+const setWithdrawalPin = async (req, res) => {
+  const code = req.body.code?.trim();
+  const pin = req.body.pin?.trim();
+  const confirmPin = req.body.confirmPin?.trim();
+
+  if (req.user.hasWithdrawalPin) {
+    return res.status(409).json({
+      success: false,
+      message: "Withdrawal PIN is already set. Use change withdrawal PIN instead."
+    });
+  }
+
+  if (!code || !pin || !confirmPin) {
+    return res.status(400).json({
+      success: false,
+      message: "Email code, PIN, and confirmation are required"
+    });
+  }
+
+  if (!/^\d{6}$/.test(code)) {
+    return res.status(400).json({
+      success: false,
+      message: "Email code must be exactly 6 numbers"
+    });
+  }
+
+  if (!/^\d{4}$/.test(pin)) {
+    return res.status(400).json({
+      success: false,
+      message: "Withdrawal PIN must be exactly 4 digits"
+    });
+  }
+
+  if (pin !== confirmPin) {
+    return res.status(400).json({
+      success: false,
+      message: "PIN and confirmation do not match"
+    });
+  }
+
+  const codeRecord = await userModel.findValidWithdrawalPinCode({
+    userId: req.user.id,
+    code
+  });
+
+  if (!codeRecord) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or expired email code"
+    });
+  }
+
+  const hashedPin = await bcrypt.hash(pin, PASSWORD_SALT_ROUNDS);
+  const user = await userModel.setWithdrawalPin({
+    userId: req.user.id,
+    withdrawalPin: hashedPin,
+    codeId: codeRecord.id
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Withdrawal PIN set successfully",
+    data: user
+  });
+};
+
 const transferBalance = async (req, res) => {
   const fromAccount = req.body.fromAccount?.trim().toLowerCase();
   const toAccount = req.body.toAccount?.trim().toLowerCase();
@@ -372,6 +458,8 @@ module.exports = {
   updateMyProfile,
   requestPasswordChangeCode,
   changeMyPassword,
+  requestWithdrawalPinCode,
+  setWithdrawalPin,
   transferBalance,
   getMyTransfers
 };

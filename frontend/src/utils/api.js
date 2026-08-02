@@ -76,6 +76,19 @@ export const changeMyPassword = (payload) => {
   });
 };
 
+export const requestWithdrawalPinCode = () => {
+  return request("/users/me/withdrawal-pin/code", {
+    method: "POST"
+  });
+};
+
+export const setWithdrawalPin = (payload) => {
+  return request("/users/me/withdrawal-pin", {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+};
+
 export const getMyKyc = () => {
   return request("/kyc");
 };

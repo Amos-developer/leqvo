@@ -10,6 +10,8 @@ const userFields = `
   trading_balance AS "tradingBalance",
   trading_started_at AS "tradingStartedAt",
   trading_unlocks_at AS "tradingUnlocksAt",
+  (withdrawal_pin IS NOT NULL) AS "hasWithdrawalPin",
+  withdrawal_pin_set_at AS "withdrawalPinSetAt",
   is_admin AS "isAdmin",
   email_verified AS "emailVerified",
   created_at AS "createdAt",
@@ -177,6 +179,86 @@ const changePassword = async ({ userId, password, codeId }) => {
     await client.query("COMMIT");
 
     return findUserById(userId);
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const createWithdrawalPinCode = async ({ userId, code, expiresAt }) => {
+  await database.query(
+    `UPDATE withdrawal_pin_codes
+     SET used_at = NOW()
+     WHERE user_id = $1
+       AND used_at IS NULL`,
+    [userId]
+  );
+
+  const result = await database.query(
+    `INSERT INTO withdrawal_pin_codes (user_id, code, expires_at)
+     VALUES ($1, $2, $3)
+     RETURNING
+       id,
+       user_id AS "userId",
+       code,
+       expires_at AS "expiresAt",
+       created_at AS "createdAt"`,
+    [userId, code, expiresAt]
+  );
+
+  return result.rows[0];
+};
+
+const findValidWithdrawalPinCode = async ({ userId, code }) => {
+  const result = await database.query(
+    `SELECT
+       id,
+       user_id AS "userId",
+       code,
+       expires_at AS "expiresAt",
+       used_at AS "usedAt",
+       created_at AS "createdAt"
+     FROM withdrawal_pin_codes
+     WHERE user_id = $1
+       AND code = $2
+       AND used_at IS NULL
+       AND expires_at > NOW()
+     ORDER BY created_at DESC
+     LIMIT 1`,
+    [userId, code]
+  );
+
+  return result.rows[0] || null;
+};
+
+const setWithdrawalPin = async ({ userId, withdrawalPin, codeId }) => {
+  const client = await database.pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const userResult = await client.query(
+      `UPDATE users
+       SET withdrawal_pin = $1,
+           withdrawal_pin_set_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $2
+       RETURNING ${userFields}`,
+      [withdrawalPin, userId]
+    );
+
+    await client.query(
+      `UPDATE withdrawal_pin_codes
+       SET used_at = NOW()
+       WHERE id = $1`,
+      [codeId]
+    );
+
+    await client.query("COMMIT");
+
+    return userResult.rows[0] || null;
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
@@ -411,6 +493,9 @@ module.exports = {
   createPasswordChangeCode,
   findValidPasswordChangeCode,
   changePassword,
+  createWithdrawalPinCode,
+  findValidWithdrawalPinCode,
+  setWithdrawalPin,
   incrementUserBalance,
   transferBalance,
   findTransfersByUserId,
