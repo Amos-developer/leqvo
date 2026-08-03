@@ -197,6 +197,7 @@ const createUser = async (req, res) => {
     password: await bcrypt.hash(password, PASSWORD_SALT_ROUNDS),
     referralCode,
     referredBy: inviter?.id || null,
+    includeTrialBonus: false,
     balance: Number(req.body.balance || 0),
     isAdmin: Boolean(req.body.isAdmin),
     emailVerified: Boolean(req.body.emailVerified)

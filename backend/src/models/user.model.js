@@ -10,6 +10,9 @@ const userFields = `
   trading_balance AS "tradingBalance",
   trading_started_at AS "tradingStartedAt",
   trading_unlocks_at AS "tradingUnlocksAt",
+  trial_bonus_amount AS "trialBonusAmount",
+  trial_bonus_expires_at AS "trialBonusExpiresAt",
+  trial_bonus_expired AS "trialBonusExpired",
   (withdrawal_pin IS NOT NULL) AS "hasWithdrawalPin",
   withdrawal_pin_set_at AS "withdrawalPinSetAt",
   withdrawal_asset AS "withdrawalAsset",
@@ -26,12 +29,73 @@ const userFields = `
   updated_at AS "updatedAt"
 `;
 
-const createUser = async ({ id, username, email, password, referralCode, referredBy = null }) => {
+const TRIAL_BONUS_AMOUNT = 50;
+
+const expireTrialBonusIfNeeded = async (id) => {
+  const client = await database.pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const userResult = await client.query(
+      `SELECT id, trading_balance, trial_bonus_amount, trial_bonus_expires_at, trial_bonus_expired
+       FROM users
+       WHERE id = $1
+       FOR UPDATE`,
+      [id]
+    );
+    const user = userResult.rows[0];
+
+    if (
+      !user ||
+      user.trial_bonus_expired ||
+      !user.trial_bonus_expires_at ||
+      new Date(user.trial_bonus_expires_at) > new Date()
+    ) {
+      await client.query("COMMIT");
+      return null;
+    }
+
+    const amountToRemove = Math.min(Number(user.trading_balance || 0), Number(user.trial_bonus_amount || 0));
+
+    const result = await client.query(
+      `UPDATE users
+       SET trading_balance = GREATEST(trading_balance - $2, 0),
+           trial_bonus_expired = TRUE,
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING ${userFields}`,
+      [id, amountToRemove]
+    );
+
+    await client.query("COMMIT");
+    return result.rows[0] || null;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const createUser = async ({ id, username, email, password, referralCode, referredBy = null, includeTrialBonus = true }) => {
+  const trialBonusAmount = includeTrialBonus ? TRIAL_BONUS_AMOUNT : 0;
+  const trialBonusExpiresAt = includeTrialBonus ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) : null;
   const result = await database.query(
-    `INSERT INTO users (id, username, email, password, referral_code, referred_by)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO users (
+       id,
+       username,
+       email,
+       password,
+       referral_code,
+       referred_by,
+       trading_balance,
+       trial_bonus_amount,
+       trial_bonus_expires_at
+     )
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      RETURNING ${userFields}`,
-    [id, username, email, password, referralCode, referredBy]
+    [id, username, email, password, referralCode, referredBy, trialBonusAmount, trialBonusAmount, trialBonusExpiresAt]
   );
 
   return result.rows[0];
@@ -48,6 +112,8 @@ const findAllUsers = async () => {
 };
 
 const findUserById = async (id) => {
+  await expireTrialBonusIfNeeded(id);
+
   const result = await database.query(
     `SELECT ${userFields}
      FROM users
@@ -81,6 +147,26 @@ const findUserByUsername = async (username) => {
 };
 
 const findUserWithPasswordByEmail = async (email) => {
+  const result = await database.query(
+    `SELECT
+       ${userFields},
+       password
+     FROM users
+     WHERE email = $1`,
+    [email]
+  );
+
+  const user = result.rows[0] || null;
+
+  if (user) {
+    await expireTrialBonusIfNeeded(user.id);
+    return findUserWithPasswordByEmailWithoutExpiry(email);
+  }
+
+  return null;
+};
+
+const findUserWithPasswordByEmailWithoutExpiry = async (email) => {
   const result = await database.query(
     `SELECT
        ${userFields},
@@ -425,46 +511,8 @@ const findTransfersByUserId = async (userId) => {
 };
 
 const getTradingEligibility = async (userId, client = database) => {
-  const userResult = await client.query(
-    `SELECT trading_started_at, trading_unlocks_at
-     FROM users
-     WHERE id = $1`,
-    [userId]
-  );
-  const user = userResult.rows[0];
-
-  if (user?.trading_started_at && user?.trading_unlocks_at) {
-    const remainingResult = await client.query(
-      `SELECT COUNT(DISTINCT opened_at::DATE)::INT AS completed_days
-       FROM trades
-       WHERE user_id = $1
-         AND opened_at >= $2`,
-      [userId, user.trading_started_at]
-    );
-    const completedTradingDays = Number(remainingResult.rows[0]?.completed_days || 0);
-    const remainingTradingDays = Math.max(10 - completedTradingDays, 0);
-    const isUnlocked = remainingTradingDays <= 0;
-
-    return {
-      hasTradingEntry: true,
-      canMoveTradingToMain: isUnlocked,
-      canWithdraw: isUnlocked,
-      tradingEntryAt: user.trading_started_at,
-      unlocksAt: user.trading_unlocks_at,
-      remainingDays: remainingTradingDays,
-      completedTradingDays,
-      remainingTradingDays,
-      requiredTradingDays: 10
-    };
-  }
-
-  const result = await client.query(
-    `SELECT
-       created_at,
-       GREATEST(
-         0,
-         CEIL(EXTRACT(EPOCH FROM (created_at + INTERVAL '10 days' - NOW())) / 86400)
-       )::INT AS remaining_days
+  const firstRealTransferResult = await client.query(
+    `SELECT created_at
      FROM account_transfers
      WHERE user_id = $1
        AND from_account = 'main'
@@ -473,31 +521,41 @@ const getTradingEligibility = async (userId, client = database) => {
      LIMIT 1`,
     [userId]
   );
-  const firstTradingEntry = result.rows[0];
+  const firstRealTransfer = firstRealTransferResult.rows[0];
 
-  if (!firstTradingEntry) {
+  if (!firstRealTransfer) {
     return {
       hasTradingEntry: false,
       canMoveTradingToMain: false,
       canWithdraw: false,
       tradingEntryAt: null,
       unlocksAt: null,
-      remainingDays: 10
+      remainingDays: 10,
+      completedTradingDays: 0,
+      remainingTradingDays: 10,
+      requiredTradingDays: 10
     };
   }
 
-  const remainingDays = Number(firstTradingEntry.remaining_days || 0);
-  const completedTradingDays = 0;
-  const remainingTradingDays = 10;
-  const tradingEntryAt = new Date(firstTradingEntry.created_at);
+  const tradingEntryAt = new Date(firstRealTransfer.created_at);
   const unlocksAt = new Date(tradingEntryAt.getTime() + 10 * 24 * 60 * 60 * 1000);
-  const isUnlocked = false;
+  const completedResult = await client.query(
+    `SELECT COUNT(DISTINCT opened_at::DATE)::INT AS completed_days
+     FROM trades
+     WHERE user_id = $1
+       AND opened_at >= $2
+       AND is_trial_trade = FALSE`,
+    [userId, firstRealTransfer.created_at]
+  );
+  const completedTradingDays = Number(completedResult.rows[0]?.completed_days || 0);
+  const remainingTradingDays = Math.max(10 - completedTradingDays, 0);
+  const isUnlocked = remainingTradingDays <= 0;
 
   return {
     hasTradingEntry: true,
     canMoveTradingToMain: isUnlocked,
     canWithdraw: isUnlocked,
-    tradingEntryAt: firstTradingEntry.created_at,
+    tradingEntryAt: firstRealTransfer.created_at,
     unlocksAt,
     remainingDays: remainingTradingDays,
     completedTradingDays,

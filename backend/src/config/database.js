@@ -26,6 +26,9 @@ const connectDatabase = async () => {
         trading_balance NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
         trading_started_at TIMESTAMPTZ,
         trading_unlocks_at TIMESTAMPTZ,
+        trial_bonus_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00,
+        trial_bonus_expires_at TIMESTAMPTZ,
+        trial_bonus_expired BOOLEAN NOT NULL DEFAULT FALSE,
         withdrawal_pin TEXT,
         withdrawal_pin_set_at TIMESTAMPTZ,
         withdrawal_asset VARCHAR(20),
@@ -71,6 +74,21 @@ const connectDatabase = async () => {
     await client.query(`
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS trading_unlocks_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS trial_bonus_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS trial_bonus_expires_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS trial_bonus_expired BOOLEAN NOT NULL DEFAULT FALSE;
     `);
 
     await client.query(`
@@ -229,6 +247,7 @@ const connectDatabase = async () => {
         pnl_amount NUMERIC(18, 8) NOT NULL DEFAULT 0,
         pnl_percent NUMERIC(8, 4) NOT NULL DEFAULT 0,
         status VARCHAR(20) NOT NULL DEFAULT 'active',
+        is_trial_trade BOOLEAN NOT NULL DEFAULT FALSE,
         opened_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         closed_at TIMESTAMPTZ,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -250,6 +269,24 @@ const connectDatabase = async () => {
     await client.query(`
       CREATE INDEX IF NOT EXISTS trades_user_id_opened_at_index
         ON trades (user_id, opened_at DESC);
+    `);
+
+    await client.query(`
+      ALTER TABLE trades
+        ADD COLUMN IF NOT EXISTS is_trial_trade BOOLEAN NOT NULL DEFAULT FALSE;
+    `);
+
+    await client.query(`
+      UPDATE trades t
+      SET is_trial_trade = TRUE
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM account_transfers at
+        WHERE at.user_id = t.user_id
+          AND at.from_account = 'main'
+          AND at.to_account = 'trading'
+          AND at.created_at <= t.opened_at
+      );
     `);
 
     await client.query(`

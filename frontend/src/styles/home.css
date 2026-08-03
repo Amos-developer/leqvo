@@ -782,6 +782,32 @@
   background: var(--green-soft);
 }
 
+.account-page .trading-countdown {
+  gap: 0;
+  padding: 8px;
+  border-radius: 14px;
+}
+
+.account-page .trial-bonus-countdown-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.account-page .trading-countdown .trial-bonus-countdown-row > span {
+  min-height: 42px;
+  padding: 5px 2px;
+  border-radius: 11px;
+}
+
+.account-page .trading-countdown .trial-bonus-countdown-row strong {
+  font-size: 0.92rem;
+}
+
+.account-page .trading-countdown .trial-bonus-countdown-row small {
+  font-size: 0.58rem;
+}
+
 .finance-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

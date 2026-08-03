@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getAccountTransfers, getMyWithdrawalAddress, getUserById } from "../utils/api";
 
@@ -14,6 +14,8 @@ const eligibility = ref({
   requiredTradingDays: 10
 });
 const withdrawalAddress = ref(null);
+const now = ref(Date.now());
+let countdownTimer = null;
 
 const initials = computed(() => {
   return (user.value.username || "Member")
@@ -39,15 +41,32 @@ const tradingBalance = computed(() => {
 });
 
 const hasTradingCountdown = computed(() => {
+  return false;
+});
+
+const trialBonusActive = computed(() => {
   return Boolean(
-    eligibility.value.hasTradingEntry &&
-      !eligibility.value.canMoveTradingToMain &&
-      Number(user.value.tradingBalance || 0) > 0
+    Number(user.value.trialBonusAmount || 0) > 0 &&
+      !user.value.trialBonusExpired &&
+      user.value.trialBonusExpiresAt &&
+      new Date(user.value.trialBonusExpiresAt).getTime() > now.value
   );
 });
 
-const earlyExitFeeText = computed(() => {
-  return Number(Number(user.value.tradingBalance || 0) * 0.3).toLocaleString("en-US", {
+const trialBonusCountdown = computed(() => {
+  const expiresAt = user.value.trialBonusExpiresAt ? new Date(user.value.trialBonusExpiresAt).getTime() : 0;
+  const remaining = Math.max(expiresAt - now.value, 0);
+  const totalSeconds = Math.floor(remaining / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return { days, hours, minutes, seconds };
+});
+
+const trialBonusAmount = computed(() => {
+  return Number(user.value.trialBonusAmount || 0).toLocaleString("en-US", {
     style: "currency",
     currency: "USD"
   });
@@ -104,6 +123,15 @@ const copyUserId = async () => {
 
 onMounted(() => {
   refreshUser();
+  countdownTimer = setInterval(() => {
+    now.value = Date.now();
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+  }
 });
 </script>
 
@@ -154,23 +182,21 @@ onMounted(() => {
         <strong>{{ balance }}</strong>
         <p>Trading balance: {{ tradingBalance }}</p>
       </div>
-      <div v-if="hasTradingCountdown" class="trading-countdown">
-        <div class="countdown-status-row">
-          <span>Trading lock</span>
-          <b>Active</b>
+      <div v-if="trialBonusActive" class="trading-countdown">
+        <div class="trial-bonus-countdown-row">
+          <span><strong>{{ trialBonusCountdown.days }}</strong><small>Days</small></span>
+          <span><strong>{{ trialBonusCountdown.hours }}</strong><small>Hours</small></span>
+          <span><strong>{{ trialBonusCountdown.minutes }}</strong><small>Minutes</small></span>
+          <span><strong>{{ trialBonusCountdown.seconds }}</strong><small>Seconds</small></span>
         </div>
-        <div>
-          <span><strong>{{ eligibility.completedTradingDays || 0 }}</strong><small>Traded</small></span>
-          <span><strong>{{ eligibility.remainingTradingDays || eligibility.remainingDays || 10 }}</strong><small>Left</small></span>
-          <span><strong>{{ eligibility.requiredTradingDays || 10 }}</strong><small>Required</small></span>
-          <span><strong>30%</strong><small>Early fee</small></span>
-        </div>
-        <p>Only days with a completed trade count. Early move to main deducts {{ earlyExitFeeText }} now.</p>
       </div>
       <div v-else class="trading-countdown ready">
-        <span>Trading funds</span>
-        <strong>Unlocked</strong>
-        <p>You can move trading funds to main without extra deduction.</p>
+        <div class="trial-bonus-countdown-row">
+          <span><strong>0</strong><small>Days</small></span>
+          <span><strong>0</strong><small>Hours</small></span>
+          <span><strong>0</strong><small>Minutes</small></span>
+          <span><strong>0</strong><small>Seconds</small></span>
+        </div>
       </div>
     </section>
 
