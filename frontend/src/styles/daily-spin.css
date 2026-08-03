@@ -7,6 +7,64 @@
     linear-gradient(180deg, #fbfcff, #f4f6fb);
 }
 
+.spin-win-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(17, 24, 39, 0.38);
+  backdrop-filter: blur(8px);
+}
+
+.spin-win-modal-card {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 340px);
+  padding: 18px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(246, 196, 83, 0.22), transparent 7rem),
+    rgba(255, 255, 255, 0.98);
+  box-shadow: 0 24px 54px rgba(17, 24, 39, 0.18);
+  text-align: center;
+  animation: spinPopupIn 220ms ease;
+}
+
+.spin-win-modal-card span {
+  color: var(--amber);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.spin-win-modal-card strong {
+  color: var(--ink);
+  font-size: 1.28rem;
+  line-height: 1.2;
+}
+
+.spin-win-modal-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.spin-win-modal-card button {
+  min-height: 46px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f6c453, #f94fa7);
+  color: #151925;
+  font-size: 0.9rem;
+  font-weight: 950;
+  box-shadow: 0 14px 28px rgba(249, 79, 167, 0.18);
+}
+
 .daily-spin-header {
   position: relative;
   display: grid;
@@ -196,6 +254,12 @@
   font-size: 0.72rem;
   font-weight: 950;
   text-shadow: 0 2px 8px rgba(17, 24, 39, 0.28);
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.spin-wheel span.revealed {
+  opacity: 1;
 }
 
 .spin-wheel b {
@@ -306,5 +370,16 @@
 @keyframes spinFloat {
   50% {
     transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+@keyframes spinPopupIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

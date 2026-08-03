@@ -15,6 +15,8 @@ const missedYesterday = ref(false);
 const nextStreakDay = ref(1);
 const history = ref([]);
 const spinResult = ref(null);
+const popupReward = ref(null);
+const showWinPopup = ref(false);
 const rotation = ref(0);
 const segments = ref([
   { label: "$0.10", amount: 0.1, index: 0 },
@@ -31,7 +33,6 @@ const balance = computed(() => Number(user.value.balance || 0).toLocaleString("e
   style: "currency",
   currency: "USD"
 }));
-const activeSpin = computed(() => spinResult.value || today.value);
 const streakLabel = computed(() => {
   if (missedYesterday.value) {
     return "Streak reset";
@@ -66,7 +67,9 @@ const loadStatus = async () => {
     nextStreakDay.value = result.data.nextStreakDay;
     history.value = result.data.history || [];
     segments.value = result.data.segments || segments.value;
-    spinResult.value = null;
+    if (!showWinPopup.value) {
+      spinResult.value = null;
+    }
   } catch (error) {
     errorMessage.value = error.message;
   } finally {
@@ -82,6 +85,7 @@ const spinWheel = async () => {
   isSpinning.value = true;
   errorMessage.value = "";
   spinResult.value = null;
+  popupReward.value = null;
 
   try {
     const result = await runDailySpin();
@@ -91,6 +95,8 @@ const spinWheel = async () => {
 
     window.setTimeout(() => {
       spinResult.value = result.data.spin;
+      popupReward.value = result.data.spin;
+      showWinPopup.value = true;
       canSpin.value = false;
       user.value = result.data.user;
       localStorage.setItem("leqvoUser", JSON.stringify(result.data.user));
@@ -109,6 +115,24 @@ onMounted(loadStatus);
 
 <template>
   <section class="daily-spin-page phone-shell page-enter">
+    <div v-if="showWinPopup && popupReward" class="spin-win-modal" role="dialog" aria-modal="true" aria-labelledby="spin-win-title">
+      <div class="spin-win-modal-card">
+        <span>Congratulations</span>
+        <strong id="spin-win-title">You won {{ popupReward.prizeLabel }}</strong>
+        <p>Your reward has been credited to your Leqvo balance. Come back tomorrow for your next spin.</p>
+        <button
+          type="button"
+          @click="
+            showWinPopup = false;
+            popupReward = null;
+            spinResult = null;
+          "
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
     <header class="daily-spin-header">
       <div>
         <p>Daily reward</p>
@@ -143,7 +167,12 @@ onMounted(loadStatus);
       <div class="wheel-stage" aria-label="Daily spin wheel">
         <div class="wheel-pointer"></div>
         <div class="spin-wheel" :class="{ spinning: isSpinning }" :style="{ transform: `rotate(${rotation}deg)` }">
-          <span v-for="segment in segments" :key="segment.index" :style="{ transform: `rotate(${segment.index * (360 / segments.length)}deg)` }">
+          <span
+            v-for="segment in segments"
+            :key="segment.index"
+            :class="{ revealed: isSpinning || !!spinResult }"
+            :style="{ transform: `rotate(${segment.index * (360 / segments.length)}deg)` }"
+          >
             <b>{{ segment.label }}</b>
           </span>
           <i></i>
@@ -153,12 +182,6 @@ onMounted(loadStatus);
       <button class="spin-action-button" type="button" :disabled="!canSpin || isSpinning || isLoading" @click="spinWheel">
         {{ isSpinning ? "Spinning..." : canSpin ? "Spin Now" : "Already Spun" }}
       </button>
-    </section>
-
-    <section v-if="activeSpin" class="spin-result-card">
-      <span>Latest prize</span>
-      <strong>{{ activeSpin.prizeLabel }}</strong>
-      <p>Reward credited to your Leqvo balance.</p>
     </section>
 
     <section class="spin-rule-card">
