@@ -1,6 +1,6 @@
 .withdrawal-page {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   align-content: start;
   background:
     radial-gradient(circle at 86% 4%, rgba(38, 199, 135, 0.12), transparent 12rem),
@@ -12,7 +12,7 @@
   display: grid;
   min-height: 54px;
   place-items: center;
-  padding-top: 8px;
+  padding-top: 6px;
   text-align: center;
 }
 
@@ -32,17 +32,17 @@
 }
 
 .withdrawal-header h1 {
-  font-size: 1.24rem;
+  font-size: 1.16rem;
   line-height: 1.15;
 }
 
 .withdrawal-back-button {
   position: absolute;
   right: 0;
-  top: 8px;
+  top: 6px;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   place-items: center;
   border-radius: 15px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
@@ -66,12 +66,12 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
   overflow: hidden;
-  min-height: 158px;
-  padding: 18px;
-  border-radius: 28px;
+  min-height: 144px;
+  padding: 16px 14px;
+  border-radius: 24px;
   background:
     radial-gradient(circle at 88% 10%, rgba(255, 255, 255, 0.58), transparent 7rem),
     linear-gradient(135deg, #1f2332, #255b6a 48%, #26c787);
@@ -98,15 +98,15 @@
 
 .withdrawal-hero strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 4px;
   color: white;
-  font-size: 1.55rem;
+  font-size: 1.42rem;
 }
 
 .withdrawal-hero p {
   position: relative;
   z-index: 1;
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   color: rgba(255, 255, 255, 0.74);
   font-size: 0.82rem;
   line-height: 1.45;
@@ -116,39 +116,39 @@
   position: relative;
   z-index: 1;
   display: grid;
-  min-width: 84px;
-  min-height: 84px;
+  min-width: 78px;
+  min-height: 78px;
   place-items: center;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 28px;
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.14);
   text-align: center;
 }
 
 .withdrawal-fee-badge strong {
   margin: 0;
-  font-size: 1.45rem;
+  font-size: 1.28rem;
 }
 
 .withdrawal-card,
 .withdrawal-guide {
   display: grid;
-  gap: 14px;
-  padding: 18px;
-  border-radius: 26px;
+  gap: 12px;
+  padding: 16px 14px;
+  border-radius: 22px;
   background: rgba(255, 255, 255, 0.96);
 }
 
 .withdrawal-card h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.96rem;
 }
 
 .withdrawal-asset-grid,
 .withdrawal-network-grid {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .withdrawal-asset-grid {
@@ -161,9 +161,9 @@
 
 .withdrawal-asset-grid button,
 .withdrawal-network-grid button {
-  min-height: 54px;
+  min-height: 50px;
   border: 1px solid #eef1f7;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #fff;
   color: #4c4a55;
   font-weight: 900;
@@ -178,12 +178,12 @@
 }
 
 .withdrawal-form-card {
-  gap: 13px;
+  gap: 11px;
 }
 
 .withdrawal-field {
   display: grid;
-  gap: 8px;
+  gap: 7px;
   color: #4c4a55;
   font-size: 0.84rem;
   font-weight: 850;
@@ -193,10 +193,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  min-height: 54px;
-  padding: 0 14px;
+  min-height: 50px;
+  padding: 0 13px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 16px;
   background: #fff;
 }
 
@@ -218,15 +218,15 @@
 .email-code-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 92px;
-  gap: 10px;
+  gap: 8px;
   align-items: end;
 }
 
 .email-code-row button,
 .pin-alert button {
-  min-height: 54px;
+  min-height: 50px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #111827;
   color: #f6c453;
   font-size: 0.78rem;
@@ -243,9 +243,9 @@
 .withdrawal-breakdown {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 9px;
-  padding: 12px;
-  border-radius: 20px;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 18px;
   background: linear-gradient(135deg, #fff8fc, #f3f6ff);
 }
 
@@ -262,7 +262,7 @@
 
 .withdrawal-breakdown strong {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
   overflow: hidden;
   color: #151925;
   font-size: 0.82rem;
@@ -271,9 +271,9 @@
 }
 
 .withdrawal-submit-button {
-  min-height: 56px;
+  min-height: 50px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 16px;
   background: linear-gradient(135deg, var(--green), var(--pink));
   color: white;
   box-shadow: 0 16px 30px rgba(38, 199, 135, 0.2);
@@ -287,9 +287,9 @@
 
 .withdrawal-message {
   margin: 0;
-  padding: 11px 13px;
-  border-radius: 15px;
-  font-size: 0.82rem;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
@@ -308,11 +308,11 @@
   position: relative;
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   overflow: hidden;
-  padding: 16px;
-  border-radius: 24px;
+  padding: 14px;
+  border-radius: 20px;
   background:
     radial-gradient(circle at 100% 0%, rgba(249, 79, 167, 0.14), transparent 7rem),
     rgba(255, 255, 255, 0.96);
@@ -322,10 +322,10 @@
 .limit-icon,
 .withdrawal-guide-steps article > span {
   display: grid;
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 14px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   box-shadow: 0 14px 26px rgba(249, 79, 167, 0.22);
@@ -347,7 +347,7 @@
 .pin-alert p,
 .withdrawal-limit-card p,
 .withdrawal-guide-steps p {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.8rem;
   line-height: 1.45;
@@ -355,7 +355,7 @@
 
 .pin-alert button {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 10px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
 }
@@ -363,10 +363,10 @@
 .withdrawal-limit-card a {
   display: inline-flex;
   width: fit-content;
-  min-height: 36px;
+  min-height: 34px;
   align-items: center;
-  margin-top: 12px;
-  padding: 0 14px;
+  margin-top: 10px;
+  padding: 0 12px;
   border-radius: 999px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
@@ -376,18 +376,24 @@
 
 .withdrawal-guide-steps {
   display: grid;
-  gap: 11px;
+  gap: 9px;
 }
 
 .withdrawal-guide-steps article {
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);
-  gap: 12px;
+  gap: 10px;
   align-items: start;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid #eef1f7;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #f9fafc;
+}
+
+@media (min-width: 760px) {
+  .withdrawal-page {
+    gap: 15px;
+  }
 }
 
 @media (max-width: 370px) {
@@ -400,5 +406,16 @@
   .withdrawal-fee-badge {
     width: 100%;
     min-height: 68px;
+  }
+
+  .withdrawal-page {
+    gap: 12px;
+  }
+
+  .withdrawal-card,
+  .withdrawal-guide,
+  .withdrawal-hero {
+    padding-right: 12px;
+    padding-left: 12px;
   }
 }
