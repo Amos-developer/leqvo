@@ -83,6 +83,39 @@ const closePopup = () => {
   popupState.value.visible = false;
 };
 
+const pasteSignalCode = async () => {
+  try {
+    if (!navigator.clipboard?.readText) {
+      showPopup({
+        tone: "error",
+        title: "Paste unavailable",
+        message: "Clipboard paste is not available on this device. Paste the signal code manually."
+      });
+      return;
+    }
+
+    const clipboardText = await navigator.clipboard.readText();
+    const cleanedCode = clipboardText.trim().toUpperCase();
+
+    if (!cleanedCode) {
+      showPopup({
+        tone: "error",
+        title: "Clipboard empty",
+        message: "No signal code was found in your clipboard."
+      });
+      return;
+    }
+
+    signalCode.value = cleanedCode;
+  } catch (error) {
+    showPopup({
+      tone: "error",
+      title: "Paste unavailable",
+      message: "Clipboard access was blocked. Please paste the signal code manually."
+    });
+  }
+};
+
 const completeTrade = async () => {
   if (!signalCode.value.trim()) {
     showPopup({
@@ -327,7 +360,10 @@ onUnmounted(() => {
 
       <label class="trade-field">
         <span>Signal Code</span>
-        <input v-model.trim="signalCode" type="text" placeholder="Enter signal code" />
+        <div class="trade-input-row">
+          <input v-model.trim="signalCode" type="text" placeholder="Paste code" />
+          <button class="trade-paste-button" type="button" @click="pasteSignalCode">Paste</button>
+        </div>
       </label>
 
       <div class="allocation-panel">

@@ -349,6 +349,12 @@
   gap: 6px;
 }
 
+.trade-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
 .trade-field span {
   color: #4e5260;
   font-size: 0.82rem;
@@ -374,6 +380,18 @@
   border-color: var(--pink);
   background: white;
   box-shadow: 0 0 0 4px rgba(249, 79, 167, 0.12);
+}
+
+.trade-paste-button {
+  min-width: 72px;
+  height: 46px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f6c453, #f94fa7);
+  color: #151925;
+  font-size: 0.82rem;
+  font-weight: 950;
+  box-shadow: 0 12px 24px rgba(249, 79, 167, 0.16);
 }
 
 .allocation-panel {
