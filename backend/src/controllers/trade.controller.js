@@ -68,7 +68,9 @@ const createTrade = async (req, res) => {
     signalCode,
     allocationPercent,
     amount,
-    entryPrice
+    entryPrice,
+    targetProfitPercent: Number(activeSignal.profitPercent || 0),
+    settlesAt: activeSignal.validTo
   });
 
   return res.status(201).json({

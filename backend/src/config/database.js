@@ -244,6 +244,8 @@ const connectDatabase = async () => {
         amount NUMERIC(18, 8) NOT NULL,
         entry_price NUMERIC(18, 8) NOT NULL DEFAULT 0,
         exit_price NUMERIC(18, 8),
+        target_profit_percent NUMERIC(8, 4) NOT NULL DEFAULT 0,
+        settles_at TIMESTAMPTZ,
         pnl_amount NUMERIC(18, 8) NOT NULL DEFAULT 0,
         pnl_percent NUMERIC(8, 4) NOT NULL DEFAULT 0,
         status VARCHAR(20) NOT NULL DEFAULT 'active',
@@ -274,6 +276,25 @@ const connectDatabase = async () => {
     await client.query(`
       ALTER TABLE trades
         ADD COLUMN IF NOT EXISTS is_trial_trade BOOLEAN NOT NULL DEFAULT FALSE;
+    `);
+
+    await client.query(`
+      ALTER TABLE trades
+        ADD COLUMN IF NOT EXISTS target_profit_percent NUMERIC(8, 4) NOT NULL DEFAULT 0;
+    `);
+
+    await client.query(`
+      ALTER TABLE trades
+        ADD COLUMN IF NOT EXISTS settles_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      UPDATE trades t
+      SET target_profit_percent = COALESCE(cs.profit_percent, t.target_profit_percent),
+          settles_at = COALESCE(cs.valid_to, t.settles_at)
+      FROM copy_signals cs
+      WHERE t.signal_code = cs.signal_code
+        AND (t.target_profit_percent = 0 OR t.settles_at IS NULL);
     `);
 
     await client.query(`

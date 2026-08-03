@@ -1,4 +1,5 @@
 const database = require("../config/database");
+const tradeModel = require("./trade.model");
 
 const userFields = `
   id,
@@ -112,6 +113,7 @@ const findAllUsers = async () => {
 };
 
 const findUserById = async (id) => {
+  await tradeModel.settleCompletedTradesForUser(id);
   await expireTrialBonusIfNeeded(id);
 
   const result = await database.query(
@@ -159,6 +161,7 @@ const findUserWithPasswordByEmail = async (email) => {
   const user = result.rows[0] || null;
 
   if (user) {
+    await tradeModel.settleCompletedTradesForUser(user.id);
     await expireTrialBonusIfNeeded(user.id);
     return findUserWithPasswordByEmailWithoutExpiry(email);
   }
