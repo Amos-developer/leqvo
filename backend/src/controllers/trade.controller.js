@@ -29,14 +29,14 @@ const createTrade = async (req, res) => {
   if (!activeSignal) {
     return res.status(409).json({
       success: false,
-      message: `There is no active admin signal for ${pair} right now. Wait for the current trading session signal.`
+      message: `There is no active signal for ${pair} right now. Please wait for the current trading session window.`
     });
   }
 
   if (!enteredSignal) {
     return res.status(400).json({
       success: false,
-      message: `Invalid signal code. Enter the active admin signal for ${pair}.`
+      message: `Invalid signal code. Please enter the current signal for ${pair}.`
     });
   }
 
@@ -50,14 +50,14 @@ const createTrade = async (req, res) => {
   if (enteredSignal.status !== "active" || new Date(enteredSignal.validFrom) > new Date() || new Date(enteredSignal.validTo) < new Date()) {
     return res.status(400).json({
       success: false,
-      message: `This signal is not valid in the current session. Use the active ${pair} signal for this time window.`
+      message: `This signal is not valid in the current session. Please use the active ${pair} signal for this trading window.`
     });
   }
 
   if (enteredSignal.signalCode !== activeSignal.signalCode) {
     return res.status(400).json({
       success: false,
-      message: `You entered a different ${pair} signal. Please use the currently active admin signal for this session only.`
+      message: `You entered a different ${pair} signal. Please use the currently active signal for this session only.`
     });
   }
 

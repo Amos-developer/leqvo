@@ -88,7 +88,7 @@ const completeTrade = async () => {
     showPopup({
       tone: "error",
       title: "Signal required",
-      message: "Enter the active admin signal code to continue."
+      message: "Enter the current signal code to continue."
     });
     return;
   }
