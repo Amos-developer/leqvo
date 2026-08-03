@@ -173,7 +173,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section class="phone-shell page-enter">
+  <section class="home-page phone-shell page-enter">
     <!-- <div class="app-toolbar">
       <button class="icon-button" aria-label="Menu"><span class="icon-menu"></span></button>
       <button class="icon-button logout-button" aria-label="Logout" @click="handleLogout">

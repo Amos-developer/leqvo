@@ -1519,3 +1519,171 @@ a {
     opacity: 1;
   }
 }
+
+/* Reasonable compact homepage spacing */
+.home-page.phone-shell {
+  padding: 12px 12px 86px;
+}
+
+.home-page .balance-card {
+  min-height: 168px;
+  padding: 16px 14px;
+  border-radius: 20px;
+}
+
+.home-page .balance-copy h1 {
+  font-size: clamp(1.12rem, 4.5vw, 1.7rem);
+}
+
+.home-page .balance-copy p {
+  margin-top: 4px;
+}
+
+.home-page .muted-label {
+  margin-top: 12px;
+}
+
+.home-page .balance-copy strong {
+  margin-top: 4px;
+  font-size: 1.55rem;
+}
+
+.home-page .trading-balance-pill {
+  margin-top: 6px;
+  padding: 6px 9px;
+}
+
+.home-page .account-id {
+  margin-top: 7px;
+  padding: 6px 9px;
+}
+
+.home-page .hero-asset {
+  transform: scale(0.88);
+  transform-origin: right bottom;
+}
+
+.home-page .quick-link-section {
+  margin-top: 14px;
+}
+
+.home-page .quick-link-section h2 {
+  margin-bottom: 8px;
+}
+
+.home-page .quick-actions {
+  gap: 8px;
+  padding: 10px 8px;
+  border-radius: 18px;
+}
+
+.home-page .quick-actions a,
+.home-page .quick-actions button {
+  gap: 5px;
+  min-height: 70px;
+  border-radius: 13px;
+}
+
+.home-page .action-icon {
+  width: 38px;
+  height: 38px;
+}
+
+.home-page .action-icon img {
+  width: 38px;
+  height: 38px;
+}
+
+.home-page .transactions {
+  margin-top: 14px;
+  padding: 14px 10px 88px;
+  border-radius: 18px 18px 0 0;
+}
+
+.home-page .search-row {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.home-page .search-row label {
+  gap: 8px;
+  padding: 0 11px;
+}
+
+.home-page .search-row input {
+  height: 38px;
+}
+
+.home-page .filter-button {
+  width: 38px;
+  height: 38px;
+}
+
+.home-page .tabs {
+  gap: 5px;
+  margin-top: 10px;
+  padding: 4px;
+}
+
+.home-page .tabs button {
+  height: 34px;
+}
+
+.home-page .crypto-list {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.home-page .crypto-trade-link,
+.home-page .crypto-list article {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 9px;
+  padding: 9px;
+  border-radius: 16px;
+}
+
+.home-page .crypto-logo {
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  border-radius: 13px;
+}
+
+.home-page .crypto-list p {
+  margin-top: 2px;
+}
+
+.home-page .crypto-price {
+  gap: 3px;
+}
+
+.home-page .market-change {
+  min-height: 21px;
+  padding: 0 7px;
+}
+
+@media (min-width: 760px) {
+  .home-page.phone-shell {
+    padding: 14px 14px 88px;
+  }
+
+  .home-page .quick-actions {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 370px) {
+  .home-page.phone-shell {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .home-page .quick-actions {
+    gap: 6px;
+  }
+
+  .home-page .quick-actions a,
+  .home-page .quick-actions button {
+    min-height: 66px;
+  }
+}
