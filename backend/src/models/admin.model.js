@@ -7,6 +7,7 @@ const getOverview = async () => {
     usersResult,
     depositsResult,
     withdrawalsResult,
+    tradesResult,
     recentUsersResult,
     depositVolumeResult
   ] = await Promise.all([
@@ -30,6 +31,14 @@ const getOverview = async () => {
         COUNT(*) FILTER (WHERE status = 'pending')::INT AS pending,
         COUNT(*)::INT AS total
       FROM withdrawals
+    `),
+    database.query(`
+      SELECT
+        COUNT(*)::INT AS total,
+        COUNT(*) FILTER (WHERE status = 'active')::INT AS active,
+        COUNT(*) FILTER (WHERE status IN ('win', 'loose'))::INT AS finished,
+        COUNT(DISTINCT user_id)::INT AS users
+      FROM trades
     `),
     database.query(`
       SELECT id, username, email, balance, is_admin AS "isAdmin", created_at AS "createdAt"
@@ -60,6 +69,7 @@ const getOverview = async () => {
     users: usersResult.rows[0],
     deposits: depositsResult.rows[0],
     withdrawals: withdrawalsResult.rows[0],
+    trades: tradesResult.rows[0],
     recentUsers: recentUsersResult.rows,
     depositVolume: volumeRows.map((row) => ({
       day: row.day,
@@ -205,6 +215,48 @@ const getWithdrawals = async () => {
   `);
 
   return result.rows;
+};
+
+const getTrades = async () => {
+  const [tradesResult, summaryResult] = await Promise.all([
+    database.query(`
+      SELECT
+        t.id,
+        t.user_id AS "userId",
+        t.username,
+        u.email,
+        t.pair,
+        t.symbol,
+        t.signal_code AS "signalCode",
+        t.allocation_percent AS "allocationPercent",
+        t.amount,
+        t.entry_price AS "entryPrice",
+        t.exit_price AS "exitPrice",
+        t.pnl_amount AS "pnlAmount",
+        t.pnl_percent AS "pnlPercent",
+        t.status,
+        t.opened_at AS "openedAt",
+        t.closed_at AS "closedAt",
+        t.created_at AS "createdAt"
+      FROM trades t
+      JOIN users u ON u.id = t.user_id
+      ORDER BY t.opened_at DESC
+      LIMIT 200
+    `),
+    database.query(`
+      SELECT
+        COUNT(*)::INT AS total,
+        COUNT(*) FILTER (WHERE status = 'active')::INT AS active,
+        COUNT(*) FILTER (WHERE status IN ('win', 'loose'))::INT AS completed,
+        COUNT(DISTINCT user_id)::INT AS users
+      FROM trades
+    `)
+  ]);
+
+  return {
+    trades: tradesResult.rows,
+    summary: summaryResult.rows[0]
+  };
 };
 
 const refreshLeadershipRecords = async () => {
@@ -478,6 +530,231 @@ const getUserDetails = async (id) => {
   };
 };
 
+const getBalanceAudit = async (userId) => {
+  const [
+    userResult,
+    totalsResult,
+    depositsResult,
+    withdrawalsResult,
+    tradesResult,
+    transfersResult,
+    teamRewardsResult,
+    rewardsResult
+  ] = await Promise.all([
+    database.query(
+      `SELECT
+         id,
+         username,
+         email,
+         balance,
+         trading_balance AS "tradingBalance",
+         created_at AS "createdAt",
+         updated_at AS "updatedAt"
+       FROM users
+       WHERE id = $1`,
+      [userId]
+    ),
+    database.query(
+      `SELECT
+         COALESCE((SELECT SUM(price_amount) FROM deposits WHERE user_id = $1 AND credited_at IS NOT NULL), 0)::NUMERIC AS "totalDeposit",
+         COALESCE((SELECT SUM(amount) FROM withdrawals WHERE user_id = $1 AND status = 'approved'), 0)::NUMERIC AS "totalWithdrawal",
+         COALESCE((SELECT SUM(amount) FROM trades WHERE user_id = $1), 0)::NUMERIC AS "totalTradeAmount",
+         COALESCE((SELECT SUM(pnl_amount) FROM trades WHERE user_id = $1), 0)::NUMERIC AS "totalTradeProfit",
+         COALESCE((SELECT SUM(amount) FROM leadership_rewards WHERE user_id = $1), 0)::NUMERIC AS "teamEarnings",
+         COALESCE((SELECT COUNT(*) FROM trades WHERE user_id = $1), 0)::INT AS "tradeCount",
+         COALESCE((SELECT COUNT(*) FROM trades WHERE user_id = $1 AND status = 'active'), 0)::INT AS "activeTradeCount",
+         COALESCE((SELECT COUNT(*) FROM withdrawals WHERE user_id = $1), 0)::INT AS "withdrawalCount",
+         COALESCE((SELECT COUNT(*) FROM deposits WHERE user_id = $1), 0)::INT AS "depositCount"
+      `,
+      [userId]
+    ),
+    database.query(
+      `SELECT
+         id,
+         price_amount AS "priceAmount",
+         actually_paid AS "actuallyPaid",
+         pay_currency AS "payCurrency",
+         pay_network AS "payNetwork",
+         status,
+         credited_at AS "creditedAt",
+         created_at AS "createdAt"
+       FROM deposits
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 100`,
+      [userId]
+    ),
+    database.query(
+      `SELECT
+         id,
+         amount,
+         fee_amount AS "feeAmount",
+         asset,
+         network,
+         address,
+         status,
+         requested_at AS "requestedAt",
+         processed_at AS "processedAt",
+         created_at AS "createdAt"
+       FROM withdrawals
+       WHERE user_id = $1
+       ORDER BY requested_at DESC
+       LIMIT 100`,
+      [userId]
+    ),
+    database.query(
+      `SELECT
+         id,
+         pair,
+         signal_code AS "signalCode",
+         allocation_percent AS "allocationPercent",
+         amount,
+         entry_price AS "entryPrice",
+         exit_price AS "exitPrice",
+         pnl_amount AS "pnlAmount",
+         pnl_percent AS "pnlPercent",
+         status,
+         opened_at AS "openedAt",
+         closed_at AS "closedAt"
+       FROM trades
+       WHERE user_id = $1
+       ORDER BY opened_at DESC
+       LIMIT 100`,
+      [userId]
+    ),
+    database.query(
+      `SELECT
+         id,
+         from_account AS "fromAccount",
+         to_account AS "toAccount",
+         amount,
+         fee_amount AS "feeAmount",
+         net_amount AS "netAmount",
+         created_at AS "createdAt"
+       FROM account_transfers
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 100`,
+      [userId]
+    ),
+    database.query(
+      `SELECT
+         id,
+         reward_type AS "rewardType",
+         amount,
+         note,
+         granted_at AS "grantedAt"
+       FROM leadership_rewards
+       WHERE user_id = $1
+       ORDER BY granted_at DESC
+       LIMIT 100`,
+      [userId]
+    ),
+    database.query(
+      `SELECT
+         id,
+         source,
+         title,
+         amount,
+         status,
+         awarded_at AS "awardedAt"
+       FROM rewards
+       WHERE user_id = $1
+       ORDER BY awarded_at DESC
+       LIMIT 100`,
+      [userId]
+    )
+  ]);
+
+  const user = userResult.rows[0] || null;
+
+  if (!user) {
+    return null;
+  }
+
+  const activities = [
+    ...depositsResult.rows.map((item) => ({
+      id: `deposit-${item.id}`,
+      category: "finance",
+      type: "Deposit",
+      title: `${item.payCurrency} ${item.payNetwork}`,
+      amount: item.priceAmount,
+      status: item.status,
+      beforeBalance: null,
+      afterBalance: item.creditedAt ? "Credited to main balance" : null,
+      date: item.creditedAt || item.createdAt
+    })),
+    ...withdrawalsResult.rows.map((item) => ({
+      id: `withdrawal-${item.id}`,
+      category: "finance",
+      type: "Withdrawal",
+      title: `${item.asset} ${item.network}`,
+      amount: item.amount,
+      status: item.status,
+      beforeBalance: null,
+      afterBalance: item.status === "approved" ? "Deducted from main balance" : null,
+      date: item.processedAt || item.requestedAt
+    })),
+    ...tradesResult.rows.map((item) => ({
+      id: `trade-${item.id}`,
+      category: "trades",
+      type: "Trade",
+      title: `${item.pair} · ${item.signalCode}`,
+      amount: item.amount,
+      status: item.status,
+      profit: item.pnlAmount,
+      beforeBalance: null,
+      afterBalance: null,
+      date: item.closedAt || item.openedAt
+    })),
+    ...transfersResult.rows.map((item) => ({
+      id: `transfer-${item.id}`,
+      category: "activity",
+      type: "Transfer",
+      title: `${item.fromAccount} to ${item.toAccount}`,
+      amount: item.amount,
+      status: Number(item.feeAmount || 0) > 0 ? `fee ${item.feeAmount}` : "completed",
+      beforeBalance: null,
+      afterBalance: `Net ${item.netAmount}`,
+      date: item.createdAt
+    })),
+    ...teamRewardsResult.rows.map((item) => ({
+      id: `team-${item.id}`,
+      category: "team",
+      type: "Team Reward",
+      title: item.rewardType,
+      amount: item.amount,
+      status: "credited",
+      beforeBalance: null,
+      afterBalance: "Added to main balance",
+      date: item.grantedAt
+    })),
+    ...rewardsResult.rows.map((item) => ({
+      id: `reward-${item.id}`,
+      category: "activity",
+      type: "Reward",
+      title: item.title,
+      amount: item.amount,
+      status: item.status,
+      beforeBalance: null,
+      afterBalance: "Added to main balance",
+      date: item.awardedAt
+    }))
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  return {
+    user,
+    totals: totalsResult.rows[0],
+    deposits: depositsResult.rows,
+    withdrawals: withdrawalsResult.rows,
+    trades: tradesResult.rows,
+    transfers: transfersResult.rows,
+    teamRewards: teamRewardsResult.rows,
+    rewards: rewardsResult.rows,
+    activities
+  };
+};
+
 module.exports = {
   getOverview,
   getUserSummary,
@@ -486,8 +763,10 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserDetails,
+  getBalanceAudit,
   getDeposits,
   getWithdrawals,
+  getTrades,
   getLeaders,
   grantLeadershipReward
 };

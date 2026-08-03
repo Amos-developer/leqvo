@@ -191,6 +191,17 @@ export const createTrade = (payload) => {
   });
 };
 
+export const getAdminCopySignals = () => {
+  return request("/copy-signals");
+};
+
+export const createAdminCopySignal = (payload) => {
+  return request("/copy-signals", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
 export const getPopularCrypto = () => {
   return request("/markets/popular");
 };
@@ -250,6 +261,12 @@ export const getAdminUserDetails = (id) => {
   });
 };
 
+export const getAdminBalanceAudit = (id) => {
+  return request(`/admin/users/${id}/balance-audit`, {
+    headers: getAdminHeaders()
+  });
+};
+
 export const createAdminUser = (payload) => {
   return request("/admin/users", {
     method: "POST",
@@ -281,6 +298,12 @@ export const getAdminDeposits = () => {
 
 export const getAdminWithdrawals = () => {
   return request("/admin/withdrawals", {
+    headers: getAdminHeaders()
+  });
+};
+
+export const getAdminTrades = () => {
+  return request("/admin/trades", {
     headers: getAdminHeaders()
   });
 };

@@ -28,6 +28,14 @@ const connectDatabase = async () => {
         trading_unlocks_at TIMESTAMPTZ,
         withdrawal_pin TEXT,
         withdrawal_pin_set_at TIMESTAMPTZ,
+        withdrawal_asset VARCHAR(20),
+        withdrawal_network VARCHAR(40),
+        withdrawal_address TEXT,
+        withdrawal_address_status VARCHAR(20) NOT NULL DEFAULT 'not_set',
+        withdrawal_address_note TEXT,
+        withdrawal_address_reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
+        withdrawal_address_reviewed_at TIMESTAMPTZ,
+        withdrawal_address_submitted_at TIMESTAMPTZ,
         is_admin BOOLEAN NOT NULL DEFAULT FALSE,
         email_verified BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -73,6 +81,51 @@ const connectDatabase = async () => {
     await client.query(`
       ALTER TABLE users
         ADD COLUMN IF NOT EXISTS withdrawal_pin_set_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_asset VARCHAR(20);
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_network VARCHAR(40);
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_address TEXT;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_address_status VARCHAR(20) NOT NULL DEFAULT 'not_set';
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_address_note TEXT;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_address_reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_address_reviewed_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_address_submitted_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS users_withdrawal_address_status_index
+        ON users (withdrawal_address_status);
     `);
 
     await client.query(`
@@ -200,6 +253,35 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
+      CREATE TABLE IF NOT EXISTS copy_signals (
+        id SERIAL PRIMARY KEY,
+        pair VARCHAR(20) NOT NULL,
+        currency VARCHAR(20) NOT NULL,
+        signal_code VARCHAR(80) NOT NULL UNIQUE,
+        profit_percent NUMERIC(8, 4) NOT NULL,
+        min_deposit_required NUMERIC(18, 8) NOT NULL DEFAULT 0,
+        valid_from TIMESTAMPTZ NOT NULL,
+        valid_to TIMESTAMPTZ NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'active',
+        created_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        CONSTRAINT copy_signals_status_check CHECK (status IN ('active', 'expired', 'cancelled')),
+        CONSTRAINT copy_signals_window_check CHECK (valid_to > valid_from)
+      );
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS copy_signals_valid_from_index
+        ON copy_signals (valid_from DESC);
+    `);
+
+    await client.query(`
+      ALTER TABLE copy_signals
+        ADD COLUMN IF NOT EXISTS min_deposit_required NUMERIC(18, 8) NOT NULL DEFAULT 0;
+    `);
+
+    await client.query(`
       CREATE TABLE IF NOT EXISTS withdrawals (
         id SERIAL PRIMARY KEY,
         user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -228,31 +310,39 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
-      CREATE TABLE IF NOT EXISTS withdrawal_addresses (
-        id SERIAL PRIMARY KEY,
-        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        username VARCHAR(80) NOT NULL,
-        asset VARCHAR(20) NOT NULL,
-        network VARCHAR(40) NOT NULL,
-        address TEXT NOT NULL,
-        status VARCHAR(20) NOT NULL DEFAULT 'pending',
-        note TEXT,
-        reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
-        reviewed_at TIMESTAMPTZ,
-        submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        CONSTRAINT withdrawal_addresses_status_check CHECK (status IN ('pending', 'approved', 'rejected'))
-      );
-    `);
+      DO $$
+      BEGIN
+        IF to_regclass('public.withdrawal_addresses') IS NOT NULL THEN
+          UPDATE users u
+          SET withdrawal_asset = latest.asset,
+              withdrawal_network = latest.network,
+              withdrawal_address = latest.address,
+              withdrawal_address_status = latest.status,
+              withdrawal_address_note = latest.note,
+              withdrawal_address_reviewed_by = latest.reviewed_by,
+              withdrawal_address_reviewed_at = latest.reviewed_at,
+              withdrawal_address_submitted_at = latest.submitted_at,
+              updated_at = NOW()
+          FROM (
+            SELECT DISTINCT ON (user_id)
+              user_id,
+              asset,
+              network,
+              address,
+              status,
+              note,
+              reviewed_by,
+              reviewed_at,
+              submitted_at
+            FROM withdrawal_addresses
+            ORDER BY user_id, submitted_at DESC
+          ) latest
+          WHERE u.id = latest.user_id
+            AND u.withdrawal_address IS NULL;
 
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS withdrawal_addresses_user_id_status_index
-        ON withdrawal_addresses (user_id, status);
-    `);
-
-    await client.query(`
-      CREATE INDEX IF NOT EXISTS withdrawal_addresses_status_submitted_at_index
-        ON withdrawal_addresses (status, submitted_at DESC);
+          DROP TABLE withdrawal_addresses;
+        END IF;
+      END $$;
     `);
 
     await client.query(`

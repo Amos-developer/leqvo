@@ -118,6 +118,28 @@ const getUserDetails = async (req, res) => {
   });
 };
 
+const getBalanceAudit = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const audit = await adminModel.getBalanceAudit(req.params.id);
+
+  if (!audit) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: audit
+  });
+};
+
 const createUser = async (req, res) => {
   const admin = await requireAdmin(req, res);
 
@@ -290,6 +312,21 @@ const getWithdrawals = async (req, res) => {
   });
 };
 
+const getTrades = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const trades = await adminModel.getTrades();
+
+  return res.status(200).json({
+    success: true,
+    data: trades
+  });
+};
+
 const getLeaders = async (req, res) => {
   const admin = await requireAdmin(req, res);
 
@@ -348,11 +385,13 @@ module.exports = {
   getOverview,
   getUsers,
   getUserDetails,
+  getBalanceAudit,
   createUser,
   updateUser,
   deleteUser,
   getDeposits,
   getWithdrawals,
+  getTrades,
   getLeaders,
   grantLeadershipReward
 };
