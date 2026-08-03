@@ -1,6 +1,6 @@
 .deposit-page {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   align-content: start;
 }
 
@@ -10,17 +10,17 @@
   min-height: 52px;
   place-items: center;
   align-items: center;
-  padding-top: 8px;
+  padding-top: 6px;
   text-align: center;
 }
 
 .back-button {
   position: absolute;
   right: 0;
-  top: 8px;
+  top: 6px;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   place-items: center;
   border-radius: 15px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
@@ -40,16 +40,16 @@
 
 .deposit-header h1 {
   margin: 0;
-  font-size: 1.24rem;
+  font-size: 1.16rem;
   line-height: 1.15;
 }
 
 .deposit-card {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: 12px;
+  padding: 16px 14px;
   border: 1px solid rgba(255, 255, 255, 0.78);
-  border-radius: 26px;
+  border-radius: 22px;
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 18px 38px rgba(78, 83, 110, 0.1);
   backdrop-filter: blur(14px);
@@ -60,9 +60,9 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   overflow: hidden;
-  min-height: 150px;
+  min-height: 138px;
   background:
     radial-gradient(circle at 88% 10%, rgba(255, 255, 255, 0.62), transparent 7rem),
     linear-gradient(135deg, #261d3f, #7342a4 54%, #f94fa7);
@@ -82,7 +82,7 @@
 
 .deposit-card h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.96rem;
 }
 
 .deposit-hero span,
@@ -98,9 +98,9 @@
 
 .deposit-hero strong {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
   color: white;
-  font-size: 1.55rem;
+  font-size: 1.42rem;
 }
 
 .deposit-hero p,
@@ -114,7 +114,7 @@
 .deposit-hero p {
   position: relative;
   z-index: 1;
-  margin-top: 10px;
+  margin-top: 8px;
   color: rgba(255, 255, 255, 0.75);
 }
 
@@ -122,12 +122,12 @@
   position: relative;
   z-index: 1;
   display: grid;
-  min-width: 86px;
-  min-height: 86px;
+  min-width: 80px;
+  min-height: 80px;
   place-items: center;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 28px;
+  border-radius: 24px;
   background: rgba(255, 255, 255, 0.14);
   text-align: center;
   backdrop-filter: blur(12px);
@@ -140,14 +140,14 @@
 
 .minimum-pill strong {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.28rem;
 }
 
 .asset-grid,
 .network-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .asset-grid {
@@ -158,10 +158,10 @@
 .network-grid button {
   display: grid;
   gap: 5px;
-  min-height: 76px;
-  padding: 12px;
+  min-height: 70px;
+  padding: 10px;
   border: 1px solid #eef1f7;
-  border-radius: 20px;
+  border-radius: 18px;
   background: #fff;
   color: inherit;
   text-align: left;
@@ -190,7 +190,7 @@
 
 .amount-field {
   display: grid;
-  gap: 8px;
+  gap: 7px;
   color: #4c4a55;
   font-size: 0.85rem;
   font-weight: 800;
@@ -200,10 +200,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  min-height: 56px;
-  padding: 0 14px;
+  min-height: 50px;
+  padding: 0 13px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 16px;
   background: #fff;
 }
 
@@ -229,7 +229,7 @@
 }
 
 .address-card {
-  gap: 16px;
+  gap: 14px;
   border-color: rgba(249, 79, 167, 0.16);
   background:
     radial-gradient(circle at 94% 8%, rgba(249, 79, 167, 0.12), transparent 8rem),
@@ -239,13 +239,13 @@
 .address-summary {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .address-summary div {
   min-width: 0;
-  padding: 12px;
-  border-radius: 18px;
+  padding: 10px;
+  border-radius: 16px;
   background: #f8f8fb;
 }
 
@@ -326,12 +326,12 @@
   position: relative;
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   overflow: hidden;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid rgba(194, 37, 92, 0.12);
-  border-radius: 24px;
+  border-radius: 20px;
   background:
     radial-gradient(circle at 100% 0%, rgba(249, 79, 167, 0.16), transparent 7rem),
     linear-gradient(135deg, #fff0f5, #ffffff);
@@ -351,10 +351,10 @@
 
 .warning-icon {
   display: grid;
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 14px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   font-weight: 900;
@@ -368,7 +368,7 @@
 }
 
 .deposit-warning p {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: #7d4b62;
   font-size: 0.8rem;
   line-height: 1.45;
@@ -376,10 +376,10 @@
 
 .deposit-guide {
   display: grid;
-  gap: 14px;
-  padding: 18px;
+  gap: 12px;
+  padding: 16px 14px;
   border: 1px solid rgba(255, 255, 255, 0.78);
-  border-radius: 26px;
+  border-radius: 22px;
   background:
     radial-gradient(circle at 100% 0%, rgba(51, 140, 242, 0.1), transparent 7rem),
     rgba(255, 255, 255, 0.96);
@@ -397,31 +397,31 @@
 .guide-heading h2 {
   margin: 4px 0 0;
   color: var(--ink);
-  font-size: 1.08rem;
+  font-size: 1rem;
 }
 
 .guide-steps {
   display: grid;
-  gap: 11px;
+  gap: 9px;
 }
 
 .guide-steps article {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr);
-  gap: 12px;
+  gap: 10px;
   align-items: start;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid #eef1f7;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #f9fafc;
 }
 
 .guide-step-icon {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  border-radius: 14px;
+  border-radius: 12px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   box-shadow: 0 12px 22px rgba(249, 79, 167, 0.2);
@@ -436,10 +436,32 @@
 }
 
 .guide-steps p {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.78rem;
   line-height: 1.45;
+}
+
+@media (min-width: 760px) {
+  .deposit-page {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 370px) {
+  .deposit-page {
+    gap: 12px;
+  }
+
+  .deposit-card,
+  .deposit-guide {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .deposit-hero {
+    gap: 10px;
+  }
 }
 
 .deposit-address-page {
