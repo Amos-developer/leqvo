@@ -1,5 +1,5 @@
-<script setup>
 import { computed, onMounted, ref } from "vue";
+<script setup>
 import { useRouter } from "vue-router";
 import { getDailySpinStatus, runDailySpin } from "../utils/api";
 

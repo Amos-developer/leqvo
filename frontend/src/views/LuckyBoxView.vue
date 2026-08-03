@@ -46,7 +46,8 @@ const loadStatus = async () => {
     qualifyingDepositAmount.value = Number(result.data.qualifyingDepositAmount || 100);
     history.value = result.data.history || [];
     prizes.value = result.data.prizes || prizes.value;
-    openedBox.value = history.value[0]?.boxNumber || null;
+    openedBox.value = null;
+    selectedBox.value = null;
     reward.value = null;
   } catch (error) {
     errorMessage.value = error.message;
