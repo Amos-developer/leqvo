@@ -49,7 +49,8 @@ const copySignals = ref([]);
 const signalForm = ref({
   pair: "BTC/USDT",
   validDate: new Date().toISOString().slice(0, 10),
-  session: "14:00",
+  validFromTime: "14:00",
+  validToTime: "14:40",
   profitPercent: "1.09"
 });
 const createdSignal = ref(null);
@@ -228,6 +229,31 @@ const availableSignalPairs = computed(() => {
   }));
 });
 
+const signalTimeSlots = [
+  { start: "10:00", end: "10:40", label: "First trade" },
+  { start: "11:00", end: "11:40", label: "Second trade" },
+  { start: "13:00", end: "13:40", label: "Third trade" },
+  { start: "14:00", end: "14:40", label: "Fourth trade" },
+  { start: "15:00", end: "15:40", label: "Fifth bonus trade" }
+];
+
+const availableSignalEndTimes = computed(() => {
+  const selectedSlot = signalTimeSlots.find((slot) => slot.start === signalForm.value.validFromTime);
+
+  return selectedSlot ? [{ value: selectedSlot.end, label: `${selectedSlot.end} UTC` }] : [];
+});
+
+watch(
+  () => signalForm.value.validFromTime,
+  (startTime) => {
+    const selectedSlot = signalTimeSlots.find((slot) => slot.start === startTime);
+
+    if (selectedSlot) {
+      signalForm.value.validToTime = selectedSlot.end;
+    }
+  }
+);
+
 const balanceAuditUsers = computed(() => {
   const search = balanceAuditSearch.value.trim().toLowerCase();
 
@@ -329,8 +355,8 @@ const loadAdminData = async () => {
 };
 
 const buildSignalDates = () => {
-  const validFrom = new Date(`${signalForm.value.validDate}T${signalForm.value.session}:00Z`);
-  const validTo = new Date(validFrom.getTime() + 40 * 60 * 1000);
+  const validFrom = new Date(`${signalForm.value.validDate}T${signalForm.value.validFromTime}:00Z`);
+  const validTo = new Date(`${signalForm.value.validDate}T${signalForm.value.validToTime}:00Z`);
 
   return { validFrom, validTo };
 };
@@ -922,13 +948,19 @@ onMounted(loadAdminData);
                 <input v-model="signalForm.validDate" type="date" />
               </label>
               <label>
-                Trade session
-                <select v-model="signalForm.session">
-                  <option value="10:00">First trade - 10:00 UTC</option>
-                  <option value="11:00">Second trade - 11:00 UTC</option>
-                  <option value="13:00">Third trade - 13:00 UTC</option>
-                  <option value="14:00">Fourth trade - 14:00 UTC</option>
-                  <option value="15:00">Fifth bonus trade - 15:00 UTC</option>
+                Start time
+                <select v-model="signalForm.validFromTime">
+                  <option v-for="slot in signalTimeSlots" :key="slot.start" :value="slot.start">
+                    {{ slot.label }} - {{ slot.start }} UTC
+                  </option>
+                </select>
+              </label>
+              <label>
+                End time
+                <select v-model="signalForm.validToTime">
+                  <option v-for="slot in availableSignalEndTimes" :key="slot.value" :value="slot.value">
+                    {{ slot.label }}
+                  </option>
                 </select>
               </label>
               <label>
@@ -939,8 +971,8 @@ onMounted(loadAdminData);
 
             <div class="copy-signal-window">
               <span>Valid for exactly 40 minutes</span>
-              <strong>{{ signalForm.session }} - {{ buildSignalDates().validTo.toISOString().slice(11, 16) }} UTC</strong>
-              <small v-if="signalForm.session === '15:00'">Bonus trade requires user deposit of 300 USDT and above.</small>
+              <strong>{{ signalForm.validFromTime }} - {{ signalForm.validToTime }} UTC</strong>
+              <small v-if="signalForm.validFromTime === '15:00'">Bonus trade requires user deposit of 300 USDT and above.</small>
             </div>
 
             <button class="copy-signal-submit" type="button" :disabled="isCreatingSignal" @click="createCopySignal">

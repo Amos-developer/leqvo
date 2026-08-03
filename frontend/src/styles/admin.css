@@ -943,7 +943,7 @@
   gap: 14px;
   overflow: hidden;
   position: relative;
-  min-height: 124px;
+  min-height: 116px;
   background:
     radial-gradient(circle at 85% 10%, rgba(14, 165, 233, 0.16), transparent 32%),
     linear-gradient(135deg, #0f172a, #1e293b 54%, #334155);
@@ -993,7 +993,7 @@
 
 .copy-signal-hero > strong {
   flex: 0 0 auto;
-  padding: 10px 13px;
+  padding: 9px 12px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.1);
@@ -1005,28 +1005,28 @@
 .copy-signal-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .copy-signal-metric-card {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   min-width: 0;
-  padding: 14px;
+  padding: 12px;
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
+  border-radius: 14px;
   background: linear-gradient(180deg, #ffffff, #f8fafc);
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
 }
 
 .copy-signal-metric-card i {
   display: grid;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
   place-items: center;
-  border-radius: 14px;
+  border-radius: 12px;
   background: #e0f2fe;
 }
 
@@ -1075,7 +1075,7 @@
 .copy-signal-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: 12px;
+  gap: 10px;
   align-items: start;
 }
 
@@ -1083,13 +1083,13 @@
 .copy-signal-share-panel,
 .copy-signal-list-panel {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .copy-signal-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 11px;
+  gap: 9px;
 }
 
 .copy-signal-form-grid label {
@@ -1103,11 +1103,11 @@
 .copy-signal-form-grid input,
 .copy-signal-form-grid select {
   width: 100%;
-  height: 42px;
+  height: 40px;
   border: 1px solid #dbe4ef;
-  border-radius: 13px;
+  border-radius: 10px;
   outline: 0;
-  padding: 0 11px;
+  padding: 0 10px;
   background: #ffffff;
   color: var(--admin-ink);
   font-weight: 850;
@@ -1125,9 +1125,9 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 16px;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #eff6ff, #f0fdfa);
 }
 
@@ -1150,9 +1150,9 @@
 }
 
 .copy-signal-submit {
-  min-height: 44px;
+  min-height: 42px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
   color: white;
   font-weight: 950;
@@ -1176,8 +1176,8 @@
 .copy-signal-share-panel pre {
   overflow-x: auto;
   margin: 0;
-  padding: 14px;
-  border-radius: 16px;
+  padding: 12px;
+  border-radius: 12px;
   background: #0f172a;
   color: #e2e8f0;
   font-size: 0.8rem;
@@ -1201,9 +1201,9 @@
   min-height: 38px;
   align-items: center;
   justify-content: center;
-  padding: 0 13px;
+  padding: 0 12px;
   border: 0;
-  border-radius: 13px;
+  border-radius: 10px;
   background: var(--admin-primary-soft);
   color: var(--admin-primary);
   font-size: 0.76rem;
@@ -1219,7 +1219,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
 .copy-signal-list-head h2 {
@@ -1229,7 +1229,7 @@
 }
 
 .copy-signal-list-head strong {
-  padding: 7px 10px;
+  padding: 6px 9px;
   border-radius: 999px;
   background: #f1f5f9;
   color: #334155;
@@ -1238,14 +1238,14 @@
 
 .copy-signal-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .copy-signal-row {
   flex-wrap: wrap;
-  padding: 12px;
+  padding: 10px;
   border: 1px solid #e7edf5;
-  border-radius: 16px;
+  border-radius: 12px;
   background: #ffffff;
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -1279,6 +1279,10 @@
     grid-template-columns: 1fr;
   }
 
+  .copy-signal-metrics {
+    gap: 7px;
+  }
+
   .copy-signal-form-grid {
     grid-template-columns: 1fr;
   }
@@ -1286,6 +1290,12 @@
   .copy-signal-window,
   .copy-signal-actions {
     display: grid;
+  }
+
+  .copy-signal-actions button,
+  .copy-signal-actions a,
+  .copy-signal-row a {
+    width: 100%;
   }
 }
 
