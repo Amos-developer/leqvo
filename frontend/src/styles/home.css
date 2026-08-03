@@ -808,6 +808,134 @@
   font-size: 0.58rem;
 }
 
+/* Reasonable compact AccountView spacing */
+.account-page.premium-account {
+  gap: 10px;
+  padding-top: 12px;
+  padding-right: 12px;
+  padding-left: 12px;
+}
+
+.account-page .account-topbar {
+  padding: 5px 1px 3px;
+}
+
+.account-page .account-topbar p {
+  margin-bottom: 3px;
+}
+
+.account-page .account-topbar button {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+}
+
+.account-page .premium-profile-card,
+.account-page .portfolio-card {
+  padding: 14px;
+  border-radius: 22px;
+}
+
+.account-page .premium-profile-head {
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 11px;
+}
+
+.account-page .premium-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  font-size: 1.12rem;
+}
+
+.account-page .premium-identity p {
+  margin-top: 5px;
+}
+
+.account-page .profile-meta-grid {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.account-page .profile-meta-grid div {
+  padding: 10px;
+  border-radius: 15px;
+}
+
+.account-page .portfolio-card {
+  gap: 10px;
+}
+
+.account-page .portfolio-card strong {
+  margin-top: 4px;
+  font-size: 1.45rem;
+}
+
+.account-page .portfolio-card p {
+  margin-top: 4px;
+}
+
+.account-page .trading-countdown {
+  padding: 10px;
+  border-radius: 16px;
+}
+
+.account-page .premium-settings {
+  gap: 8px;
+}
+
+.account-page .premium-list {
+  gap: 8px;
+}
+
+.account-page .premium-list button {
+  grid-template-columns: 42px minmax(0, 1fr) 18px;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 16px;
+}
+
+.account-page .premium-list p {
+  margin-top: 3px;
+}
+
+.account-page .settings-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+}
+
+.account-page .logout-action {
+  height: 48px;
+  border-radius: 16px;
+}
+
+@media (min-width: 760px) {
+  .account-page.premium-account {
+    padding-top: 14px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+}
+
+@media (max-width: 370px) {
+  .account-page.premium-account {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .account-page .premium-list button {
+    grid-template-columns: 38px minmax(0, 1fr) 16px;
+    gap: 8px;
+    padding: 9px;
+  }
+
+  .account-page .settings-icon {
+    width: 38px;
+    height: 38px;
+  }
+}
+
 .finance-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
