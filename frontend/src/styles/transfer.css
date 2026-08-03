@@ -1,6 +1,6 @@
 .transfer-page {
   display: grid;
-  gap: 15px;
+  gap: 14px;
   align-content: start;
   background:
     radial-gradient(circle at 14% 0%, rgba(249, 79, 167, 0.12), transparent 12rem),
@@ -12,7 +12,7 @@
   display: grid;
   min-height: 54px;
   place-items: center;
-  padding-top: 8px;
+  padding-top: 6px;
   text-align: center;
 }
 
@@ -33,16 +33,16 @@
 }
 
 .transfer-header h1 {
-  font-size: 1.24rem;
+  font-size: 1.16rem;
 }
 
 .transfer-header > button {
   position: absolute;
-  top: 8px;
+  top: 6px;
   right: 0;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   place-items: center;
   border: 0;
   border-radius: 15px;
@@ -64,10 +64,10 @@
 
 .transfer-hero {
   position: relative;
-  min-height: 152px;
+  min-height: 140px;
   overflow: hidden;
-  padding: 18px;
-  border-radius: 28px;
+  padding: 16px 14px;
+  border-radius: 24px;
   background:
     radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.52), transparent 6rem),
     linear-gradient(135deg, #29213f, #6740a1 56%, #f94fa7);
@@ -91,25 +91,25 @@
 
 .transfer-hero strong {
   display: block;
-  margin-top: 7px;
+  margin-top: 5px;
   color: white;
-  font-size: 2rem;
+  font-size: 1.72rem;
   line-height: 1;
 }
 
 .transfer-hero p {
   max-width: 15rem;
-  margin: 10px 0 0;
+  margin: 8px 0 0;
   font-size: 0.82rem;
 }
 
 .transfer-orbit {
   position: absolute;
-  right: 20px;
-  bottom: 18px;
+  right: 18px;
+  bottom: 16px;
   display: grid;
-  width: 74px;
-  height: 74px;
+  width: 68px;
+  height: 68px;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 50%;
@@ -118,9 +118,9 @@
 
 .transfer-orbit i {
   position: absolute;
-  width: 32px;
-  height: 32px;
-  border-radius: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.22);
 }
 
@@ -135,18 +135,18 @@
 .transfer-balance-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .transfer-balance-grid article {
   min-width: 0;
-  padding: 14px;
-  border-radius: 22px;
+  padding: 12px;
+  border-radius: 18px;
 }
 
 .transfer-balance-grid strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   overflow: hidden;
   color: #151925;
   font-size: 1.1rem;
@@ -157,7 +157,7 @@
 .transfer-balance-grid p,
 .transfer-flow strong,
 .transfer-row p {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.74rem;
 }
@@ -165,9 +165,9 @@
 .transfer-card,
 .transfer-history {
   display: grid;
-  gap: 13px;
-  padding: 15px;
-  border-radius: 28px;
+  gap: 11px;
+  padding: 14px 12px;
+  border-radius: 22px;
 }
 
 .transfer-card-heading,
@@ -176,12 +176,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
 .transfer-card-heading button {
   min-height: 34px;
-  padding: 0 13px;
+  padding: 0 12px;
   border: 0;
   border-radius: 999px;
   background: var(--pink-soft);
@@ -193,16 +193,16 @@
 .transfer-direction {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  padding: 5px;
-  border-radius: 18px;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 16px;
   background: #f3f5fa;
 }
 
 .transfer-direction button {
-  min-height: 42px;
+  min-height: 38px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   background: transparent;
   color: #777584;
   font-size: 0.78rem;
@@ -218,14 +218,14 @@
 .transfer-flow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 .transfer-flow div {
   min-width: 0;
-  padding: 12px;
-  border-radius: 18px;
+  padding: 10px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #fff8fc, #f5f7ff);
 }
 
@@ -242,29 +242,29 @@
   display: grid;
   height: 34px;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 10px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
 }
 
 .transfer-field {
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .transfer-field div {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 7px;
 }
 
 .transfer-field input {
   width: 100%;
-  height: 52px;
+  height: 48px;
   border: 1px solid #e8ebf3;
-  border-radius: 18px;
+  border-radius: 16px;
   outline: 0;
-  padding: 0 14px;
+  padding: 0 13px;
   background: #f9fafc;
   color: #151925;
   font-weight: 850;
@@ -279,7 +279,7 @@
 .transfer-field button {
   width: 58px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 14px;
   background: #151925;
   color: white;
   font-size: 0.76rem;
@@ -292,8 +292,8 @@
 
 .transfer-rule-note {
   margin: -4px 0 0;
-  padding: 10px 12px;
-  border-radius: 14px;
+  padding: 9px 11px;
+  border-radius: 13px;
   background: #fff8e6;
   color: #9a6a12;
   font-size: 0.78rem;
@@ -306,9 +306,9 @@
 }
 
 .transfer-submit {
-  height: 56px;
+  height: 50px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #f6c453, #f94fa7);
   color: #151925;
   box-shadow: 0 16px 30px rgba(249, 79, 167, 0.22);
@@ -324,9 +324,9 @@
 .transfer-message,
 .transfer-state {
   margin: 0;
-  padding: 11px 13px;
-  border-radius: 15px;
-  font-size: 0.82rem;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.78rem;
   font-weight: 850;
 }
 
@@ -345,7 +345,7 @@
   min-width: 32px;
   height: 32px;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--pink-soft);
   color: var(--pink);
   font-size: 0.76rem;
@@ -353,9 +353,9 @@
 }
 
 .transfer-row {
-  padding: 12px;
+  padding: 10px;
   border: 1px solid #eef1f7;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #f9fafc;
 }
 
@@ -385,7 +385,7 @@
       "hero card"
       "balances card"
       "history history";
-    gap: 18px;
+    gap: 14px;
   }
 
   .transfer-header {
@@ -411,6 +411,10 @@
 }
 
 @media (max-width: 370px) {
+  .transfer-page {
+    gap: 12px;
+  }
+
   .transfer-balance-grid,
   .transfer-direction,
   .transfer-flow {
@@ -419,5 +423,12 @@
 
   .transfer-flow b {
     transform: rotate(90deg);
+  }
+
+  .transfer-card,
+  .transfer-history,
+  .transfer-hero {
+    padding-right: 12px;
+    padding-left: 12px;
   }
 }

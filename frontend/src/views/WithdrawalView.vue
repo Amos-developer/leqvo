@@ -235,7 +235,7 @@ onMounted(loadWithdrawalEligibility);
       <p v-if="formMessage" class="withdrawal-message success">{{ formMessage }}</p>
     </section>
 
-    <section class="withdrawal-guide" aria-labelledby="withdrawal-guide-title">
+    <!-- <section class="withdrawal-guide" aria-labelledby="withdrawal-guide-title">
       <div class="withdrawal-guide-heading">
         <span>Guide</span>
         <h2 id="withdrawal-guide-title">How withdrawal works</h2>
@@ -270,6 +270,7 @@ onMounted(loadWithdrawalEligibility);
           </div>
         </article>
       </div>
-    </section>
+    </section> -->
+
   </section>
 </template>
