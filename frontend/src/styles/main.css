@@ -1687,3 +1687,161 @@ a {
     min-height: 66px;
   }
 }
+
+/* Reasonable compact MarketsView spacing */
+.markets-page.phone-shell {
+  padding: 12px 12px 86px;
+}
+
+.markets-page .market-header {
+  padding: 4px 0 2px;
+}
+
+.markets-page .market-header h1 {
+  font-size: 1.05rem;
+}
+
+.markets-page .market-back-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+}
+
+.markets-page .market-trend-card {
+  gap: 10px;
+  min-height: 0;
+  padding: 12px;
+  border-radius: 20px;
+}
+
+.markets-page .trend-coin-row {
+  gap: 9px;
+}
+
+.markets-page .trend-coin-row img {
+  width: 42px;
+  height: 42px;
+}
+
+.markets-page .trend-price-panel {
+  padding: 10px;
+  border-radius: 16px;
+}
+
+.markets-page .trend-price-panel strong {
+  font-size: 1.15rem;
+}
+
+.markets-page .trend-metric-grid {
+  gap: 7px;
+}
+
+.markets-page .trend-metric-grid div {
+  padding: 9px;
+  border-radius: 14px;
+}
+
+.markets-page .trend-footer-row {
+  gap: 8px;
+}
+
+.markets-page .market-controls,
+.markets-page .market-list-panel {
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 20px;
+}
+
+.markets-page .market-search {
+  min-height: 40px;
+  padding: 0 11px;
+  border-radius: 14px;
+}
+
+.markets-page .market-search input {
+  height: 40px;
+}
+
+.markets-page .market-filter-row {
+  gap: 7px;
+}
+
+.markets-page .market-filter-row button {
+  min-height: 34px;
+  padding: 0 10px;
+}
+
+.markets-page .market-list-heading {
+  gap: 8px;
+}
+
+.markets-page .market-list-heading h2 {
+  font-size: 0.9rem;
+}
+
+.markets-page .market-list-heading button,
+.markets-page .market-row-state button {
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.markets-page .market-list {
+  gap: 8px;
+}
+
+.markets-page .market-row {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: 9px;
+  padding: 9px;
+  border-radius: 16px;
+}
+
+.markets-page .market-row img {
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  border-radius: 13px;
+}
+
+.markets-page .market-identity span,
+.markets-page .market-volume span {
+  margin-top: 2px;
+}
+
+.markets-page .market-price-block {
+  gap: 3px;
+}
+
+.markets-page .market-price-block span {
+  min-height: 21px;
+  padding: 0 7px;
+}
+
+@media (min-width: 760px) {
+  .markets-page.phone-shell {
+    padding: 14px 14px 88px;
+  }
+
+  .markets-page .market-row {
+    grid-template-columns: 40px minmax(0, 1fr) auto auto;
+  }
+}
+
+@media (max-width: 370px) {
+  .markets-page.phone-shell {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .markets-page .market-row {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .markets-page .market-row img {
+    width: 36px;
+    height: 36px;
+  }
+}
