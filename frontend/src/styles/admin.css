@@ -2117,3 +2117,249 @@
     min-height: 100vh;
   }
 }
+
+/* Compact admin density */
+.admin-workspace {
+  padding: 8px 8px 16px;
+}
+
+.admin-topbar {
+  gap: 8px;
+  margin: -8px -8px 0;
+  padding: 8px;
+}
+
+.admin-mobile-nav {
+  gap: 6px;
+  margin: 8px -8px 0;
+  padding: 0 8px 3px;
+}
+
+.admin-mobile-nav button,
+.admin-nav button,
+.admin-sidebar-actions button {
+  padding: 6px 9px;
+}
+
+.admin-view-stack,
+.copy-signal-admin,
+.user-signals-admin,
+.balance-audit-admin,
+.leaders-admin-view {
+  gap: 8px;
+}
+
+.admin-foundation,
+.admin-metrics,
+.admin-grid,
+.admin-review-strip {
+  margin-top: 8px;
+}
+
+.admin-foundation {
+  gap: 9px;
+  padding: 12px;
+  border-radius: 13px;
+}
+
+.admin-foundation h2 {
+  margin: 6px 0 4px;
+}
+
+.admin-metrics,
+.admin-grid,
+.admin-review-strip,
+.copy-signal-metrics,
+.copy-signal-workspace,
+.copy-signal-list,
+.user-signals-metrics,
+.user-signals-list,
+.balance-audit-cards,
+.balance-audit-list,
+.leader-admin-list {
+  gap: 8px;
+}
+
+.admin-metric-card,
+.admin-review-strip article,
+.copy-signal-metric-card,
+.user-signal-metric,
+.user-signal-card,
+.balance-audit-card,
+.balance-audit-row,
+.leader-admin-card,
+.withdrawal-address-admin-card {
+  padding: 9px;
+  border-radius: 13px;
+}
+
+.admin-metric-card {
+  min-height: 78px;
+  gap: 8px;
+}
+
+.admin-metric-card strong {
+  margin-top: 12px;
+  font-size: clamp(1rem, 4vw, 1.35rem);
+}
+
+.admin-metric-card span {
+  margin-top: 5px;
+}
+
+.admin-metric-card i {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+}
+
+.admin-panel {
+  border-radius: 13px;
+}
+
+.admin-panel-head {
+  gap: 8px;
+  padding: 10px 10px 7px;
+}
+
+.admin-panel-head h2 {
+  margin-bottom: 3px;
+}
+
+.admin-hero-actions,
+.copy-signal-actions,
+.withdrawal-address-admin-actions,
+.leader-admin-actions,
+.balance-audit-filters {
+  gap: 6px;
+}
+
+.admin-hero-actions button,
+.admin-panel-head button,
+.admin-refresh,
+.copy-signal-submit,
+.leader-admin-actions button,
+.withdrawal-address-admin-actions button {
+  min-height: 38px;
+  padding: 7px 10px;
+  border-radius: 11px;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 8px;
+}
+
+.admin-chart-bars {
+  min-height: 170px;
+  gap: 8px;
+  padding: 8px 10px 12px;
+}
+
+.admin-chart-column {
+  height: 135px;
+  gap: 5px;
+}
+
+.admin-user-row {
+  gap: 8px;
+  padding: 9px 10px;
+}
+
+.copy-signal-hero,
+.user-signals-hero {
+  min-height: 92px;
+}
+
+.copy-signal-form-panel,
+.copy-signal-share-panel,
+.copy-signal-list-panel,
+.user-signals-panel,
+.balance-audit-panel,
+.balance-audit-search-panel {
+  gap: 8px;
+}
+
+.copy-signal-form-grid,
+.leader-admin-grid,
+.user-signal-grid {
+  gap: 6px;
+}
+
+.copy-signal-form-grid input,
+.copy-signal-form-grid select,
+.balance-audit-search input {
+  min-height: 40px;
+  height: 40px;
+  border-radius: 11px;
+  padding: 0 10px;
+}
+
+.copy-signal-window,
+.copy-signal-share-panel pre,
+.copy-signal-row,
+.balance-audit-row > div:not(.balance-audit-type),
+.leader-admin-grid div,
+.leader-admin-progress {
+  padding: 8px;
+  border-radius: 11px;
+}
+
+.copy-signal-share-panel pre {
+  min-height: 150px;
+}
+
+.balance-audit-search-row {
+  gap: 8px;
+}
+
+.balance-audit-search-row button {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 11px;
+}
+
+@media (min-width: 1040px) {
+  .admin-shell {
+    grid-template-columns: 228px minmax(0, 1fr);
+  }
+
+  .admin-brand-row {
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .admin-nav {
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .admin-nav-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .admin-sidebar-actions {
+    gap: 5px;
+    padding: 8px;
+  }
+
+  .admin-workspace {
+    padding: 0 8px;
+  }
+
+  .admin-topbar {
+    margin: 0 -8px;
+    padding: 8px 10px;
+  }
+
+  .admin-foundation,
+  .admin-metrics,
+  .admin-grid {
+    margin-top: 8px;
+  }
+
+  .admin-review-strip {
+    margin-bottom: 10px;
+  }
+}

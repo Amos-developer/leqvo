@@ -1408,3 +1408,184 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Compact homepage density */
+.phone-shell:has(.balance-card) {
+  gap: 8px;
+  padding-inline: clamp(8px, 2.6vw, 14px);
+  padding-top: 8px;
+}
+
+.phone-shell:has(.balance-card) .balance-card {
+  min-height: 0;
+  padding: 12px 12px;
+  border-radius: 18px;
+}
+
+.phone-shell:has(.balance-card) .balance-copy h1 {
+  margin: 0 0 3px;
+  font-size: clamp(1rem, 4.5vw, 1.35rem);
+}
+
+.phone-shell:has(.balance-card) .balance-copy p,
+.phone-shell:has(.balance-card) .muted-label,
+.phone-shell:has(.balance-card) .account-id {
+  margin-top: 3px;
+  font-size: 0.7rem;
+}
+
+.phone-shell:has(.balance-card) .balance-copy strong {
+  margin-top: 4px;
+  font-size: clamp(1.35rem, 7vw, 2rem);
+}
+
+.phone-shell:has(.balance-card) .trading-balance-pill {
+  margin-top: 6px;
+  min-height: 24px;
+  padding: 0 8px;
+  font-size: 0.68rem;
+}
+
+.phone-shell:has(.balance-card) .hero-asset {
+  transform: scale(0.84);
+  transform-origin: right center;
+}
+
+.phone-shell:has(.balance-card) .quick-link-section {
+  padding: 4px 0 0;
+}
+
+.phone-shell:has(.balance-card) .quick-link-section h2,
+.phone-shell:has(.balance-card) .section-heading h2 {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+}
+
+.phone-shell:has(.balance-card) .quick-actions {
+  gap: 7px;
+}
+
+.phone-shell:has(.balance-card) .quick-actions a,
+.phone-shell:has(.balance-card) .quick-actions button {
+  min-height: 66px;
+  padding: 8px 4px;
+  border-radius: 14px;
+  font-size: 0.68rem;
+}
+
+.phone-shell:has(.balance-card) .action-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+}
+
+.phone-shell:has(.balance-card) .action-icon img {
+  width: 18px;
+  height: 18px;
+}
+
+.phone-shell:has(.balance-card) .transactions {
+  gap: 8px;
+  margin-top: 2px;
+  padding: 10px;
+  border-radius: 18px;
+}
+
+.phone-shell:has(.balance-card) .section-heading {
+  gap: 8px;
+}
+
+.phone-shell:has(.balance-card) .section-heading a {
+  min-height: 28px;
+  padding: 0 9px;
+  font-size: 0.68rem;
+}
+
+.phone-shell:has(.balance-card) .search-row {
+  gap: 7px;
+}
+
+.phone-shell:has(.balance-card) .search-row label {
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 13px;
+}
+
+.phone-shell:has(.balance-card) .filter-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+}
+
+.phone-shell:has(.balance-card) .tabs {
+  gap: 6px;
+}
+
+.phone-shell:has(.balance-card) .tabs button {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 0.68rem;
+}
+
+.phone-shell:has(.balance-card) .crypto-list {
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.phone-shell:has(.balance-card) .crypto-trade-link,
+.phone-shell:has(.balance-card) .crypto-list article {
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 14px;
+}
+
+.phone-shell:has(.balance-card) .crypto-logo {
+  width: 38px;
+  height: 38px;
+  padding: 5px;
+  border-radius: 12px;
+}
+
+.phone-shell:has(.balance-card) .crypto-list strong,
+.phone-shell:has(.balance-card) .crypto-price strong {
+  font-size: 0.8rem;
+}
+
+.phone-shell:has(.balance-card) .crypto-list p {
+  margin-top: 2px;
+  font-size: 0.68rem;
+}
+
+.phone-shell:has(.balance-card) .crypto-price {
+  gap: 3px;
+}
+
+.phone-shell:has(.balance-card) .market-change {
+  min-height: 20px;
+  padding: 0 7px;
+  font-size: 0.66rem;
+}
+
+@media (min-width: 760px) {
+  .phone-shell:has(.balance-card) {
+    max-width: 1120px;
+    padding-inline: 14px;
+  }
+
+  .phone-shell:has(.balance-card) .quick-actions {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .phone-shell:has(.balance-card) .quick-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .phone-shell:has(.balance-card) .crypto-price strong {
+    max-width: 84px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
