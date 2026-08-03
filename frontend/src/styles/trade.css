@@ -7,6 +7,77 @@
     linear-gradient(180deg, #f8f9fd, #eef2f8);
 }
 
+.trade-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(17, 24, 39, 0.38);
+  backdrop-filter: blur(8px);
+}
+
+.trade-modal-card {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 344px);
+  padding: 18px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 24px 54px rgba(17, 24, 39, 0.18);
+  text-align: center;
+}
+
+.trade-modal-card.success {
+  background:
+    radial-gradient(circle at 88% 10%, rgba(14, 203, 129, 0.16), transparent 7rem),
+    rgba(255, 255, 255, 0.98);
+}
+
+.trade-modal-card.error {
+  background:
+    radial-gradient(circle at 88% 10%, rgba(249, 79, 167, 0.18), transparent 7rem),
+    rgba(255, 255, 255, 0.98);
+}
+
+.trade-modal-pill {
+  color: var(--pink);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.trade-modal-card.success .trade-modal-pill {
+  color: #0a9f66;
+}
+
+.trade-modal-card strong {
+  color: #141821;
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.trade-modal-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.trade-modal-card button {
+  min-height: 46px;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f6c453, #f94fa7);
+  color: #151925;
+  font-size: 0.9rem;
+  font-weight: 950;
+  box-shadow: 0 14px 28px rgba(249, 79, 167, 0.18);
+}
+
 .trade-header {
   display: flex;
   align-items: center;

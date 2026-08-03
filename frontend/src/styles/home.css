@@ -814,6 +814,7 @@
   padding-top: 12px;
   padding-right: 12px;
   padding-left: 12px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
 }
 
 .account-page .account-topbar {
@@ -822,12 +823,29 @@
 
 .account-page .account-topbar p {
   margin-bottom: 3px;
+  font-size: 0.72rem;
+  font-weight: 900;
 }
 
 .account-page .account-topbar button {
   width: 38px;
   height: 38px;
   border-radius: 13px;
+}
+
+.account-page .account-topbar h1 {
+  margin: 0;
+  font-size: 1.16rem;
+  line-height: 1.15;
+}
+
+.account-page .premium-profile-card,
+.account-page .portfolio-card,
+.account-page .premium-settings,
+.account-page .premium-list button,
+.account-page .profile-meta-grid,
+.account-page .trading-countdown {
+  font-family: inherit;
 }
 
 .account-page .premium-profile-card,
@@ -849,7 +867,18 @@
 }
 
 .account-page .premium-identity p {
-  margin-top: 5px;
+  margin-top: 4px;
+  font-size: 0.76rem;
+}
+
+.account-page .premium-identity h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.15;
+}
+
+.account-page .premium-identity .verified-badge {
+  font-size: 0.68rem;
 }
 
 .account-page .profile-meta-grid {
@@ -862,17 +891,33 @@
   border-radius: 15px;
 }
 
+.account-page .profile-meta-grid span,
+.account-page .portfolio-card span,
+.account-page .premium-list p,
+.account-page .premium-settings h2 {
+  font-size: 0.78rem;
+}
+
+.account-page .profile-meta-grid strong {
+  font-size: 0.9rem;
+}
+
+.account-page .profile-meta-grid small {
+  font-size: 0.72rem;
+}
+
 .account-page .portfolio-card {
   gap: 10px;
 }
 
 .account-page .portfolio-card strong {
   margin-top: 4px;
-  font-size: 1.45rem;
+  font-size: 1.55rem;
 }
 
 .account-page .portfolio-card p {
-  margin-top: 4px;
+  margin-top: 2px;
+  font-size: 0.76rem;
 }
 
 .account-page .trading-countdown {
@@ -882,6 +927,13 @@
 
 .account-page .premium-settings {
   gap: 8px;
+}
+
+.account-page .premium-settings h2 {
+  margin: 0;
+  padding: 0 2px;
+  color: var(--ink);
+  font-weight: 900;
 }
 
 .account-page .premium-list {
@@ -897,6 +949,12 @@
 
 .account-page .premium-list p {
   margin-top: 3px;
+}
+
+.account-page .premium-list strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--ink);
 }
 
 .account-page .settings-icon {

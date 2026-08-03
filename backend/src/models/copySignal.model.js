@@ -37,7 +37,37 @@ const getSignals = async () => {
   return result.rows;
 };
 
+const findSignalByCode = async (signalCode) => {
+  const result = await database.query(
+    `SELECT ${signalFields}
+     FROM copy_signals
+     WHERE signal_code = $1
+     LIMIT 1`,
+    [signalCode]
+  );
+
+  return result.rows[0] || null;
+};
+
+const findActiveSignalByPair = async (pair) => {
+  const result = await database.query(
+    `SELECT ${signalFields}
+     FROM copy_signals
+     WHERE pair = $1
+       AND status = 'active'
+       AND valid_from <= NOW()
+       AND valid_to >= NOW()
+     ORDER BY valid_from DESC
+     LIMIT 1`,
+    [pair]
+  );
+
+  return result.rows[0] || null;
+};
+
 module.exports = {
   createSignal,
-  getSignals
+  getSignals,
+  findSignalByCode,
+  findActiveSignalByPair
 };

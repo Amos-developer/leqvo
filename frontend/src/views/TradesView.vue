@@ -16,8 +16,12 @@ const routePair = String(route.query.pair || "BTCUSDT").toUpperCase();
 const selectedSymbol = ref(routePair.replace("USDT", "") || "BTC");
 const signalCode = ref("");
 const selectedPercent = ref(20);
-const tradeStatus = ref("");
-const tradeError = ref("");
+const popupState = ref({
+  visible: false,
+  tone: "success",
+  title: "",
+  message: ""
+});
 const chartContainer = ref(null);
 const chartError = ref("");
 const isChartLoading = ref(true);
@@ -66,17 +70,35 @@ const syncUserBalances = (updatedUser) => {
   localStorage.setItem("leqvoUser", JSON.stringify(updatedUser));
 };
 
-const completeTrade = async () => {
-  tradeError.value = "";
-  tradeStatus.value = "";
+const showPopup = ({ tone, title, message }) => {
+  popupState.value = {
+    visible: true,
+    tone,
+    title,
+    message
+  };
+};
 
+const closePopup = () => {
+  popupState.value.visible = false;
+};
+
+const completeTrade = async () => {
   if (!signalCode.value.trim()) {
-    tradeError.value = "Enter your signal code to continue.";
+    showPopup({
+      tone: "error",
+      title: "Signal required",
+      message: "Enter the active admin signal code to continue."
+    });
     return;
   }
 
   if (investmentAmount.value <= 0) {
-    tradeError.value = "Transfer funds to your trading account before completing a trade.";
+    showPopup({
+      tone: "error",
+      title: "Trading balance needed",
+      message: "Transfer funds to your trading account before completing a trade."
+    });
     return;
   }
 
@@ -94,11 +116,19 @@ const completeTrade = async () => {
     await createTrade(tradePayload);
     saveTradeRecord(tradePayload);
   } catch (error) {
-    tradeError.value = error.message || "Could not complete trade.";
+    showPopup({
+      tone: "error",
+      title: "Trade not accepted",
+      message: error.message || "Could not complete trade."
+    });
     return;
   }
 
-  router.push({ name: "history", query: { tab: "active" } });
+  showPopup({
+    tone: "success",
+    title: "Trade accepted",
+    message: "Your signal has been confirmed. Tap OK to view it in active trade history."
+  });
 };
 
 const startMarketStream = () => {
@@ -215,6 +245,25 @@ onUnmounted(() => {
 
 <template>
   <section class="phone-shell page-enter app-page trade-page">
+    <div v-if="popupState.visible" class="trade-modal" role="dialog" aria-modal="true" aria-labelledby="trade-modal-title">
+      <div class="trade-modal-card" :class="popupState.tone">
+        <span class="trade-modal-pill">{{ popupState.tone === "success" ? "Success" : "Signal check" }}</span>
+        <strong id="trade-modal-title">{{ popupState.title }}</strong>
+        <p>{{ popupState.message }}</p>
+        <button
+          type="button"
+          @click="
+            closePopup();
+            if (popupState.tone === 'success') {
+              router.push({ name: 'history', query: { tab: 'active' } });
+            }
+          "
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
     <header class="trade-header">
       <div>
         <p>Spot signal</p>
@@ -304,9 +353,6 @@ onUnmounted(() => {
       </div>
 
       <button class="complete-trade-button" @click="completeTrade">Complete Trade</button>
-
-      <p v-if="tradeError" class="trade-message error">{{ tradeError }}</p>
-      <p v-if="tradeStatus" class="trade-message success">{{ tradeStatus }}</p>
     </section>
   </section>
 </template>
