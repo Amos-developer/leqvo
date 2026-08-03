@@ -12,23 +12,26 @@ const selectedBox = ref(null);
 const openedBox = ref(null);
 const reward = ref(null);
 const canOpen = ref(false);
-const todayReward = ref(null);
+const availableChances = ref(0);
+const selfQualifiedCount = ref(0);
+const referralQualifiedCount = ref(0);
+const qualifyingDepositAmount = ref(100);
 const history = ref([]);
 const prizes = ref([0.5, 1, 3, 5, 8, 10, 15, 17, 20]);
-const instructions = [
-  "You can open only one lucky box per day.",
-  "After opening, your reward is credited instantly to your balance.",
-  "Your next chance becomes available tomorrow."
-];
 
 const boxes = computed(() => Array.from({ length: 9 }, (_, index) => index + 1));
 const balance = computed(() => Number(user.value.balance || 0).toLocaleString("en-US", {
   style: "currency",
   currency: "USD"
 }));
+const instructions = computed(() => [
+  `Each credited deposit of $${Number(qualifyingDepositAmount.value).toFixed(0)} or more gives one lucky box chance.`,
+  `A direct invited member who deposits $${Number(qualifyingDepositAmount.value).toFixed(0)} or more gives you one leader chance.`,
+  "Each earned chance can be used only once, and your reward is credited instantly after opening a box."
+]);
+const lastPrize = computed(() => reward.value || history.value[0] || null);
 
 const formatPrize = (value) => `$${Number(value || 0).toFixed(2)}`;
-const lastPrize = computed(() => reward.value || todayReward.value);
 
 const loadStatus = async () => {
   isLoading.value = true;
@@ -37,10 +40,13 @@ const loadStatus = async () => {
   try {
     const result = await getLuckyBoxStatus();
     canOpen.value = result.data.canOpen;
-    todayReward.value = result.data.today;
+    availableChances.value = Number(result.data.availableChances || 0);
+    selfQualifiedCount.value = Number(result.data.selfQualifiedCount || 0);
+    referralQualifiedCount.value = Number(result.data.referralQualifiedCount || 0);
+    qualifyingDepositAmount.value = Number(result.data.qualifyingDepositAmount || 100);
     history.value = result.data.history || [];
     prizes.value = result.data.prizes || prizes.value;
-    openedBox.value = result.data.today?.boxNumber || null;
+    openedBox.value = history.value[0]?.boxNumber || null;
     reward.value = null;
   } catch (error) {
     errorMessage.value = error.message;
@@ -66,7 +72,6 @@ const chooseBox = async (boxNumber) => {
     window.setTimeout(() => {
       reward.value = result.data.reward;
       openedBox.value = boxNumber;
-      canOpen.value = false;
       user.value = result.data.user;
       localStorage.setItem("leqvoUser", JSON.stringify(result.data.user));
       isOpening.value = false;
@@ -86,7 +91,7 @@ onMounted(loadStatus);
   <section class="lucky-page phone-shell page-enter">
     <header class="lucky-header">
       <div>
-        <p>Daily reward</p>
+        <p>Reward chance</p>
         <h1>Lucky Box</h1>
       </div>
       <button type="button" aria-label="Go back" @click="router.back()">&larr;</button>
@@ -96,7 +101,7 @@ onMounted(loadStatus);
       <div>
         <span>Available balance</span>
         <strong>{{ balance }}</strong>
-        <p>Open one prize box per day and win instant reward credit.</p>
+        <p>Earn a chance from your own 100 USDT+ deposit, or from a direct invited member who deposits 100 USDT+.</p>
       </div>
       <div class="lucky-box-visual" aria-hidden="true">
         <span></span>
@@ -107,11 +112,19 @@ onMounted(loadStatus);
     <section class="lucky-status-card">
       <div>
         <span>Status</span>
-        <strong>{{ canOpen ? "Ready to open" : "Come back tomorrow" }}</strong>
+        <strong>{{ canOpen ? "Chance available" : "No earned chance yet" }}</strong>
       </div>
       <div>
-        <span>Prize range</span>
-        <strong>$0.50 - $20.00</strong>
+        <span>Available chances</span>
+        <strong>{{ availableChances }}</strong>
+      </div>
+      <div>
+        <span>Your deposit chances</span>
+        <strong>{{ selfQualifiedCount }}</strong>
+      </div>
+      <div>
+        <span>Leader chances</span>
+        <strong>{{ referralQualifiedCount }}</strong>
       </div>
     </section>
 
@@ -121,7 +134,7 @@ onMounted(loadStatus);
           <p>Choose carefully</p>
           <h2>Pick 1 of 9 boxes</h2>
         </div>
-        <span>1x daily</span>
+        <span>{{ availableChances }} chance{{ availableChances === 1 ? "" : "s" }}</span>
       </div>
 
       <article v-if="isLoading" class="lucky-state">Loading lucky box...</article>
@@ -151,7 +164,7 @@ onMounted(loadStatus);
     </section>
 
     <section v-if="lastPrize" class="lucky-result-card">
-      <span>Today’s prize</span>
+      <span>Latest prize</span>
       <strong>{{ formatPrize(lastPrize.prizeAmount) }}</strong>
       <p>Your prize has been credited to your Leqvo balance.</p>
     </section>
@@ -171,7 +184,7 @@ onMounted(loadStatus);
     <section class="lucky-instruction-card">
       <div class="lucky-board-head">
         <div>
-          <p>Daily rule</p>
+          <p>Eligibility rule</p>
           <h2>How Lucky Box Works</h2>
         </div>
       </div>

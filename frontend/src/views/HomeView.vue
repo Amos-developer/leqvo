@@ -188,7 +188,7 @@ onUnmounted(() => {
         <span class="muted-label">Main account</span>
         <strong>{{ balance }}</strong>
         <span class="trading-balance-pill">Trading: {{ tradingBalance }}</span>
-        <span class="account-id">ID: {{ user.id }}</span>
+        <!-- <span class="account-id">ID: {{ user.id }}</span> -->
       </div>
       <div class="hero-asset" aria-hidden="true">
         <div class="sparkle one"></div>

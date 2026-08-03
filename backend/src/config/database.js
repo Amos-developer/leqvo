@@ -421,16 +421,53 @@ const connectDatabase = async () => {
         username VARCHAR(80) NOT NULL,
         box_number INT NOT NULL CHECK (box_number BETWEEN 1 AND 9),
         prize_amount NUMERIC(12, 2) NOT NULL,
+        source_type VARCHAR(20),
+        source_user_id VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
+        qualifying_deposit_id INT REFERENCES deposits(id) ON DELETE SET NULL,
         opened_on DATE NOT NULL DEFAULT CURRENT_DATE,
         opened_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-        UNIQUE (user_id, opened_on)
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+    `);
+
+    await client.query(`
+      ALTER TABLE lucky_box
+        ADD COLUMN IF NOT EXISTS source_type VARCHAR(20);
+    `);
+
+    await client.query(`
+      ALTER TABLE lucky_box
+        ADD COLUMN IF NOT EXISTS source_user_id VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL;
+    `);
+
+    await client.query(`
+      ALTER TABLE lucky_box
+        ADD COLUMN IF NOT EXISTS qualifying_deposit_id INT REFERENCES deposits(id) ON DELETE SET NULL;
+    `);
+
+    await client.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1
+          FROM information_schema.table_constraints
+          WHERE table_name = 'lucky_box'
+            AND constraint_name = 'lucky_box_user_id_opened_on_key'
+        ) THEN
+          ALTER TABLE lucky_box DROP CONSTRAINT lucky_box_user_id_opened_on_key;
+        END IF;
+      END $$;
     `);
 
     await client.query(`
       CREATE INDEX IF NOT EXISTS lucky_box_user_id_opened_at_index
         ON lucky_box (user_id, opened_at DESC);
+    `);
+
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS lucky_box_source_type_deposit_unique
+        ON lucky_box (source_type, qualifying_deposit_id)
+        WHERE source_type IS NOT NULL AND qualifying_deposit_id IS NOT NULL;
     `);
 
     await client.query(`

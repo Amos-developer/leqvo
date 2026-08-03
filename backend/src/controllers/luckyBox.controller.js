@@ -6,6 +6,7 @@ const getStatus = async (req, res) => {
   return res.status(200).json({
     success: true,
     data: {
+      qualifyingDepositAmount: luckyBoxModel.QUALIFYING_DEPOSIT_AMOUNT,
       prizes: luckyBoxModel.prizes,
       ...status
     }
@@ -27,11 +28,10 @@ const openBox = async (req, res) => {
     boxNumber
   });
 
-  if (result.alreadyOpened) {
+  if (result.noChanceAvailable) {
     return res.status(409).json({
       success: false,
-      message: "You already opened your lucky box today. Come back tomorrow.",
-      data: result.reward
+      message: "No earned lucky box chance is available yet. Deposit 100 USDT or more, or invite someone who deposits 100 USDT or more."
     });
   }
 
