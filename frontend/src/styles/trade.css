@@ -1,6 +1,6 @@
 .trade-page {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   align-content: start;
   background:
     radial-gradient(circle at 20% 4%, rgba(249, 79, 167, 0.12), transparent 12rem),
@@ -11,12 +11,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 2px 2px;
+  padding: 6px 2px 1px;
 }
 
 .trade-header p,
 .ticket-heading p {
-  margin: 0 0 5px;
+  margin: 0 0 4px;
   color: var(--pink);
   font-size: 0.72rem;
   font-weight: 900;
@@ -30,30 +30,30 @@
 }
 
 .trade-header h1 {
-  font-size: 1.24rem;
+  font-size: 1.16rem;
   line-height: 1.15;
 }
 
 .trade-pair-title {
   display: inline-flex;
   align-items: center;
-  min-height: 38px;
-  padding: 0 12px;
+  min-height: 36px;
+  padding: 0 11px;
   border: 1px solid rgba(249, 79, 167, 0.18);
   border-radius: 16px;
   background: linear-gradient(135deg, #ffffff, #fff2fa);
   box-shadow: 0 12px 24px rgba(78, 83, 110, 0.08);
   color: #141821;
-  font-size: clamp(1rem, 5.6vw, 1.24rem);
+  font-size: clamp(0.96rem, 5.1vw, 1.18rem);
   font-weight: 950;
   letter-spacing: 0;
 }
 
 .trade-pair-title::after {
   display: inline-grid;
-  min-width: 42px;
-  height: 22px;
-  margin-left: 10px;
+  min-width: 40px;
+  height: 21px;
+  margin-left: 8px;
   place-items: center;
   border-radius: 999px;
   background: rgba(14, 203, 129, 0.12);
@@ -65,8 +65,8 @@
 
 .trade-back-button {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   place-items: center;
   border: 0;
   border-radius: 15px;
@@ -87,9 +87,9 @@
 
 .trade-market-card {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   overflow: hidden;
-  padding: 15px;
+  padding: 13px;
   border-radius: 28px;
 }
 
@@ -99,13 +99,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
 .trade-account-panel {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
+  gap: 8px;
 }
 
 .trade-account-panel div,
@@ -116,7 +116,7 @@
 
 .trade-account-panel div {
   min-width: 0;
-  padding: 12px;
+  padding: 10px;
   border-radius: 18px;
 }
 
@@ -129,7 +129,7 @@
 
 .trade-account-panel strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   overflow: hidden;
   color: #151925;
   font-size: 0.88rem;
@@ -140,20 +140,20 @@
 .trade-transfer-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 8px;
   align-items: end;
-  padding: 12px;
+  padding: 10px;
   border-radius: 20px;
 }
 
 .trade-transfer-card .trade-field input {
-  height: 46px;
+  height: 44px;
   text-transform: none;
 }
 
 .transfer-button {
   min-width: 98px;
-  height: 46px;
+  height: 44px;
   border: 0;
   border-radius: 16px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
@@ -185,16 +185,16 @@
 
 .trade-market-top strong {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
   color: #141821;
-  font-size: 1.75rem;
+  font-size: 1.62rem;
   line-height: 1;
 }
 
 .trade-change {
   display: grid;
-  min-width: 78px;
-  height: 40px;
+  min-width: 74px;
+  height: 38px;
   place-items: center;
   border-radius: 14px;
   font-size: 0.82rem;
@@ -233,7 +233,7 @@
 
 .trade-chart {
   position: relative;
-  height: 238px;
+  height: 224px;
   overflow: hidden;
   border-radius: 22px;
   background: #121722;
@@ -272,12 +272,12 @@
 .trade-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 9px;
+  gap: 8px;
 }
 
 .trade-stats div {
   min-width: 0;
-  padding: 11px 9px;
+  padding: 10px 8px;
   border-radius: 16px;
   background: #f6f7fb;
 }
@@ -294,15 +294,15 @@
 
 .trade-ticket {
   display: grid;
-  gap: 14px;
-  padding: 16px;
+  gap: 12px;
+  padding: 14px;
   border-radius: 28px;
 }
 
 .ticket-heading span {
   display: grid;
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   place-items: center;
   border-radius: 18px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
@@ -313,7 +313,7 @@
 
 .trade-field {
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .trade-field span {
@@ -324,11 +324,11 @@
 
 .trade-field input {
   width: 100%;
-  height: 54px;
+  height: 50px;
   border: 1px solid #e8ebf3;
   border-radius: 18px;
   outline: 0;
-  padding: 0 15px;
+  padding: 0 14px;
   background: #f9fafc;
   color: #141821;
   font-size: 0.9rem;
@@ -344,7 +344,7 @@
 }
 
 .allocation-panel {
-  padding: 13px;
+  padding: 11px;
   border-radius: 18px;
   background: linear-gradient(135deg, #fff8fc, #f3f6ff);
 }
@@ -355,7 +355,7 @@
 
 .allocation-copy strong {
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
   overflow: hidden;
   color: #151925;
   font-size: 1rem;
@@ -370,16 +370,16 @@
 .percent-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 7px;
+  gap: 6px;
 }
 
 .percent-grid button {
-  min-height: 42px;
+  min-height: 40px;
   font-size: 0.78rem;
 }
 
 .complete-trade-button {
-  height: 56px;
+  height: 52px;
   border: 0;
   border-radius: 18px;
   background: linear-gradient(135deg, #f6c453, #f94fa7);
@@ -397,7 +397,7 @@
 
 .trade-message {
   margin: 0;
-  padding: 11px 13px;
+  padding: 10px 12px;
   border-radius: 15px;
   font-size: 0.82rem;
   font-weight: 800;
@@ -419,7 +419,7 @@
   }
 
   .trade-chart {
-    height: 280px;
+    height: 268px;
   }
 }
 
@@ -430,9 +430,9 @@
     grid-template-areas:
       "header header"
       "market ticket";
-    gap: 18px;
-    padding-right: 24px;
-    padding-left: 24px;
+    gap: 16px;
+    padding-right: 20px;
+    padding-left: 20px;
   }
 
   .trade-header {
@@ -442,23 +442,23 @@
   .trade-market-card {
     grid-area: market;
     min-width: 0;
-    padding: 18px;
+    padding: 16px;
   }
 
   .trade-ticket {
     grid-area: ticket;
     position: sticky;
-    top: 18px;
+    top: 16px;
     align-self: start;
   }
 
   .trade-chart {
-    height: min(58vh, 560px);
-    min-height: 430px;
+    height: min(57vh, 540px);
+    min-height: 400px;
   }
 
   .trade-market-top strong {
-    font-size: 1.35rem;
+    font-size: 1.28rem;
   }
 }
 
