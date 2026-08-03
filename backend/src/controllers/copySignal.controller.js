@@ -46,6 +46,54 @@ const getSignals = async (req, res) => {
   });
 };
 
+const previewSignal = async (req, res) => {
+  const signalCode = req.params.signalCode?.trim().toUpperCase();
+
+  if (!signalCode) {
+    return res.status(400).json({
+      success: false,
+      message: "Signal code is required"
+    });
+  }
+
+  const signal = await copySignalModel.findSignalByCode(signalCode);
+
+  if (!signal) {
+    return res.status(404).json({
+      success: false,
+      message: "This signal code could not be found. Please check the code and try again."
+    });
+  }
+
+  if (signal.status !== "active" || new Date(signal.validFrom) > new Date() || new Date(signal.validTo) < new Date()) {
+    return res.status(400).json({
+      success: false,
+      message: "This signal code is not available in the current trading session."
+    });
+  }
+
+  const activeSignal = await copySignalModel.findActiveSignalByPair(signal.pair);
+
+  if (!activeSignal || activeSignal.signalCode !== signal.signalCode) {
+    return res.status(400).json({
+      success: false,
+      message: `This signal code is not the active ${signal.pair} session signal right now.`
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: {
+      pair: signal.pair,
+      symbol: signal.pair.split("/")[0],
+      signalCode: signal.signalCode,
+      validFrom: signal.validFrom,
+      validTo: signal.validTo,
+      profitPercent: signal.profitPercent
+    }
+  });
+};
+
 const createSignal = async (req, res) => {
   const pair = req.body.pair?.trim().toUpperCase();
   const currency = pair?.split("/")[1];
@@ -124,5 +172,6 @@ const createSignal = async (req, res) => {
 
 module.exports = {
   getSignals,
-  createSignal
+  createSignal,
+  previewSignal
 };

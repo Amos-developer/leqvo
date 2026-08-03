@@ -191,6 +191,10 @@ export const createTrade = (payload) => {
   });
 };
 
+export const previewTradeSignal = (signalCode) => {
+  return request(`/copy-signals/preview/${encodeURIComponent(signalCode)}`);
+};
+
 export const getAdminCopySignals = () => {
   return request("/copy-signals");
 };

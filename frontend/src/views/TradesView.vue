@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { CandlestickSeries, createChart } from "lightweight-charts";
 import { createBinanceKlineSocket, fetchBinanceKlines } from "../utils/binanceKlineSocket";
 import { createBinanceMarketSocket, createInitialBinanceMarkets } from "../utils/binanceMarketSocket";
-import { createTrade } from "../utils/api";
+import { createTrade, previewTradeSignal } from "../utils/api";
 import { saveTradeRecord } from "../utils/tradeHistory";
 
 const route = useRoute();
@@ -20,7 +20,10 @@ const popupState = ref({
   visible: false,
   tone: "success",
   title: "",
-  message: ""
+  message: "",
+  buttonLabel: "OK",
+  actionType: "close",
+  previewSignal: null
 });
 const chartContainer = ref(null);
 const chartError = ref("");
@@ -70,17 +73,61 @@ const syncUserBalances = (updatedUser) => {
   localStorage.setItem("leqvoUser", JSON.stringify(updatedUser));
 };
 
-const showPopup = ({ tone, title, message }) => {
+const showPopup = ({ tone, title, message, buttonLabel = "OK", actionType = "close", previewSignal = null }) => {
   popupState.value = {
     visible: true,
     tone,
     title,
-    message
+    message,
+    buttonLabel,
+    actionType,
+    previewSignal
   };
 };
 
 const closePopup = () => {
-  popupState.value.visible = false;
+  popupState.value = {
+    visible: false,
+    tone: "success",
+    title: "",
+    message: "",
+    buttonLabel: "OK",
+    actionType: "close",
+    previewSignal: null
+  };
+};
+
+const applyPreviewSignal = () => {
+  const preview = popupState.value.previewSignal;
+
+  if (!preview) {
+    closePopup();
+    return;
+  }
+
+  signalCode.value = preview.signalCode;
+  selectedSymbol.value = preview.symbol;
+  router.replace({
+    name: "trade",
+    query: {
+      pair: preview.pair.replace("/", "")
+    }
+  });
+  closePopup();
+};
+
+const handlePopupAction = () => {
+  if (popupState.value.actionType === "preview") {
+    applyPreviewSignal();
+    return;
+  }
+
+  const shouldRedirectToHistory = popupState.value.actionType === "history";
+  closePopup();
+
+  if (shouldRedirectToHistory) {
+    router.push({ name: "history", query: { tab: "active" } });
+  }
 };
 
 const pasteSignalCode = async () => {
@@ -106,12 +153,26 @@ const pasteSignalCode = async () => {
       return;
     }
 
-    signalCode.value = cleanedCode;
+    const response = await previewTradeSignal(cleanedCode);
+    const preview = response.data;
+
+    showPopup({
+      tone: "success",
+      title: "Signal ready",
+      message: `${preview.pair} is active for this session. Tap Apply to load the pair and continue with your trade.`,
+      buttonLabel: "Apply",
+      actionType: "preview",
+      previewSignal: preview
+    });
   } catch (error) {
+    const isClipboardError = error?.name === "NotAllowedError";
+
     showPopup({
       tone: "error",
-      title: "Paste unavailable",
-      message: "Clipboard access was blocked. Please paste the signal code manually."
+      title: isClipboardError ? "Paste unavailable" : "Signal not accepted",
+      message: isClipboardError
+        ? "Clipboard access was blocked. Please paste the signal code manually."
+        : error.message || "This signal code could not be verified."
     });
   }
 };
@@ -160,7 +221,8 @@ const completeTrade = async () => {
   showPopup({
     tone: "success",
     title: "Trade accepted",
-    message: "Your signal has been confirmed. Tap OK to view it in active trade history."
+    message: "Your signal has been confirmed. Tap OK to view it in active trade history.",
+    actionType: "history"
   });
 };
 
@@ -283,17 +345,7 @@ onUnmounted(() => {
         <span class="trade-modal-pill">{{ popupState.tone === "success" ? "Success" : "Signal check" }}</span>
         <strong id="trade-modal-title">{{ popupState.title }}</strong>
         <p>{{ popupState.message }}</p>
-        <button
-          type="button"
-          @click="
-            closePopup();
-            if (popupState.tone === 'success') {
-              router.push({ name: 'history', query: { tab: 'active' } });
-            }
-          "
-        >
-          OK
-        </button>
+        <button type="button" @click="handlePopupAction">{{ popupState.buttonLabel }}</button>
       </div>
     </div>
 
