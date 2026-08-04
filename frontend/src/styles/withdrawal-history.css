@@ -1,7 +1,8 @@
 .withdrawal-history-page {
   display: grid;
-  gap: 15px;
+  gap: 11px;
   align-content: start;
+  padding: 12px 12px 86px;
   background:
     radial-gradient(circle at 16% 0%, rgba(249, 79, 167, 0.12), transparent 12rem),
     linear-gradient(180deg, #f8f9fd, #eef2f8);
@@ -10,9 +11,9 @@
 .withdrawal-history-header {
   position: relative;
   display: grid;
-  min-height: 54px;
+  min-height: 50px;
   place-items: center;
-  padding-top: 8px;
+  padding-top: 5px;
   text-align: center;
 }
 
@@ -29,19 +30,19 @@
 .withdrawal-history-header h1 {
   margin: 0;
   color: #151925;
-  font-size: 1.22rem;
+  font-size: 1.16rem;
 }
 
 .withdrawal-history-header button {
   position: absolute;
-  top: 8px;
+  top: 5px;
   right: 0;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   place-items: center;
   border: 0;
-  border-radius: 15px;
+  border-radius: 13px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   box-shadow: 0 16px 28px rgba(249, 79, 167, 0.28);
@@ -62,9 +63,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 18px;
-  border-radius: 28px;
+  gap: 11px;
+  padding: 14px 12px;
+  border-radius: 20px;
   background:
     radial-gradient(circle at 86% 8%, rgba(255, 255, 255, 0.5), transparent 7rem),
     linear-gradient(135deg, #241f35, #334155 54%, #26c787);
@@ -78,23 +79,23 @@
 
 .withdrawal-history-hero strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   color: white;
-  font-size: 1.8rem;
+  font-size: 1.58rem;
 }
 
 .withdrawal-history-hero p {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   font-size: 0.82rem;
 }
 
 .withdrawal-history-orb {
   display: grid;
-  flex: 0 0 70px;
-  width: 70px;
-  height: 70px;
+  flex: 0 0 62px;
+  width: 62px;
+  height: 62px;
   place-items: center;
-  border-radius: 24px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.18);
 }
 
@@ -114,14 +115,14 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 7px;
-  padding: 6px;
-  border-radius: 20px;
+  padding: 5px;
+  border-radius: 18px;
 }
 
 .withdrawal-history-filters button {
-  min-height: 42px;
+  min-height: 38px;
   border: 0;
-  border-radius: 15px;
+  border-radius: 13px;
   background: transparent;
   color: #777584;
   font-size: 0.78rem;
@@ -136,15 +137,15 @@
 
 .withdrawal-history-list {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .withdrawal-history-card,
 .withdrawal-history-empty {
   display: grid;
-  gap: 13px;
-  padding: 14px;
-  border-radius: 24px;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
 }
 
 .withdrawal-history-card-head,
@@ -163,11 +164,11 @@
 .withdrawal-history-card-head strong {
   display: block;
   color: #151925;
-  font-size: 1.25rem;
+  font-size: 1.12rem;
 }
 
 .withdrawal-history-card-head b {
-  padding: 7px 10px;
+  padding: 6px 9px;
   border-radius: 999px;
   font-size: 0.7rem;
   text-transform: capitalize;
@@ -191,13 +192,13 @@
 .withdrawal-history-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
+  gap: 8px;
 }
 
 .withdrawal-history-grid div {
   min-width: 0;
-  padding: 11px;
-  border-radius: 16px;
+  padding: 10px;
+  border-radius: 14px;
   background: #f8f9fd;
 }
 
@@ -236,8 +237,8 @@
 
 .withdrawal-history-message {
   margin: 0;
-  padding: 11px 13px;
-  border-radius: 15px;
+  padding: 10px 12px;
+  border-radius: 13px;
   font-size: 0.82rem;
   font-weight: 850;
 }
@@ -253,7 +254,22 @@
 }
 
 @media (min-width: 760px) {
+  .withdrawal-history-page {
+    gap: 12px;
+    padding-top: 14px;
+    padding-right: 14px;
+    padding-bottom: 88px;
+    padding-left: 14px;
+  }
+
   .withdrawal-history-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 370px) {
+  .withdrawal-history-page {
+    padding-right: 10px;
+    padding-left: 10px;
   }
 }

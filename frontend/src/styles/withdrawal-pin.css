@@ -1,7 +1,8 @@
 .withdrawal-pin-page {
   display: grid;
-  gap: 15px;
+  gap: 11px;
   align-content: start;
+  padding: 12px 12px 86px;
   background:
     radial-gradient(circle at 18% 0%, rgba(249, 79, 167, 0.12), transparent 12rem),
     linear-gradient(180deg, #f8f9fd, #eef2f8);
@@ -10,9 +11,9 @@
 .withdrawal-pin-header {
   position: relative;
   display: grid;
-  min-height: 54px;
+  min-height: 50px;
   place-items: center;
-  padding-top: 8px;
+  padding-top: 5px;
   text-align: center;
 }
 
@@ -34,19 +35,19 @@
 .withdrawal-pin-guide h2 {
   margin: 0;
   color: #151925;
-  font-size: 1.22rem;
+  font-size: 1.16rem;
 }
 
 .withdrawal-pin-header button {
   position: absolute;
-  top: 8px;
+  top: 5px;
   right: 0;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   place-items: center;
   border: 0;
-  border-radius: 15px;
+  border-radius: 13px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   box-shadow: 0 16px 28px rgba(249, 79, 167, 0.28);
@@ -64,9 +65,9 @@
 
 .withdrawal-pin-hero {
   display: grid;
-  gap: 14px;
-  padding: 18px;
-  border-radius: 28px;
+  gap: 11px;
+  padding: 14px 12px;
+  border-radius: 20px;
   background:
     radial-gradient(circle at 86% 8%, rgba(255, 255, 255, 0.5), transparent 7rem),
     linear-gradient(135deg, #29213f, #6740a1 56%, #f94fa7);
@@ -80,20 +81,20 @@
 
 .withdrawal-pin-hero strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   color: white;
-  font-size: 1.2rem;
+  font-size: 1.08rem;
 }
 
 .withdrawal-pin-hero p {
-  margin: 7px 0 0;
+  margin: 6px 0 0;
   font-size: 0.82rem;
 }
 
 .withdrawal-pin-hero button {
-  height: 48px;
+  height: 44px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 14px;
   background: white;
   color: var(--pink);
   font-weight: 950;
@@ -102,14 +103,14 @@
 .withdrawal-pin-card,
 .withdrawal-pin-guide {
   display: grid;
-  gap: 14px;
-  padding: 16px;
-  border-radius: 28px;
+  gap: 11px;
+  padding: 12px;
+  border-radius: 20px;
 }
 
 .withdrawal-pin-field {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .withdrawal-pin-field span {
@@ -118,11 +119,11 @@
 
 .withdrawal-pin-field input {
   width: 100%;
-  height: 54px;
+  height: 50px;
   border: 1px solid #e8ebf3;
-  border-radius: 18px;
+  border-radius: 15px;
   outline: 0;
-  padding: 0 15px;
+  padding: 0 13px;
   background: #f9fafc;
   color: #151925;
   font-size: 0.95rem;
@@ -136,9 +137,9 @@
 }
 
 .withdrawal-pin-submit {
-  height: 56px;
+  height: 50px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 15px;
   background: linear-gradient(135deg, #f6c453, #f94fa7);
   color: #151925;
   box-shadow: 0 16px 30px rgba(249, 79, 167, 0.22);
@@ -154,8 +155,8 @@
 
 .withdrawal-pin-message {
   margin: 0;
-  padding: 11px 13px;
-  border-radius: 15px;
+  padding: 10px 12px;
+  border-radius: 13px;
   font-size: 0.82rem;
   font-weight: 850;
 }
@@ -176,8 +177,8 @@
 }
 
 .withdrawal-pin-guide article {
-  padding: 12px;
-  border-radius: 18px;
+  padding: 10px 11px;
+  border-radius: 15px;
   background: linear-gradient(135deg, #fff8fc, #f5f7ff);
 }
 
@@ -187,15 +188,30 @@
 }
 
 .withdrawal-pin-guide p {
-  margin: 5px 0 0;
+  margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.78rem;
   line-height: 1.45;
 }
 
 @media (min-width: 760px) {
+  .withdrawal-pin-page {
+    gap: 12px;
+    padding-top: 14px;
+    padding-right: 14px;
+    padding-bottom: 88px;
+    padding-left: 14px;
+  }
+
   .withdrawal-pin-hero {
     grid-template-columns: minmax(0, 1fr) 160px;
     align-items: center;
+  }
+}
+
+@media (max-width: 370px) {
+  .withdrawal-pin-page {
+    padding-right: 10px;
+    padding-left: 10px;
   }
 }

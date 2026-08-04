@@ -1,16 +1,17 @@
 .withdrawal-address-page {
   display: grid;
-  gap: 15px;
+  gap: 11px;
   align-content: start;
+  padding: 12px 12px 86px;
   background: radial-gradient(circle at 18% 0%, rgba(249, 79, 167, 0.12), transparent 12rem), linear-gradient(180deg, #f8f9fd, #eef2f8);
 }
 
 .withdrawal-address-header {
   position: relative;
   display: grid;
-  min-height: 54px;
+  min-height: 50px;
   place-items: center;
-  padding-top: 8px;
+  padding-top: 5px;
   text-align: center;
 }
 
@@ -33,19 +34,19 @@
 .withdrawal-address-guide h2 {
   margin: 0;
   color: #151925;
-  font-size: 1.22rem;
+  font-size: 1.16rem;
 }
 
 .withdrawal-address-header button {
   position: absolute;
-  top: 8px;
+  top: 5px;
   right: 0;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   place-items: center;
   border: 0;
-  border-radius: 15px;
+  border-radius: 13px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   box-shadow: 0 16px 28px rgba(249, 79, 167, 0.28);
@@ -63,8 +64,8 @@
 }
 
 .withdrawal-address-hero {
-  padding: 18px;
-  border-radius: 28px;
+  padding: 14px 12px;
+  border-radius: 20px;
   background: radial-gradient(circle at 86% 8%, rgba(255, 255, 255, 0.5), transparent 7rem), linear-gradient(135deg, #29213f, #6740a1 56%, #f94fa7);
   color: white;
 }
@@ -76,15 +77,15 @@
 
 .withdrawal-address-hero strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.34rem;
   text-transform: capitalize;
 }
 
 .withdrawal-address-hero p,
 .withdrawal-address-guide p {
-  margin: 7px 0 0;
+  margin: 6px 0 0;
   font-size: 0.82rem;
   line-height: 1.45;
 }
@@ -93,9 +94,9 @@
 .withdrawal-address-status,
 .withdrawal-address-guide {
   display: grid;
-  gap: 14px;
-  padding: 16px;
-  border-radius: 28px;
+  gap: 11px;
+  padding: 12px;
+  border-radius: 20px;
 }
 
 .withdrawal-address-status {
@@ -131,39 +132,39 @@
 .withdrawal-address-selects {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
 }
 
 .withdrawal-address-code-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 98px;
-  gap: 9px;
+  gap: 8px;
   align-items: end;
 }
 
 .withdrawal-address-selects label,
 .withdrawal-address-field {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .withdrawal-address-selects select,
 .withdrawal-address-field input {
   width: 100%;
-  height: 54px;
+  height: 50px;
   border: 1px solid #e8ebf3;
-  border-radius: 18px;
+  border-radius: 15px;
   outline: 0;
-  padding: 0 14px;
+  padding: 0 13px;
   background: #f9fafc;
   color: #151925;
   font-weight: 850;
 }
 
 .withdrawal-address-submit {
-  height: 56px;
+  height: 50px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 15px;
   background: linear-gradient(135deg, #f6c453, #f94fa7);
   color: #151925;
   box-shadow: 0 16px 30px rgba(249, 79, 167, 0.22);
@@ -171,9 +172,9 @@
 }
 
 .withdrawal-address-code-row button {
-  height: 54px;
+  height: 50px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 15px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   font-size: 0.78rem;
@@ -181,8 +182,8 @@
 }
 
 .withdrawal-address-guide article {
-  padding: 12px;
-  border-radius: 18px;
+  padding: 10px 11px;
+  border-radius: 15px;
   background: linear-gradient(135deg, #fff8fc, #f5f7ff);
 }
 
@@ -197,8 +198,8 @@
 
 .withdrawal-address-message {
   margin: 0;
-  padding: 11px 13px;
-  border-radius: 15px;
+  padding: 10px 12px;
+  border-radius: 13px;
   font-size: 0.82rem;
   font-weight: 850;
 }
@@ -218,7 +219,22 @@
   color: #0a8f5e;
 }
 
+@media (min-width: 760px) {
+  .withdrawal-address-page {
+    gap: 12px;
+    padding-top: 14px;
+    padding-right: 14px;
+    padding-bottom: 88px;
+    padding-left: 14px;
+  }
+}
+
 @media (max-width: 370px) {
+  .withdrawal-address-page {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
   .withdrawal-address-selects,
   .withdrawal-address-code-row {
     grid-template-columns: 1fr;
