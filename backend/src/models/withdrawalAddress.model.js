@@ -7,6 +7,7 @@ const baseFields = `
   withdrawal_network AS "activeNetwork",
   withdrawal_address AS "activeAddress",
   withdrawal_address_status AS "activeStatus",
+  withdrawal_address_locked AS "activeLocked",
   withdrawal_address_note AS "activeNote",
   withdrawal_address_reviewed_by AS "activeReviewedBy",
   withdrawal_address_reviewed_at AS "activeReviewedAt",
@@ -31,6 +32,7 @@ const mapAddressRecord = (row) => {
     id: row.userId,
     userId: row.userId,
     username: row.username,
+    locked: Boolean(row.activeLocked),
     asset: row.pendingAddress ? row.pendingAsset : row.activeAsset,
     network: row.pendingAddress ? row.pendingNetwork : row.activeNetwork,
     address: row.pendingAddress || row.activeAddress,
@@ -45,6 +47,7 @@ const mapAddressRecord = (row) => {
           network: row.activeNetwork,
           address: row.activeAddress,
           status: row.activeStatus || "approved",
+          locked: Boolean(row.activeLocked),
           note: row.activeNote || "",
           reviewedBy: row.activeReviewedBy,
           reviewedAt: row.activeReviewedAt,
@@ -147,12 +150,34 @@ const getAll = async () => {
     `SELECT ${baseFields}
      FROM users
      WHERE pending_withdrawal_address IS NOT NULL
+        OR (withdrawal_address IS NOT NULL AND withdrawal_address_locked = TRUE)
      ORDER BY
-       CASE WHEN pending_withdrawal_status = 'pending' THEN 0 ELSE 1 END,
-       pending_withdrawal_submitted_at DESC`
+       CASE
+         WHEN pending_withdrawal_status = 'pending' THEN 0
+         WHEN withdrawal_address_locked = TRUE THEN 1
+         ELSE 2
+       END,
+       COALESCE(pending_withdrawal_submitted_at, withdrawal_address_reviewed_at, updated_at) DESC`
   );
 
   return result.rows.map(mapAddressRecord);
+};
+
+const unlockAddressChange = async ({ id, reviewedBy, note }) => {
+  const result = await database.query(
+    `UPDATE users
+     SET withdrawal_address_locked = FALSE,
+         withdrawal_address_note = COALESCE(NULLIF($3, ''), withdrawal_address_note),
+         withdrawal_address_reviewed_by = $2,
+         withdrawal_address_reviewed_at = NOW(),
+         updated_at = NOW()
+     WHERE id = $1
+       AND withdrawal_address IS NOT NULL
+     RETURNING ${baseFields}`,
+    [id, reviewedBy, note || ""]
+  );
+
+  return mapAddressRecord(result.rows[0]);
 };
 
 const updateStatus = async ({ id, status, note, reviewedBy }) => {
@@ -186,6 +211,7 @@ const updateStatus = async ({ id, status, note, reviewedBy }) => {
             withdrawal_network = pending_withdrawal_network,
             withdrawal_address = pending_withdrawal_address,
             withdrawal_address_status = 'approved',
+            withdrawal_address_locked = TRUE,
             withdrawal_address_note = $2,
             withdrawal_address_reviewed_by = $3,
             withdrawal_address_reviewed_at = NOW(),
@@ -234,5 +260,6 @@ module.exports = {
   findValidAddressCode,
   markAddressCodeUsed,
   getAll,
+  unlockAddressChange,
   updateStatus
 };

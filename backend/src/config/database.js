@@ -35,6 +35,7 @@ const connectDatabase = async () => {
         withdrawal_network VARCHAR(40),
         withdrawal_address TEXT,
         withdrawal_address_status VARCHAR(20) NOT NULL DEFAULT 'not_set',
+        withdrawal_address_locked BOOLEAN NOT NULL DEFAULT FALSE,
         withdrawal_address_note TEXT,
         withdrawal_address_reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
         withdrawal_address_reviewed_at TIMESTAMPTZ,
@@ -131,6 +132,11 @@ const connectDatabase = async () => {
 
     await client.query(`
       ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS withdrawal_address_locked BOOLEAN NOT NULL DEFAULT FALSE;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
         ADD COLUMN IF NOT EXISTS withdrawal_address_note TEXT;
     `);
 
@@ -197,6 +203,14 @@ const connectDatabase = async () => {
     await client.query(`
       CREATE INDEX IF NOT EXISTS users_pending_withdrawal_status_index
         ON users (pending_withdrawal_status);
+    `);
+
+    await client.query(`
+      UPDATE users
+      SET withdrawal_address_locked = TRUE
+      WHERE withdrawal_address IS NOT NULL
+        AND withdrawal_address_status = 'approved'
+        AND withdrawal_address_locked = FALSE;
     `);
 
     await client.query(`

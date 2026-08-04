@@ -20,6 +20,7 @@ const userFields = `
   withdrawal_network AS "withdrawalNetwork",
   withdrawal_address AS "withdrawalAddress",
   withdrawal_address_status AS "withdrawalAddressStatus",
+  withdrawal_address_locked AS "withdrawalAddressLocked",
   withdrawal_address_note AS "withdrawalAddressNote",
   withdrawal_address_reviewed_by AS "withdrawalAddressReviewedBy",
   withdrawal_address_reviewed_at AS "withdrawalAddressReviewedAt",

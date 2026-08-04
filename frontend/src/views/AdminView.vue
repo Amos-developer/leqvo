@@ -16,7 +16,8 @@ import {
   createAdminCopySignal,
   getAdminCopySignals,
   updateAdminKycStatus,
-  updateAdminWithdrawalAddressStatus
+  updateAdminWithdrawalAddressStatus,
+  unlockAdminWithdrawalAddress
 } from "../utils/api";
 import { BINANCE_MARKETS } from "../utils/binanceMarketSocket";
 import AdminUsersView from "./admin/AdminUsersView.vue";
@@ -67,6 +68,7 @@ const menuItems = [
   "Users",
   "Deposits",
   "Withdrawals",
+  "Withdrawal Addresses",
   "KYC",
   "Copy Signals",
   "Users Signals",
@@ -438,6 +440,22 @@ const reviewWithdrawalAddress = async (address, status) => {
   }
 };
 
+const unlockWithdrawalAddress = async (address) => {
+  addressReviewId.value = `${address.userId}-unlock`;
+  errorMessage.value = "";
+
+  try {
+    await unlockAdminWithdrawalAddress(address.userId, {
+      note: "Unlocked by admin for address update"
+    });
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    addressReviewId.value = "";
+  }
+};
+
 const reviewKyc = async (submission, status) => {
   kycReviewId.value = `${submission.id}-${status}`;
   errorMessage.value = "";
@@ -789,17 +807,21 @@ onMounted(loadAdminData);
           </table>
         </div>
 
+      </section>
+
+      <section v-else-if="activeTab === 'Withdrawal Addresses'" class="admin-view-stack">
+        <section class="admin-panel withdrawal-address-admin-panel">
         <div class="admin-panel-head withdrawal-address-admin-head">
           <div>
             <h2>Withdrawal Addresses</h2>
-            <p>Review payout wallet addresses submitted by users</p>
+            <p>Unlock approved address changes and approve pending wallet updates</p>
           </div>
         </div>
 
         <div class="withdrawal-address-admin-list">
           <article v-if="!withdrawalAddresses.length" class="admin-empty-state">
             <h2>No address submissions</h2>
-            <p>User payout wallet requests will appear here.</p>
+            <p>User payout wallet requests and locked address records will appear here.</p>
           </article>
           <article v-for="address in withdrawalAddresses" :key="address.userId" class="withdrawal-address-admin-card">
             <div class="withdrawal-address-admin-top">
@@ -810,18 +832,39 @@ onMounted(loadAdminData);
               <b :class="address.status">{{ address.status }}</b>
             </div>
             <p>{{ address.address }}</p>
-            <small>Submitted {{ formatDate(address.submittedAt) }}</small>
+            <small>
+              {{
+                address.pendingAddress?.submittedAt
+                  ? `Submitted ${formatDate(address.pendingAddress.submittedAt)}`
+                  : address.locked
+                    ? "Approved address locked for user changes"
+                    : `Reviewed ${formatDate(address.reviewedAt)}`
+              }}
+            </small>
+            <div v-if="address.activeAddress && !address.pendingAddress" class="withdrawal-address-admin-current">
+              <span>Current approved address is protected until admin unlocks it.</span>
+            </div>
             <div class="withdrawal-address-admin-actions">
               <button
+                v-if="address.activeAddress && address.locked && !address.pendingAddress"
                 type="button"
-                :disabled="address.status === 'approved' || addressReviewId === `${address.id}-approved`"
+                :disabled="addressReviewId === `${address.userId}-unlock`"
+                @click="unlockWithdrawalAddress(address)"
+              >
+                {{ addressReviewId === `${address.userId}-unlock` ? "Unlocking..." : "Unlock" }}
+              </button>
+              <button
+                v-if="address.pendingAddress"
+                type="button"
+                :disabled="address.status === 'approved' || addressReviewId === `${address.userId}-approved`"
                 @click="reviewWithdrawalAddress(address, 'approved')"
               >
                 Approve
               </button>
               <button
+                v-if="address.pendingAddress"
                 type="button"
-                :disabled="address.status === 'rejected' || addressReviewId === `${address.id}-rejected`"
+                :disabled="address.status === 'rejected' || addressReviewId === `${address.userId}-rejected`"
                 @click="reviewWithdrawalAddress(address, 'rejected')"
               >
                 Reject
@@ -829,6 +872,7 @@ onMounted(loadAdminData);
             </div>
           </article>
         </div>
+        </section>
       </section>
 
       <section v-else-if="activeTab === 'KYC'" class="admin-view-stack">

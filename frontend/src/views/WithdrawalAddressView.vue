@@ -27,6 +27,7 @@ const codeRequested = ref(false);
 const availableNetworks = computed(() => assets.find((asset) => asset.value === form.value.asset)?.networks || []);
 const activeAddress = computed(() => currentAddress.value?.activeAddress || null);
 const pendingAddress = computed(() => currentAddress.value?.pendingAddress || null);
+const isAddressLocked = computed(() => Boolean(activeAddress.value?.locked));
 const hasPendingReview = computed(() => pendingAddress.value?.status === "pending");
 const pageTitle = computed(() => (activeAddress.value ? "Change Address" : "Set Address"));
 const heroStatus = computed(() => {
@@ -181,6 +182,14 @@ onMounted(loadAddress);
       </div>
     </section>
 
+    <section v-if="activeAddress && isAddressLocked" class="withdrawal-address-status locked">
+      <span class="withdrawal-address-lock-icon" aria-hidden="true"></span>
+      <strong>Address changes are locked</strong>
+      <p>Your approved withdrawal address is protected. Send a message to admin/support to request an address-change unlock.</p>
+      <small>Once admin unlocks it, you can submit a new wallet for approval.</small>
+      <button type="button" class="withdrawal-address-support-button" @click="router.push('/support')">Message Admin</button>
+    </section>
+
     <section v-if="activeAddress" class="withdrawal-address-status approved">
       <strong>{{ activeAddress.asset }} / {{ activeAddress.network }}</strong>
       <p>{{ activeAddress.address }}</p>
@@ -196,7 +205,7 @@ onMounted(loadAddress);
       <small v-if="pendingAddress.note">{{ pendingAddress.note }}</small>
     </section>
 
-    <section v-if="!hasPendingReview" class="withdrawal-address-card">
+    <section v-if="!hasPendingReview && !isAddressLocked" class="withdrawal-address-card">
       <div class="withdrawal-address-selects">
         <label>
           <span>Asset</span>

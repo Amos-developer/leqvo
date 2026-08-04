@@ -124,6 +124,13 @@ export const updateAdminWithdrawalAddressStatus = (id, payload) => {
   });
 };
 
+export const unlockAdminWithdrawalAddress = (id, payload = {}) => {
+  return request(`/withdrawal-addresses/admin/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ action: "unlock", ...payload })
+  });
+};
+
 export const getMyKyc = () => {
   return request("/kyc");
 };

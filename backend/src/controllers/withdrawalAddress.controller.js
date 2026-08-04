@@ -71,6 +71,13 @@ const submitAddress = async (req, res) => {
     });
   }
 
+  if (latest?.activeAddress?.locked) {
+    return res.status(423).json({
+      success: false,
+      message: "Your approved withdrawal address is locked. Contact admin to unlock address changes first."
+    });
+  }
+
   const codeRecord = await withdrawalAddressModel.findValidAddressCode({
     userId: req.user.id,
     code
@@ -129,8 +136,30 @@ const getAdminAddresses = async (req, res) => {
 };
 
 const updateAddressStatus = async (req, res) => {
+  const action = req.body.action?.trim().toLowerCase();
   const status = req.body.status?.trim().toLowerCase();
   const note = req.body.note?.trim();
+
+  if (action === "unlock") {
+    const address = await withdrawalAddressModel.unlockAddressChange({
+      id: req.params.id,
+      note,
+      reviewedBy: req.user.id
+    });
+
+    if (!address) {
+      return res.status(404).json({
+        success: false,
+        message: "Approved withdrawal address not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Withdrawal address unlocked for user update",
+      data: address
+    });
+  }
 
   if (!["approved", "rejected"].includes(status)) {
     return res.status(400).json({
