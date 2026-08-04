@@ -64,7 +64,7 @@ const submitAddress = async (req, res) => {
 
   const latest = await withdrawalAddressModel.getLatestByUserId(req.user.id);
 
-  if (latest?.status === "pending") {
+  if (latest?.pendingAddress?.status === "pending") {
     return res.status(409).json({
       success: false,
       message: "Your withdrawal address is already pending admin review"

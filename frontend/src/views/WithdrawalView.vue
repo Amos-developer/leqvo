@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { getAccountTransfers } from "../utils/api";
+import { getAccountTransfers, getMyWithdrawalAddress } from "../utils/api";
 
 const router = useRouter();
 const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
@@ -24,6 +24,8 @@ const withdrawalPin = ref("");
 const codeRequested = ref(false);
 const formMessage = ref("");
 const formError = ref("");
+const approvedAddressRecord = ref(null);
+const pendingAddressRecord = ref(null);
 const eligibility = ref({
   hasTradingEntry: false,
   canWithdraw: false,
@@ -44,6 +46,7 @@ const canSubmit = computed(() => {
     withdrawalPin.value.trim()
   );
 });
+const hasApprovedWithdrawalAddress = computed(() => Boolean(approvedAddressRecord.value?.address));
 
 const formatCurrency = (value) => {
   return Number(value || 0).toLocaleString("en-US", {
@@ -56,6 +59,23 @@ const formatCurrency = (value) => {
 const selectAsset = (asset) => {
   selectedAsset.value = asset;
   selectedNetwork.value = asset.networks[0];
+
+  if (
+    approvedAddressRecord.value?.asset === asset.value &&
+    approvedAddressRecord.value?.network === selectedNetwork.value
+  ) {
+    address.value = approvedAddressRecord.value.address;
+  } else if (approvedAddressRecord.value?.asset === asset.value) {
+    const matchingNetwork = asset.networks.find((network) => network === approvedAddressRecord.value.network);
+    if (matchingNetwork) {
+      selectedNetwork.value = matchingNetwork;
+      address.value = approvedAddressRecord.value.address;
+    } else {
+      address.value = "";
+    }
+  } else {
+    address.value = "";
+  }
 };
 
 const requestEmailCode = () => {
@@ -66,8 +86,19 @@ const requestEmailCode = () => {
 
 const loadWithdrawalEligibility = async () => {
   try {
-    const result = await getAccountTransfers();
-    eligibility.value = result.data?.eligibility || eligibility.value;
+    const [transfersResult, addressResult] = await Promise.all([getAccountTransfers(), getMyWithdrawalAddress()]);
+
+    const addressData = addressResult.data;
+    eligibility.value = transfersResult.data?.eligibility || eligibility.value;
+    approvedAddressRecord.value = addressData?.activeAddress || null;
+    pendingAddressRecord.value = addressData?.pendingAddress || null;
+
+    if (approvedAddressRecord.value) {
+      const asset = assets.find((item) => item.value === approvedAddressRecord.value.asset) || assets[0];
+      selectedAsset.value = asset;
+      selectedNetwork.value = approvedAddressRecord.value.network || asset.networks[0];
+      address.value = approvedAddressRecord.value.address || "";
+    }
   } catch (error) {
     formError.value = error.message || "Could not check withdrawal eligibility.";
   }
@@ -191,9 +222,20 @@ onMounted(loadWithdrawalEligibility);
       <label class="withdrawal-field">
         Withdrawal address
         <div>
-          <input v-model.trim="address" type="text" placeholder="Enter wallet address" />
+          <input
+            v-model.trim="address"
+            type="text"
+            :readonly="hasApprovedWithdrawalAddress"
+            :placeholder="hasApprovedWithdrawalAddress ? 'Approved address applied' : 'Enter wallet address'"
+          />
         </div>
       </label>
+      <p v-if="hasApprovedWithdrawalAddress" class="withdrawal-note">
+        Your approved withdrawal address is applied automatically. Change it from Address settings.
+      </p>
+      <p v-if="pendingAddressRecord?.status === 'pending'" class="withdrawal-note">
+        A new address change is waiting for admin approval. Your currently approved address stays active until then.
+      </p>
 
       <div class="email-code-row">
         <label class="withdrawal-field">

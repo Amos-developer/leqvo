@@ -13,7 +13,7 @@ const form = ref({
   asset: "USDT",
   network: "TRC20",
   address: "",
-  code: ""
+  code: ""   
 });
 const currentAddress = ref(null);
 const isLoading = ref(false);
@@ -25,6 +25,21 @@ const codeMessage = ref("");
 const codeRequested = ref(false);
 
 const availableNetworks = computed(() => assets.find((asset) => asset.value === form.value.asset)?.networks || []);
+const activeAddress = computed(() => currentAddress.value?.activeAddress || null);
+const pendingAddress = computed(() => currentAddress.value?.pendingAddress || null);
+const hasPendingReview = computed(() => pendingAddress.value?.status === "pending");
+const pageTitle = computed(() => (activeAddress.value ? "Change Address" : "Set Address"));
+const heroStatus = computed(() => {
+  if (hasPendingReview.value) {
+    return "Pending review";
+  }
+
+  if (activeAddress.value) {
+    return "Approved";
+  }
+
+  return "Not set";
+});
 
 const validateAddress = () => {
   const address = form.value.address.trim();
@@ -63,6 +78,12 @@ const loadAddress = async () => {
   try {
     const result = await getMyWithdrawalAddress();
     currentAddress.value = result.data;
+
+    if (activeAddress.value) {
+      form.value.asset = activeAddress.value.asset || form.value.asset;
+      form.value.network = activeAddress.value.network || form.value.network;
+      form.value.address = activeAddress.value.address || "";
+    }
   } catch (error) {
     errorMessage.value = error.message || "Could not load withdrawal address.";
   } finally {
@@ -101,7 +122,7 @@ const submitAddress = async () => {
       code: form.value.code.trim()
     });
     currentAddress.value = result.data;
-    form.value.address = "";
+    form.value.address = activeAddress.value?.address || "";
     form.value.code = "";
     codeRequested.value = false;
     codeMessage.value = "";
@@ -147,7 +168,7 @@ onMounted(loadAddress);
     <header class="withdrawal-address-header">
       <div>
         <p>Payout wallet</p>
-        <h1>{{ currentAddress ? "Change Address" : "Set Address" }}</h1>
+        <h1>{{ pageTitle }}</h1>
       </div>
       <button type="button" aria-label="Go back" @click="router.back()">&larr;</button>
     </header>
@@ -155,20 +176,27 @@ onMounted(loadAddress);
     <section class="withdrawal-address-hero">
       <div>
         <span>Status</span>
-        <strong>{{ currentAddress?.status || "Not set" }}</strong>
+        <strong>{{ heroStatus }}</strong>
         <p>Submit the correct asset, network, and wallet address. Admin approval is required before payouts.</p>
       </div>
     </section>
 
-    <section v-if="currentAddress" class="withdrawal-address-status" :class="currentAddress.status">
-      <strong>{{ currentAddress.asset }} / {{ currentAddress.network }}</strong>
-      <p>{{ currentAddress.address }}</p>
-      <span>Submitted {{ formatDate(currentAddress.submittedAt) }}</span>
-      <span v-if="currentAddress.reviewedAt">Reviewed {{ formatDate(currentAddress.reviewedAt) }}</span>
-      <small v-if="currentAddress.note">{{ currentAddress.note }}</small>
+    <section v-if="activeAddress" class="withdrawal-address-status approved">
+      <strong>{{ activeAddress.asset }} / {{ activeAddress.network }}</strong>
+      <p>{{ activeAddress.address }}</p>
+      <span>Approved {{ formatDate(activeAddress.reviewedAt || activeAddress.submittedAt) }}</span>
+      <small v-if="activeAddress.note">{{ activeAddress.note }}</small>
     </section>
 
-    <section v-if="currentAddress?.status !== 'pending'" class="withdrawal-address-card">
+    <section v-if="pendingAddress" class="withdrawal-address-status" :class="pendingAddress.status">
+      <strong>{{ pendingAddress.asset }} / {{ pendingAddress.network }}</strong>
+      <p>{{ pendingAddress.address }}</p>
+      <span>Submitted {{ formatDate(pendingAddress.submittedAt) }}</span>
+      <span v-if="pendingAddress.reviewedAt">Reviewed {{ formatDate(pendingAddress.reviewedAt) }}</span>
+      <small v-if="pendingAddress.note">{{ pendingAddress.note }}</small>
+    </section>
+
+    <section v-if="!hasPendingReview" class="withdrawal-address-card">
       <div class="withdrawal-address-selects">
         <label>
           <span>Asset</span>

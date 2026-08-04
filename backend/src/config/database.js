@@ -39,6 +39,14 @@ const connectDatabase = async () => {
         withdrawal_address_reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
         withdrawal_address_reviewed_at TIMESTAMPTZ,
         withdrawal_address_submitted_at TIMESTAMPTZ,
+        pending_withdrawal_asset VARCHAR(20),
+        pending_withdrawal_network VARCHAR(40),
+        pending_withdrawal_address TEXT,
+        pending_withdrawal_status VARCHAR(20) NOT NULL DEFAULT 'not_set',
+        pending_withdrawal_note TEXT,
+        pending_withdrawal_reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL,
+        pending_withdrawal_reviewed_at TIMESTAMPTZ,
+        pending_withdrawal_submitted_at TIMESTAMPTZ,
         is_admin BOOLEAN NOT NULL DEFAULT FALSE,
         email_verified BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -142,8 +150,76 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS pending_withdrawal_asset VARCHAR(20);
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS pending_withdrawal_network VARCHAR(40);
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS pending_withdrawal_address TEXT;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS pending_withdrawal_status VARCHAR(20) NOT NULL DEFAULT 'not_set';
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS pending_withdrawal_note TEXT;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS pending_withdrawal_reviewed_by VARCHAR(10) REFERENCES users(id) ON DELETE SET NULL;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS pending_withdrawal_reviewed_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS pending_withdrawal_submitted_at TIMESTAMPTZ;
+    `);
+
+    await client.query(`
       CREATE INDEX IF NOT EXISTS users_withdrawal_address_status_index
         ON users (withdrawal_address_status);
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS users_pending_withdrawal_status_index
+        ON users (pending_withdrawal_status);
+    `);
+
+    await client.query(`
+      UPDATE users
+      SET pending_withdrawal_asset = withdrawal_asset,
+          pending_withdrawal_network = withdrawal_network,
+          pending_withdrawal_address = withdrawal_address,
+          pending_withdrawal_status = withdrawal_address_status,
+          pending_withdrawal_note = withdrawal_address_note,
+          pending_withdrawal_reviewed_by = withdrawal_address_reviewed_by,
+          pending_withdrawal_reviewed_at = withdrawal_address_reviewed_at,
+          pending_withdrawal_submitted_at = withdrawal_address_submitted_at,
+          withdrawal_asset = NULL,
+          withdrawal_network = NULL,
+          withdrawal_address = NULL,
+          withdrawal_address_status = 'not_set',
+          withdrawal_address_note = NULL,
+          withdrawal_address_reviewed_by = NULL,
+          withdrawal_address_reviewed_at = NULL,
+          withdrawal_address_submitted_at = NULL
+      WHERE withdrawal_address_status = 'pending'
+        AND withdrawal_address IS NOT NULL
+        AND pending_withdrawal_address IS NULL;
     `);
 
     await client.query(`

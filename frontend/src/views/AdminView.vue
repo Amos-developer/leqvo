@@ -422,11 +422,11 @@ const copySignalMessage = async (signal) => {
 };
 
 const reviewWithdrawalAddress = async (address, status) => {
-  addressReviewId.value = `${address.id}-${status}`;
+  addressReviewId.value = `${address.userId}-${status}`;
   errorMessage.value = "";
 
   try {
-    await updateAdminWithdrawalAddressStatus(address.id, {
+    await updateAdminWithdrawalAddressStatus(address.userId, {
       status,
       note: status === "approved" ? "Approved by admin" : "Rejected by admin"
     });
@@ -801,7 +801,7 @@ onMounted(loadAdminData);
             <h2>No address submissions</h2>
             <p>User payout wallet requests will appear here.</p>
           </article>
-          <article v-for="address in withdrawalAddresses" :key="address.id" class="withdrawal-address-admin-card">
+          <article v-for="address in withdrawalAddresses" :key="address.userId" class="withdrawal-address-admin-card">
             <div class="withdrawal-address-admin-top">
               <div>
                 <strong>{{ address.username }}</strong>
