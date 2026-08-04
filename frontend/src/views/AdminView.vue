@@ -1407,6 +1407,7 @@ onMounted(loadAdminData);
             <div class="copy-signal-window">
               <span>Valid for exactly 40 minutes</span>
               <strong>{{ resolvedSignalStartTime }} - {{ signalForm.validToTime }} UTC</strong>
+              <small v-if="signalForm.validFromTime === '13:00'">Third trade requires a credited deposit of 100 USDT or above.</small>
               <small v-if="signalForm.validFromTime === '15:00'">Bonus trade requires user deposit of 300 USDT and above.</small>
               <small v-else-if="signalForm.validFromTime === 'admin-anytime'">Admin signal ends exactly 40 minutes after the initiated time.</small>
             </div>

@@ -46,7 +46,21 @@ const ALLOWED_PAIRS = [
   "ATOM/USDT"
 ];
 
-const ensureBonusSignalAccess = async (signal, userId) => {
+const getSignalMinimumDepositRequirement = (validFrom) => {
+  const startHour = validFrom.getUTCHours();
+
+  if (startHour === 13) {
+    return 100;
+  }
+
+  if (startHour === 15) {
+    return 300;
+  }
+
+  return 0;
+};
+
+const ensureDepositTierSignalAccess = async (signal, userId) => {
   const minimumDepositRequired = Number(signal.minDepositRequired || 0);
 
   if (!minimumDepositRequired) {
@@ -59,7 +73,11 @@ const ensureBonusSignalAccess = async (signal, userId) => {
     return null;
   }
 
-  return `This bonus signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
+  if (minimumDepositRequired >= 300) {
+    return `This signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
+  }
+
+  return `This signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or above.`;
 };
 
 const getSignals = async (req, res) => {
@@ -106,7 +124,7 @@ const previewSignal = async (req, res) => {
     });
   }
 
-  const bonusAccessMessage = await ensureBonusSignalAccess(signal, req.user.id);
+  const bonusAccessMessage = await ensureDepositTierSignalAccess(signal, req.user.id);
 
   if (bonusAccessMessage) {
     return res.status(403).json({
@@ -191,7 +209,7 @@ const createSignal = async (req, res) => {
     currency,
     signalCode: generateSignalCode(pair),
     profitPercent,
-    minDepositRequired: validFrom.getUTCHours() === 15 ? 300 : 0,
+    minDepositRequired: getSignalMinimumDepositRequirement(validFrom),
     validFrom,
     validTo,
     createdBy: req.user.id

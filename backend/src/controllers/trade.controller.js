@@ -10,7 +10,9 @@ const formatUtcTime = (value) => {
   }).format(new Date(value));
 };
 
-const getBonusSignalAccessMessage = async (signal, userId) => {
+const MINIMUM_TRADE_ENTRY_AMOUNT = 30;
+
+const getDepositTierSignalAccessMessage = async (signal, userId) => {
   const minimumDepositRequired = Number(signal.minDepositRequired || 0);
 
   if (!minimumDepositRequired) {
@@ -23,7 +25,11 @@ const getBonusSignalAccessMessage = async (signal, userId) => {
     return null;
   }
 
-  return `This bonus signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
+  if (minimumDepositRequired >= 300) {
+    return `This signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
+  }
+
+  return `This signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or above.`;
 };
 
 const createTrade = async (req, res) => {
@@ -38,6 +44,13 @@ const createTrade = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "Pair, symbol, signal code, allocation percent, and amount are required"
+    });
+  }
+
+  if (amount < MINIMUM_TRADE_ENTRY_AMOUNT) {
+    return res.status(400).json({
+      success: false,
+      message: `Trade entry amount must be at least ${MINIMUM_TRADE_ENTRY_AMOUNT} USDT.`
     });
   }
 
@@ -86,7 +99,7 @@ const createTrade = async (req, res) => {
     });
   }
 
-  const bonusAccessMessage = await getBonusSignalAccessMessage(activeSignal, req.user.id);
+  const bonusAccessMessage = await getDepositTierSignalAccessMessage(activeSignal, req.user.id);
 
   if (bonusAccessMessage) {
     return res.status(403).json({
