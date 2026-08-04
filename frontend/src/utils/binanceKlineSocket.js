@@ -3,6 +3,18 @@ const BINANCE_WS_URL = "wss://stream.binance.com:9443/ws";
 
 const normalizePair = (pair) => String(pair || "BTCUSDT").toLowerCase();
 
+const safelyCloseSocket = (socket) => {
+  if (!socket || socket.readyState === WebSocket.CLOSING || socket.readyState === WebSocket.CLOSED) {
+    return;
+  }
+
+  try {
+    socket.close();
+  } catch (error) {
+    // Ignore close-time browser/socket lifecycle noise.
+  }
+};
+
 const mapKline = (kline) => ({
   time: Math.floor(Number(kline[0]) / 1000),
   open: Number(kline[1]),
@@ -30,8 +42,13 @@ export const fetchBinanceKlines = async (pair, interval = "1m", limit = 120) => 
 
 export const createBinanceKlineSocket = ({ pair, interval = "1m", onCandle, onError, onClose }) => {
   const socket = new WebSocket(`${BINANCE_WS_URL}/${normalizePair(pair)}@kline_${interval}`);
+  let manuallyClosed = false;
 
   socket.addEventListener("message", (event) => {
+    if (manuallyClosed) {
+      return;
+    }
+
     const message = JSON.parse(event.data);
     const kline = message.k;
 
@@ -49,12 +66,25 @@ export const createBinanceKlineSocket = ({ pair, interval = "1m", onCandle, onEr
   });
 
   socket.addEventListener("error", () => {
+    if (manuallyClosed) {
+      return;
+    }
+
     onError?.();
   });
 
   socket.addEventListener("close", () => {
+    if (manuallyClosed) {
+      return;
+    }
+
     onClose?.();
   });
 
-  return socket;
+  return {
+    close() {
+      manuallyClosed = true;
+      safelyCloseSocket(socket);
+    }
+  };
 };

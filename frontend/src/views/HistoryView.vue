@@ -103,7 +103,7 @@ const filteredTrades = computed(() => {
   }
 
   if (activeTab.value === "completed") {
-    return normalizedTrades.value.filter((trade) => trade.status === "win" || trade.status === "loose");
+    return normalizedTrades.value.filter((trade) => trade.displayStatus === "completed" || trade.displayStatus === "finished");
   }
 
   return normalizedTrades.value.filter((trade) => trade.status === activeTab.value);
@@ -111,7 +111,7 @@ const filteredTrades = computed(() => {
 
 const tradeCounts = computed(() => ({
   all: normalizedTrades.value.length,
-  completed: normalizedTrades.value.filter((trade) => trade.status === "win" || trade.status === "loose").length,
+  completed: normalizedTrades.value.filter((trade) => trade.displayStatus === "completed" || trade.displayStatus === "finished").length,
   win: normalizedTrades.value.filter((trade) => trade.status === "win").length,
   loose: normalizedTrades.value.filter((trade) => trade.status === "loose").length
 }));

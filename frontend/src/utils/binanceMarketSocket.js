@@ -249,15 +249,37 @@ export const createInitialBinanceMarkets = () => {
   }));
 };
 
+const safelyCloseSocket = (socket) => {
+  if (!socket || socket.readyState === WebSocket.CLOSING || socket.readyState === WebSocket.CLOSED) {
+    return;
+  }
+
+  try {
+    socket.close();
+  } catch (error) {
+    // Ignore close-time browser/socket lifecycle noise.
+  }
+};
+
 export const createBinanceMarketSocket = ({ onUpdate, onOpen, onError, onClose }) => {
   const streams = BINANCE_MARKETS.map((market) => market.stream).join("/");
   const socket = new WebSocket(`${BINANCE_STREAM_URL}?streams=${streams}`);
+  let manuallyClosed = false;
 
   socket.addEventListener("open", () => {
+    if (manuallyClosed) {
+      safelyCloseSocket(socket);
+      return;
+    }
+
     onOpen?.();
   });
 
   socket.addEventListener("message", (event) => {
+    if (manuallyClosed) {
+      return;
+    }
+
     const message = JSON.parse(event.data);
     const ticker = message.data;
     const market = BINANCE_MARKETS.find((item) => item.pair === ticker.s);
@@ -278,12 +300,25 @@ export const createBinanceMarketSocket = ({ onUpdate, onOpen, onError, onClose }
   });
 
   socket.addEventListener("error", () => {
+    if (manuallyClosed) {
+      return;
+    }
+
     onError?.();
   });
 
   socket.addEventListener("close", () => {
+    if (manuallyClosed) {
+      return;
+    }
+
     onClose?.();
   });
 
-  return socket;
+  return {
+    close() {
+      manuallyClosed = true;
+      safelyCloseSocket(socket);
+    }
+  };
 };
