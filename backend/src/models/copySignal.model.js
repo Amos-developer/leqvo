@@ -65,9 +65,41 @@ const findActiveSignalByPair = async (pair) => {
   return result.rows[0] || null;
 };
 
+const hasBonusSignalAccess = async (userId, minimumDepositRequired) => {
+  const threshold = Number(minimumDepositRequired || 0);
+
+  if (!userId || threshold <= 0) {
+    return true;
+  }
+
+  const result = await database.query(
+    `SELECT EXISTS (
+       SELECT 1
+       FROM deposits d
+       WHERE d.user_id = $1
+         AND d.credited_at IS NOT NULL
+         AND d.price_amount >= $2
+     ) AS "hasSelfQualified",
+     EXISTS (
+       SELECT 1
+       FROM deposits d
+       JOIN users u ON u.id = d.user_id
+       WHERE u.referred_by = $1
+         AND d.credited_at IS NOT NULL
+         AND d.price_amount >= $2
+     ) AS "hasReferralQualified"`,
+    [userId, threshold]
+  );
+
+  const eligibility = result.rows[0] || {};
+
+  return Boolean(eligibility.hasSelfQualified || eligibility.hasReferralQualified);
+};
+
 module.exports = {
   createSignal,
   getSignals,
   findSignalByCode,
-  findActiveSignalByPair
+  findActiveSignalByPair,
+  hasBonusSignalAccess
 };

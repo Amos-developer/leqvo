@@ -46,6 +46,22 @@ const ALLOWED_PAIRS = [
   "ATOM/USDT"
 ];
 
+const ensureBonusSignalAccess = async (signal, userId) => {
+  const minimumDepositRequired = Number(signal.minDepositRequired || 0);
+
+  if (!minimumDepositRequired) {
+    return null;
+  }
+
+  const eligible = await copySignalModel.hasBonusSignalAccess(userId, minimumDepositRequired);
+
+  if (eligible) {
+    return null;
+  }
+
+  return `This bonus signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
+};
+
 const getSignals = async (req, res) => {
   const signals = await copySignalModel.getSignals();
 
@@ -87,6 +103,15 @@ const previewSignal = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: `This signal code is not the active ${signal.pair} session signal right now.`
+    });
+  }
+
+  const bonusAccessMessage = await ensureBonusSignalAccess(signal, req.user.id);
+
+  if (bonusAccessMessage) {
+    return res.status(403).json({
+      success: false,
+      message: bonusAccessMessage
     });
   }
 
