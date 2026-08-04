@@ -274,7 +274,7 @@ onUnmounted(() => {
             <img class="crypto-logo" :src="coin.image" :alt="coin.name" />
             <div>
               <strong>{{ coin.name }}</strong>
-              <p>{{ coin.symbol }} / USDT - Rank #{{ coin.marketCapRank }}</p>
+              <p>{{ coin.symbol }} / USDT · #{{ coin.marketCapRank }}</p>
             </div>
             <div class="crypto-price">
               <strong>{{ formatPrice(coin.price) }}</strong>

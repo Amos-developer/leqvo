@@ -242,7 +242,7 @@ onUnmounted(() => {
           <img :src="coin.image" :alt="coin.name" />
           <div class="market-identity">
             <strong>{{ coin.name }}</strong>
-            <span>{{ coin.symbol }} · Rank #{{ coin.marketCapRank }}</span>
+            <span>{{ coin.symbol }} · #{{ coin.marketCapRank }}</span>
           </div>
           <div class="market-price-block">
             <strong>{{ formatPrice(coin.price) }}</strong>
