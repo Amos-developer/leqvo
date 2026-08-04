@@ -1,6 +1,6 @@
 .history-page {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   align-content: start;
   background:
     radial-gradient(circle at 85% 3%, rgba(249, 79, 167, 0.14), transparent 12rem),
@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 2px 2px;
+  padding: 4px 0 2px;
 }
 
 .history-header p {
@@ -25,35 +25,35 @@
 .history-header h1 {
   margin: 0;
   color: #141821;
-  font-size: 1.24rem;
+  font-size: 1.08rem;
   line-height: 1.15;
 }
 
 .history-action {
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   place-items: center;
   border: 0;
-  border-radius: 15px;
+  border-radius: 13px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   box-shadow: 0 16px 28px rgba(249, 79, 167, 0.28);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 900;
 }
 
 .history-summary {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 112px;
-  gap: 10px;
+  gap: 8px;
 }
 
 .history-summary div {
   min-width: 0;
-  padding: 16px;
+  padding: 13px;
   border: 1px solid rgba(255, 255, 255, 0.78);
-  border-radius: 24px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 16px 34px rgba(78, 83, 110, 0.09);
 }
@@ -77,10 +77,10 @@
 
 .history-summary strong {
   display: block;
-  margin-top: 7px;
+  margin-top: 5px;
   overflow: hidden;
   color: #141821;
-  font-size: 1.08rem;
+  font-size: 1rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -92,9 +92,9 @@
 .history-tabs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
-  padding: 6px;
-  border-radius: 20px;
+  gap: 6px;
+  padding: 5px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 12px 26px rgba(78, 83, 110, 0.08);
 }
@@ -103,10 +103,10 @@
   display: grid;
   gap: 4px;
   min-width: 0;
-  min-height: 48px;
+  min-height: 42px;
   place-items: center;
   border: 0;
-  border-radius: 15px;
+  border-radius: 13px;
   background: transparent;
   color: #747987;
   font-size: 0.74rem;
@@ -137,22 +137,22 @@
 
 .history-list {
   display: grid;
-  gap: 12px;
-  padding-bottom: 18px;
+  gap: 10px;
+  padding-bottom: 14px;
 }
 
 .trade-history-card,
 .history-empty {
   border: 1px solid rgba(255, 255, 255, 0.78);
-  border-radius: 24px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 16px 34px rgba(78, 83, 110, 0.09);
 }
 
 .trade-history-card {
   display: grid;
-  gap: 14px;
-  padding: 15px;
+  gap: 11px;
+  padding: 12px;
 }
 
 .trade-history-top {
@@ -164,27 +164,27 @@
 
 .history-pair {
   display: inline-flex;
-  min-height: 28px;
+  min-height: 24px;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 9px;
   border-radius: 999px;
   background: #111827;
   color: #f6c453;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 950;
 }
 
 .trade-history-top strong {
   display: block;
-  margin-top: 8px;
+  margin-top: 6px;
   color: #141821;
-  font-size: 1.35rem;
+  font-size: 1.15rem;
 }
 
 .history-status {
   display: grid;
-  min-width: 74px;
-  height: 34px;
+  min-width: 68px;
+  height: 30px;
   place-items: center;
   border-radius: 999px;
   font-size: 0.74rem;
@@ -209,13 +209,13 @@
 .history-meta-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px;
+  gap: 8px;
 }
 
 .history-meta-grid div {
   min-width: 0;
-  padding: 11px;
-  border-radius: 16px;
+  padding: 10px;
+  border-radius: 14px;
   background: #f6f7fb;
 }
 
@@ -234,7 +234,7 @@
   min-height: 260px;
   place-items: center;
   align-content: center;
-  padding: 22px;
+  padding: 18px;
   text-align: center;
 }
 
