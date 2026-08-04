@@ -1,6 +1,6 @@
 .kyc-page {
   display: grid;
-  gap: 15px;
+  gap: 11px;
   align-content: start;
   background:
     radial-gradient(circle at 18% 0%, rgba(249, 79, 167, 0.12), transparent 12rem),
@@ -10,9 +10,9 @@
 .kyc-header {
   position: relative;
   display: grid;
-  min-height: 54px;
+  min-height: 50px;
   place-items: center;
-  padding-top: 8px;
+  padding-top: 5px;
   text-align: center;
 }
 
@@ -30,19 +30,19 @@
 .kyc-guide h2 {
   margin: 0;
   color: #151925;
-  font-size: 1.22rem;
+  font-size: 1.16rem;
 }
 
 .kyc-header button {
   position: absolute;
-  top: 8px;
+  top: 5px;
   right: 0;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   place-items: center;
   border: 0;
-  border-radius: 15px;
+  border-radius: 13px;
   background: linear-gradient(135deg, var(--pink), #d94fff);
   color: white;
   box-shadow: 0 16px 28px rgba(249, 79, 167, 0.28);
@@ -63,9 +63,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 18px;
-  border-radius: 28px;
+  gap: 11px;
+  padding: 14px;
+  border-radius: 22px;
   background:
     radial-gradient(circle at 86% 8%, rgba(255, 255, 255, 0.5), transparent 7rem),
     linear-gradient(135deg, #29213f, #6740a1 56%, #f94fa7);
@@ -79,26 +79,26 @@
 
 .kyc-hero strong {
   display: block;
-  margin-top: 6px;
+  margin-top: 5px;
   color: white;
-  font-size: 1.45rem;
+  font-size: 1.28rem;
   text-transform: capitalize;
 }
 
 .kyc-hero p {
   max-width: 16rem;
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   font-size: 0.82rem;
 }
 
 .kyc-badge {
   display: grid;
-  flex: 0 0 66px;
-  width: 66px;
-  height: 66px;
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 24px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.18);
   color: white;
   font-weight: 950;
@@ -112,9 +112,9 @@
 .kyc-status-card,
 .kyc-guide {
   display: grid;
-  gap: 10px;
-  padding: 15px;
-  border-radius: 24px;
+  gap: 8px;
+  padding: 13px;
+  border-radius: 20px;
 }
 
 .kyc-status-card {
@@ -154,8 +154,8 @@
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: 7px 10px;
   margin-top: 4px;
-  padding: 11px;
-  border-radius: 16px;
+  padding: 10px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.62);
 }
 
@@ -175,25 +175,25 @@
 
 .kyc-upload-grid {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .kyc-upload-card {
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
-  padding: 12px;
-  border-radius: 24px;
+  padding: 10px;
+  border-radius: 20px;
 }
 
 .kyc-preview {
   display: grid;
-  width: 88px;
-  height: 88px;
+  width: 82px;
+  height: 82px;
   place-items: center;
   overflow: hidden;
-  border-radius: 22px;
+  border-radius: 18px;
   background: linear-gradient(135deg, #fff8fc, #f5f7ff);
 }
 
@@ -205,17 +205,17 @@
 
 .kyc-preview span {
   color: var(--pink);
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 950;
 }
 
 .kyc-upload-card label {
   display: inline-flex;
   width: fit-content;
-  min-height: 36px;
+  min-height: 34px;
   align-items: center;
-  margin-top: 10px;
-  padding: 0 13px;
+  margin-top: 8px;
+  padding: 0 12px;
   border-radius: 999px;
   background: var(--pink-soft);
   color: var(--pink);
@@ -228,9 +228,9 @@
 }
 
 .kyc-submit {
-  height: 56px;
+  height: 50px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 15px;
   background: linear-gradient(135deg, #f6c453, #f94fa7);
   color: #151925;
   box-shadow: 0 16px 30px rgba(249, 79, 167, 0.22);
@@ -245,8 +245,8 @@
 
 .kyc-message {
   margin: 0;
-  padding: 11px 13px;
-  border-radius: 15px;
+  padding: 10px 12px;
+  border-radius: 13px;
   font-size: 0.82rem;
   font-weight: 850;
 }
@@ -267,6 +267,13 @@
 }
 
 @media (min-width: 760px) {
+  .kyc-page {
+    gap: 12px;
+    padding-top: 14px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
   .kyc-upload-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -277,6 +284,13 @@
 
   .kyc-preview {
     width: 100%;
-    height: 150px;
+    height: 142px;
+  }
+}
+
+@media (max-width: 370px) {
+  .kyc-page {
+    padding-right: 10px;
+    padding-left: 10px;
   }
 }
