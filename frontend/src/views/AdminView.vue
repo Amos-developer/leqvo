@@ -10,6 +10,7 @@ import {
   getAdminLeaders,
   getAdminKyc,
   getAdminOverview,
+  getAdminTransactions,
   getAdminBalanceAudit,
   getAdminUsers,
   getAdminTrades,
@@ -32,6 +33,7 @@ const admin = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 const isLoading = ref(true);
 const errorMessage = ref("");
 const overview = ref(null);
+const transactions = ref([]);
 const users = ref([]);
 const userSummary = ref({ total: 0, active: 0, inactive: 0, verified: 0 });
 const deposits = ref([]);
@@ -73,6 +75,7 @@ const isLoadingBalanceAudit = ref(false);
 
 const menuItems = [
   "Overview",
+  "Transactions",
   "Users",
   "Deposits",
   "Withdrawals",
@@ -164,12 +167,8 @@ const stats = computed(() => {
 
 const volumeBars = computed(() => overview.value?.depositVolume || []);
 const recentUsers = computed(() => overview.value?.recentUsers || []);
-
-const reviewItems = computed(() => [
-  { title: "Deposit confirmations", status: `${overview.value?.deposits?.pending || 0} open`, accent: "blue" },
-  { title: "Withdrawal approvals", status: `${overview.value?.withdrawals?.pending || 0} urgent`, accent: "pink" },
-  { title: "Registered users", status: `${overview.value?.users?.total || 0} accounts`, accent: "amber" }
-]);
+const recentTransactions = computed(() => overview.value?.recentTransactions || []);
+const transactionRows = computed(() => transactions.value || []);
 
 const depositSummaryCards = computed(() => {
   const total = deposits.value.length;
@@ -386,8 +385,9 @@ const loadAdminData = async () => {
   errorMessage.value = "";
 
   try {
-    const [overviewResult, usersResult, depositsResult, withdrawalsResult, tradesResult, leadersResult, kycResult, addressesResult, signalsResult] = await Promise.all([
+    const [overviewResult, transactionsResult, usersResult, depositsResult, withdrawalsResult, tradesResult, leadersResult, kycResult, addressesResult, signalsResult] = await Promise.all([
       getAdminOverview(),
+      getAdminTransactions(),
       getAdminUsers(),
       getAdminDeposits(),
       getAdminWithdrawals(),
@@ -399,6 +399,7 @@ const loadAdminData = async () => {
     ]);
 
     overview.value = overviewResult.data;
+    transactions.value = transactionsResult.data;
     users.value = usersResult.data.users;
     userSummary.value = usersResult.data.summary;
     deposits.value = depositsResult.data;
@@ -858,15 +859,112 @@ onMounted(loadAdminData);
           </article>
         </section>
 
-        <section class="admin-review-strip" aria-label="Review queue">
-          <article v-for="item in reviewItems" :key="item.title" :class="`is-${item.accent}`">
-            <div>
-              <strong>{{ item.title }}</strong>
-              <span>{{ item.status }}</span>
+        <section class="admin-overview-lower-grid" aria-label="Recent admin activity">
+          <article class="admin-panel admin-transactions-panel">
+            <div class="admin-panel-head">
+              <div>
+                <h2>Recent Transactions</h2>
+                <p>Latest deposit, withdrawal, and trade activity</p>
+              </div>
+              <button type="button" @click="switchTab('Transactions')">See More</button>
             </div>
-            <button type="button">Review</button>
+
+            <div class="admin-table-scroll">
+              <table class="admin-table admin-transactions-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Type</th>
+                    <th>Detail</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="transaction in recentTransactions" :key="`${transaction.type}-${transaction.userId}-${transaction.activityTime}`">
+                    <td>{{ transaction.username }}</td>
+                    <td>
+                      <span class="admin-type-pill" :class="transaction.type.toLowerCase()">{{ transaction.type }}</span>
+                    </td>
+                    <td>{{ transaction.detail || transaction.pair || "-" }}</td>
+                    <td>{{ money(transaction.amount) }} USDT</td>
+                    <td>
+                      <span class="admin-status-pill" :class="transaction.status.toLowerCase()">{{ transaction.status }}</span>
+                    </td>
+                    <td>{{ formatDateTime(transaction.activityTime) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="admin-panel admin-users-panel">
+            <div class="admin-panel-head">
+              <div>
+                <h2>Recent Accounts</h2>
+                <p>Latest registered users</p>
+              </div>
+              <button type="button" @click="switchTab('Users')">View All</button>
+            </div>
+
+            <div class="admin-user-list">
+              <div v-for="user in recentUsers" :key="user.id" class="admin-user-row">
+                <div class="admin-user-mini">{{ user.username.charAt(0).toUpperCase() }}</div>
+                <div>
+                  <strong>{{ user.username }}</strong>
+                  <span>{{ user.email }}</span>
+                </div>
+                <div class="admin-user-side">
+                  <b :class="['admin-status-pill', user.isActive ? 'completed' : 'pending']">
+                    {{ user.isActive ? "Active" : "Inactive" }}
+                  </b>
+                  <small>{{ formatDateTime(user.createdAt) }}</small>
+                </div>
+              </div>
+            </div>
           </article>
         </section>
+      </section>
+
+      <section v-else-if="activeTab === 'Transactions'" class="admin-panel admin-table-panel">
+        <div class="admin-panel-head">
+          <div>
+            <h2>All Transactions</h2>
+            <p>All deposits, withdrawals, and trades pulled from the database</p>
+          </div>
+        </div>
+
+        <div class="admin-table-scroll">
+          <table class="admin-table admin-transactions-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Type</th>
+                <th>Detail</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(transaction, index) in transactionRows" :key="`${transaction.type}-${transaction.id}-${transaction.activityTime}`">
+                <td>{{ index + 1 }}</td>
+                <td>{{ transaction.username }}</td>
+                <td>
+                  <span class="admin-type-pill" :class="transaction.type.toLowerCase()">{{ transaction.type }}</span>
+                </td>
+                <td>{{ transaction.detail || transaction.pair || "-" }}</td>
+                <td>{{ money(transaction.amount) }} USDT</td>
+                <td>
+                  <span class="admin-status-pill" :class="transaction.status.toLowerCase()">{{ transaction.status }}</span>
+                </td>
+                <td>{{ formatDateTime(transaction.activityTime) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <AdminUsersView

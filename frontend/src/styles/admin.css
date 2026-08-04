@@ -334,57 +334,73 @@
   font-size: 0.9rem;
 }
 
-.admin-review-strip {
+.admin-overview-lower-grid {
   display: grid;
   gap: 10px;
   margin-top: 10px;
 }
 
-.admin-review-strip article {
-  display: flex;
+.admin-transactions-table {
+  min-width: 680px;
+}
+
+.admin-type-pill,
+.admin-status-pill {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid var(--admin-border);
-  border-radius: 15px;
-  background: var(--admin-surface);
-  box-shadow: var(--admin-shadow);
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
-.admin-review-strip strong {
-  display: block;
-  color: var(--admin-ink);
-  font-size: 0.82rem;
+.admin-type-pill.deposit {
+  background: #e0f2fe;
+  color: #0369a1;
 }
 
-.admin-review-strip span {
-  display: block;
-  margin-top: 4px;
+.admin-type-pill.withdrawal {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.admin-status-pill.completed,
+.admin-status-pill.approved,
+.admin-status-pill.finished {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.admin-status-pill.pending,
+.admin-status-pill.confirming,
+.admin-status-pill.confirmed,
+.admin-status-pill.waiting,
+.admin-status-pill.processing {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.admin-status-pill.inactive,
+.admin-status-pill.failed,
+.admin-status-pill.expired,
+.admin-status-pill.rejected {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.admin-user-side {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.admin-user-side small {
   color: var(--admin-muted);
   font-size: 0.68rem;
   font-weight: 800;
-}
-
-.admin-review-strip button {
-  flex: 0 0 auto;
-  border: 0;
-  border-radius: 12px;
-  background: var(--admin-primary-soft);
-  color: var(--admin-primary);
-  padding: 8px 10px;
-  font-size: 0.7rem;
-  font-weight: 950;
-}
-
-.admin-review-strip article.is-blue button {
-  background: var(--admin-primary-soft);
-  color: var(--admin-primary);
-}
-
-.admin-review-strip article.is-amber button {
-  background: var(--admin-amber-soft);
-  color: var(--admin-amber);
 }
 
 .admin-chart-bars {
@@ -2375,8 +2391,9 @@
     align-items: stretch;
   }
 
-  .admin-review-strip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .admin-overview-lower-grid {
+    grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+    align-items: start;
     margin-bottom: 18px;
   }
 }
@@ -2431,7 +2448,7 @@
 .admin-foundation,
 .admin-metrics,
 .admin-grid,
-.admin-review-strip {
+.admin-overview-lower-grid {
   margin-top: 8px;
 }
 
@@ -2447,7 +2464,7 @@
 
 .admin-metrics,
 .admin-grid,
-.admin-review-strip,
+.admin-overview-lower-grid,
 .copy-signal-metrics,
 .copy-signal-workspace,
 .copy-signal-list,
@@ -2460,7 +2477,6 @@
 }
 
 .admin-metric-card,
-.admin-review-strip article,
 .copy-signal-metric-card,
 .user-signal-metric,
 .user-signal-card,
@@ -2638,7 +2654,7 @@
     margin-top: 8px;
   }
 
-  .admin-review-strip {
+  .admin-overview-lower-grid {
     margin-bottom: 10px;
   }
 }

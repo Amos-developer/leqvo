@@ -271,6 +271,12 @@ export const getAdminOverview = () => {
   });
 };
 
+export const getAdminTransactions = () => {
+  return request("/admin/transactions", {
+    headers: getAdminHeaders()
+  });
+};
+
 export const getAdminUsers = () => {
   return request("/admin/users", {
     headers: getAdminHeaders()

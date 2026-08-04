@@ -10,7 +10,8 @@ const getOverview = async () => {
     withdrawalsResult,
     tradesResult,
     recentUsersResult,
-    depositVolumeResult
+    depositVolumeResult,
+    recentTransactionsResult
   ] = await Promise.all([
     database.query(`
       SELECT
@@ -42,7 +43,19 @@ const getOverview = async () => {
       FROM trades
     `),
     database.query(`
-      SELECT id, username, email, balance, is_admin AS "isAdmin", created_at AS "createdAt"
+      SELECT
+        id,
+        username,
+        email,
+        balance,
+        is_admin AS "isAdmin",
+        created_at AS "createdAt",
+        EXISTS (
+          SELECT 1
+          FROM deposits d
+          WHERE d.user_id = users.id
+            AND d.credited_at IS NOT NULL
+        ) AS "isActive"
       FROM users
       ORDER BY created_at DESC
       LIMIT 6
@@ -60,6 +73,9 @@ const getOverview = async () => {
         ON DATE(d.created_at) = DATE(day)
       GROUP BY day
       ORDER BY day
+    `),
+    database.query(`
+      ${buildTransactionsQuery(10)}
     `)
   ]);
 
@@ -72,12 +88,81 @@ const getOverview = async () => {
     withdrawals: withdrawalsResult.rows[0],
     trades: tradesResult.rows[0],
     recentUsers: recentUsersResult.rows,
+    recentTransactions: recentTransactionsResult.rows,
     depositVolume: volumeRows.map((row) => ({
       day: row.day,
       value: Number(row.value).toFixed(2),
       height: Math.max(8, Math.round((Number(row.value) / highestVolume) * 100))
     }))
   };
+};
+
+const buildTransactionsQuery = (limit) => `
+  SELECT *
+  FROM (
+    SELECT
+      d.id,
+      d.user_id AS "userId",
+      d.username,
+      'Deposit'::TEXT AS type,
+      d.price_amount::NUMERIC AS amount,
+      CASE
+        WHEN d.credited_at IS NOT NULL THEN 'Completed'
+        ELSE INITCAP(d.status)
+      END AS status,
+      COALESCE(d.credited_at, d.updated_at, d.created_at) AS "activityTime",
+      UPPER(d.pay_currency) AS asset,
+      UPPER(d.pay_network) AS network,
+      d.pay_id AS reference,
+      NULL::TEXT AS pair,
+      CONCAT(UPPER(d.pay_currency), ' / ', UPPER(d.pay_network)) AS detail
+    FROM deposits d
+
+    UNION ALL
+
+    SELECT
+      w.id,
+      w.user_id AS "userId",
+      w.username,
+      'Withdrawal'::TEXT AS type,
+      w.amount::NUMERIC AS amount,
+      INITCAP(w.status) AS status,
+      COALESCE(w.processed_at, w.requested_at, w.created_at) AS "activityTime",
+      UPPER(w.asset) AS asset,
+      UPPER(w.network) AS network,
+      NULL::TEXT AS reference,
+      NULL::TEXT AS pair,
+      CONCAT(UPPER(w.asset), ' / ', UPPER(w.network)) AS detail
+    FROM withdrawals w
+
+    UNION ALL
+
+    SELECT
+      t.id,
+      t.user_id AS "userId",
+      t.username,
+      'Trade'::TEXT AS type,
+      t.amount::NUMERIC AS amount,
+      CASE
+        WHEN t.status = 'win' THEN 'Completed'
+        WHEN t.status = 'loose' THEN 'Failed'
+        ELSE INITCAP(t.status)
+      END AS status,
+      COALESCE(t.closed_at, t.opened_at, t.created_at) AS "activityTime",
+      'USDT'::TEXT AS asset,
+      NULL::TEXT AS network,
+      t.signal_code AS reference,
+      t.pair,
+      REPLACE(t.pair, 'USDT', '/USDT') AS detail
+    FROM trades t
+  ) transactions
+  ORDER BY "activityTime" DESC
+  ${limit ? `LIMIT ${Number(limit)}` : ""}
+`;
+
+const getTransactions = async () => {
+  const result = await database.query(buildTransactionsQuery());
+  return result.rows;
 };
 
 const getUsers = async () => {
@@ -787,6 +872,7 @@ module.exports = {
   deleteDeposit,
   getWithdrawals,
   getTrades,
+  getTransactions,
   getLeaders,
   grantLeadershipReward
 };
