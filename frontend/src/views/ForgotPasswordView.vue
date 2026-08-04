@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from "vue";
 import AuthLayout from "../components/AuthLayout.vue";
+import { requestForgotPassword } from "../utils/api";
 
 const isSubmitting = ref(false);
 const errorMessage = ref("");
@@ -10,21 +11,34 @@ const form = reactive({
   email: ""
 });
 
-const handleContinue = () => {
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+const handleContinue = async () => {
   errorMessage.value = "";
   successMessage.value = "";
 
-  if (!form.email.trim()) {
+  const email = form.email.trim().toLowerCase();
+
+  if (!email) {
     errorMessage.value = "Email is required.";
+    return;
+  }
+
+  if (!emailPattern.test(email)) {
+    errorMessage.value = "Enter a valid email address.";
     return;
   }
 
   isSubmitting.value = true;
 
-  window.setTimeout(() => {
+  try {
+    const result = await requestForgotPassword({ email });
+    successMessage.value = result.message || `Recovery request prepared for ${email}.`;
+  } catch (error) {
+    errorMessage.value = error.message || "Could not validate this email.";
+  } finally {
     isSubmitting.value = false;
-    successMessage.value = `Recovery request prepared for ${form.email.trim()}. Email reset will be connected in the next step.`;
-  }, 700);
+  }
 };
 </script>
 

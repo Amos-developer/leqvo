@@ -52,6 +52,13 @@ export const loginUser = (payload) => {
   });
 };
 
+export const requestForgotPassword = (payload) => {
+  return request("/users/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
 export const getUserById = (id) => {
   return request(`/users/${id}`);
 };

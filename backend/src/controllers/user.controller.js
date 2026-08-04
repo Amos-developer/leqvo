@@ -231,6 +231,34 @@ const requestPasswordChangeCode = async (req, res) => {
   });
 };
 
+const requestForgotPasswordReset = async (req, res) => {
+  const email = req.body.email?.trim().toLowerCase();
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is required"
+    });
+  }
+
+  const user = await userModel.findUserByEmail(email);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "No account was found with this email"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: `Recovery request prepared for ${email}`,
+    data: {
+      email
+    }
+  });
+};
+
 const changeMyPassword = async (req, res) => {
   const oldPassword = req.body.oldPassword;
   const newPassword = req.body.newPassword;
@@ -542,6 +570,7 @@ module.exports = {
   getUsers,
   getUserById,
   updateMyProfile,
+  requestForgotPasswordReset,
   requestPasswordChangeCode,
   changeMyPassword,
   requestWithdrawalPinCode,

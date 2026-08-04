@@ -6,6 +6,7 @@ const asyncHandler = require("../utils/asyncHandler");
 
 router.post("/", asyncHandler(userController.createUser));
 router.post("/login", asyncHandler(userController.loginUser));
+router.post("/forgot-password", asyncHandler(userController.requestForgotPasswordReset));
 router.patch("/me/profile", requireAuth, asyncHandler(userController.updateMyProfile));
 router.post("/me/password/code", requireAuth, asyncHandler(userController.requestPasswordChangeCode));
 router.patch("/me/password", requireAuth, asyncHandler(userController.changeMyPassword));
