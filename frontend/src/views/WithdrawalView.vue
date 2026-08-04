@@ -48,6 +48,8 @@ const canSubmit = computed(() => {
 });
 const hasApprovedWithdrawalAddress = computed(() => Boolean(approvedAddressRecord.value?.address));
 
+const generateTestCode = () => String(Math.floor(100000 + Math.random() * 900000));
+
 const formatCurrency = (value) => {
   return Number(value || 0).toLocaleString("en-US", {
     style: "currency",
@@ -81,7 +83,7 @@ const selectAsset = (asset) => {
 const requestEmailCode = () => {
   formError.value = "";
   codeRequested.value = true;
-  formMessage.value = `Verification code requested for ${user.email || "your email"}.`;
+  formMessage.value = `Code requested. Test code: ${generateTestCode()}`;
 };
 
 const loadWithdrawalEligibility = async () => {

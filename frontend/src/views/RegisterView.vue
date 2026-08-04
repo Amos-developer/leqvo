@@ -29,6 +29,8 @@ const validators = {
   sixDigits: /^\d{6}$/
 };
 
+const generateTestCode = () => String(Math.floor(100000 + Math.random() * 900000));
+
 const validateForm = () => {
   const username = form.username.trim();
   const email = form.email.trim();
@@ -76,7 +78,7 @@ const handleRequestCode = () => {
 
   window.setTimeout(() => {
     isRequestingCode.value = false;
-    codeMessage.value = "Email code request is ready. Verification will be enabled soon.";
+    codeMessage.value = `Code requested. Test code: ${generateTestCode()}`;
   }, 650);
 };
 
