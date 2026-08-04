@@ -1,6 +1,15 @@
 const tradeModel = require("../models/trade.model");
 const copySignalModel = require("../models/copySignal.model");
 
+const formatUtcTime = (value) => {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+    hour12: false
+  }).format(new Date(value));
+};
+
 const createTrade = async (req, res) => {
   const pair = req.body.pair?.trim().toUpperCase();
   const symbol = req.body.symbol?.trim().toUpperCase();
@@ -50,7 +59,7 @@ const createTrade = async (req, res) => {
   if (enteredSignal.status !== "active" || new Date(enteredSignal.validFrom) > new Date() || new Date(enteredSignal.validTo) < new Date()) {
     return res.status(400).json({
       success: false,
-      message: `This signal is not valid in the current session. Please use the active ${pair} signal for this trading window.`
+      message: `This signal is outside its trading session. It can only be used from ${formatUtcTime(enteredSignal.validFrom)} to ${formatUtcTime(enteredSignal.validTo)} UTC.`
     });
   }
 
@@ -69,8 +78,7 @@ const createTrade = async (req, res) => {
     allocationPercent,
     amount,
     entryPrice,
-    targetProfitPercent: Number(activeSignal.profitPercent || 0),
-    settlesAt: activeSignal.validTo
+    targetProfitPercent: Number(activeSignal.profitPercent || 0)
   });
 
   return res.status(201).json({

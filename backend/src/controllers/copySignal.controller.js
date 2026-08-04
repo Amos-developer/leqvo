@@ -1,5 +1,14 @@
 const copySignalModel = require("../models/copySignal.model");
 
+const formatUtcTime = (value) => {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+    hour12: false
+  }).format(new Date(value));
+};
+
 const generateSignalCode = (pair) => {
   const prefix = pair.replace("/", "").slice(0, 6).toUpperCase();
   const number = Math.floor(100000 + Math.random() * 900000);
@@ -68,7 +77,7 @@ const previewSignal = async (req, res) => {
   if (signal.status !== "active" || new Date(signal.validFrom) > new Date() || new Date(signal.validTo) < new Date()) {
     return res.status(400).json({
       success: false,
-      message: "This signal code is not available in the current trading session."
+      message: `This signal is outside its trading session. It can only be used from ${formatUtcTime(signal.validFrom)} to ${formatUtcTime(signal.validTo)} UTC.`
     });
   }
 

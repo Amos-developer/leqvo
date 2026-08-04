@@ -92,8 +92,7 @@ const createTrade = async ({
   allocationPercent,
   amount,
   entryPrice,
-  targetProfitPercent,
-  settlesAt
+  targetProfitPercent
 }) => {
   const client = await database.pool.connect();
 
@@ -143,6 +142,8 @@ const createTrade = async ({
        WHERE id = $1`,
       [user.id, amount]
     );
+
+    const settlesAt = new Date(Date.now() + 40 * 60 * 1000);
 
     const result = await client.query(
       `INSERT INTO trades (
