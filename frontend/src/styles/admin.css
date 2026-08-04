@@ -1359,7 +1359,7 @@
 
 .copy-signal-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   align-items: start;
 }
@@ -1403,6 +1403,10 @@
 .copy-signal-form-grid select:focus {
   border-color: #38bdf8;
   box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.copy-signal-note-field {
+  grid-column: 1 / -1;
 }
 
 .copy-signal-window {

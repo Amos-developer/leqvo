@@ -62,6 +62,7 @@ const signalForm = ref({
   validDate: new Date().toISOString().slice(0, 10),
   validFromTime: "14:00",
   validToTime: "14:40",
+  customStartTime: "14:00",
   profitPercent: "1.09"
 });
 const createdSignal = ref(null);
@@ -297,11 +298,38 @@ const signalTimeSlots = [
   { start: "11:00", end: "11:40", label: "Second trade" },
   { start: "13:00", end: "13:40", label: "Third trade" },
   { start: "14:00", end: "14:40", label: "Fourth trade" },
+  { start: "admin-anytime", end: "", label: "Admin signal - Any time" },
   { start: "15:00", end: "15:40", label: "Fifth bonus trade" }
 ];
 
+const padTime = (value) => String(value).padStart(2, "0");
+const addMinutesToTime = (time, minutesToAdd = 40) => {
+  if (!time || !/^\d{2}:\d{2}$/.test(time)) {
+    return "";
+  }
+
+  const [hours, minutes] = time.split(":").map(Number);
+  const totalMinutes = hours * 60 + minutes + minutesToAdd;
+  const normalized = ((totalMinutes % 1440) + 1440) % 1440;
+  const nextHours = Math.floor(normalized / 60);
+  const nextMinutes = normalized % 60;
+
+  return `${padTime(nextHours)}:${padTime(nextMinutes)}`;
+};
+
+const resolvedSignalStartTime = computed(() => {
+  return signalForm.value.validFromTime === "admin-anytime"
+    ? signalForm.value.customStartTime
+    : signalForm.value.validFromTime;
+});
+
 const availableSignalEndTimes = computed(() => {
   const selectedSlot = signalTimeSlots.find((slot) => slot.start === signalForm.value.validFromTime);
+
+  if (signalForm.value.validFromTime === "admin-anytime") {
+    const customEndTime = addMinutesToTime(signalForm.value.customStartTime);
+    return customEndTime ? [{ value: customEndTime, label: `${customEndTime} UTC` }] : [];
+  }
 
   return selectedSlot ? [{ value: selectedSlot.end, label: `${selectedSlot.end} UTC` }] : [];
 });
@@ -311,8 +339,22 @@ watch(
   (startTime) => {
     const selectedSlot = signalTimeSlots.find((slot) => slot.start === startTime);
 
+    if (startTime === "admin-anytime") {
+      signalForm.value.validToTime = addMinutesToTime(signalForm.value.customStartTime);
+      return;
+    }
+
     if (selectedSlot) {
       signalForm.value.validToTime = selectedSlot.end;
+    }
+  }
+);
+
+watch(
+  () => signalForm.value.customStartTime,
+  (customStartTime) => {
+    if (signalForm.value.validFromTime === "admin-anytime") {
+      signalForm.value.validToTime = addMinutesToTime(customStartTime);
     }
   }
 );
@@ -502,7 +544,7 @@ const deleteDepositRecord = async (deposit) => {
 };
 
 const buildSignalDates = () => {
-  const validFrom = new Date(`${signalForm.value.validDate}T${signalForm.value.validFromTime}:00Z`);
+  const validFrom = new Date(`${signalForm.value.validDate}T${resolvedSignalStartTime.value}:00Z`);
   const validTo = new Date(`${signalForm.value.validDate}T${signalForm.value.validToTime}:00Z`);
 
   return { validFrom, validTo };
@@ -1340,9 +1382,13 @@ onMounted(loadAdminData);
                 Start time
                 <select v-model="signalForm.validFromTime">
                   <option v-for="slot in signalTimeSlots" :key="slot.start" :value="slot.start">
-                    {{ slot.label }} - {{ slot.start }} UTC
+                    {{ slot.start === "admin-anytime" ? slot.label : `${slot.label} - ${slot.start} UTC` }}
                   </option>
                 </select>
+              </label>
+              <label v-if="signalForm.validFromTime === 'admin-anytime'">
+                Initiated time
+                <input v-model="signalForm.customStartTime" type="time" />
               </label>
               <label>
                 End time
@@ -1360,8 +1406,9 @@ onMounted(loadAdminData);
 
             <div class="copy-signal-window">
               <span>Valid for exactly 40 minutes</span>
-              <strong>{{ signalForm.validFromTime }} - {{ signalForm.validToTime }} UTC</strong>
+              <strong>{{ resolvedSignalStartTime }} - {{ signalForm.validToTime }} UTC</strong>
               <small v-if="signalForm.validFromTime === '15:00'">Bonus trade requires user deposit of 300 USDT and above.</small>
+              <small v-else-if="signalForm.validFromTime === 'admin-anytime'">Admin signal ends exactly 40 minutes after the initiated time.</small>
             </div>
 
             <button class="copy-signal-submit" type="button" :disabled="isCreatingSignal" @click="createCopySignal">
