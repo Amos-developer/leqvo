@@ -16,6 +16,10 @@ router.delete("/users/:id", asyncHandler(adminController.deleteUser));
 router.get("/leaders", asyncHandler(adminController.getLeaders));
 router.post("/leaders/:userId/rewards", asyncHandler(adminController.grantLeadershipReward));
 router.get("/deposits", asyncHandler(adminController.getDeposits));
+router.post("/deposits/:id/refresh", asyncHandler(adminController.refreshDeposit));
+router.post("/deposits/:id/credit", asyncHandler(adminController.creditDeposit));
+router.patch("/deposits/:id", asyncHandler(adminController.updateDeposit));
+router.delete("/deposits/:id", asyncHandler(adminController.deleteDeposit));
 router.get("/withdrawals", asyncHandler(adminController.getWithdrawals));
 router.get("/trades", asyncHandler(adminController.getTrades));
 

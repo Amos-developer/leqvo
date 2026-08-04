@@ -304,6 +304,17 @@ const findDepositsByUserId = async (userId) => {
   return result.rows;
 };
 
+const findDepositById = async (id, client = database) => {
+  const result = await client.query(
+    `SELECT ${depositFields}
+     FROM deposits
+     WHERE id = $1`,
+    [Number(id)]
+  );
+
+  return result.rows[0] || null;
+};
+
 const shouldCreditDeposit = (deposit) => {
   const status = deposit.status;
   const expectedUsd = Number(deposit.priceAmount || 0);
@@ -397,12 +408,109 @@ const refreshDepositStatus = async (paymentId) => {
   });
 };
 
+const creditDepositManually = async (depositId) => {
+  const client = await database.pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const deposit = await findDepositById(depositId, client);
+
+    if (!deposit) {
+      const error = new Error("Deposit not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (deposit.creditedAt) {
+      const error = new Error("Deposit is already credited");
+      error.statusCode = 409;
+      throw error;
+    }
+
+    await userModel.incrementUserBalance(deposit.userId, deposit.priceAmount, client);
+
+    const result = await client.query(
+      `UPDATE deposits
+       SET status = 'finished',
+           actually_paid = CASE
+             WHEN actually_paid > 0 THEN actually_paid
+             ELSE pay_amount
+           END,
+           actually_paid_at_fiat = CASE
+             WHEN actually_paid_at_fiat > 0 THEN actually_paid_at_fiat
+             ELSE price_amount
+           END,
+           credited_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING ${depositFields}`,
+      [Number(depositId)]
+    );
+
+    await client.query("COMMIT");
+    return result.rows[0] || null;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const updateDepositByAdmin = async (depositId, payload) => {
+  const result = await database.query(
+    `UPDATE deposits
+     SET price_amount = COALESCE($2, price_amount),
+         pay_amount = COALESCE($3, pay_amount),
+         actually_paid = COALESCE($4, actually_paid),
+         actually_paid_at_fiat = COALESCE($5, actually_paid_at_fiat),
+         pay_currency = COALESCE($6, pay_currency),
+         pay_network = COALESCE($7, pay_network),
+         pay_id = COALESCE($8, pay_id),
+         pay_address = COALESCE($9, pay_address),
+         status = COALESCE($10, status),
+         updated_at = NOW()
+     WHERE id = $1
+     RETURNING ${depositFields}`,
+    [
+      Number(depositId),
+      payload.priceAmount,
+      payload.payAmount,
+      payload.actuallyPaid,
+      payload.actuallyPaidAtFiat,
+      payload.payCurrency,
+      payload.payNetwork,
+      payload.paymentId,
+      payload.payAddress,
+      payload.status
+    ]
+  );
+
+  return result.rows[0] || null;
+};
+
+const deleteDepositByAdmin = async (depositId) => {
+  const result = await database.query(
+    `DELETE FROM deposits
+     WHERE id = $1
+     RETURNING id`,
+    [Number(depositId)]
+  );
+
+  return result.rows[0] || null;
+};
+
 module.exports = {
   getPayCurrency,
   findActiveDeposit,
+  findDepositById,
   findDepositByPaymentId,
   findDepositsByUserId,
   createNowPaymentsPayment,
   applyPaymentUpdate,
-  refreshDepositStatus
+  refreshDepositStatus,
+  creditDepositManually,
+  updateDepositByAdmin,
+  deleteDepositByAdmin
 };

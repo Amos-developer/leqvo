@@ -619,6 +619,29 @@
   font-size: 0.7rem;
 }
 
+.admin-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-inline-actions button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(206, 216, 232, 0.92);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--admin-ink);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.admin-inline-actions button.danger {
+  color: #c2415a;
+  border-color: rgba(255, 213, 221, 0.95);
+  background: #fff7f9;
+}
+
 .admin-empty-state {
   padding: 24px;
   text-align: center;

@@ -1,6 +1,7 @@
 const adminModel = require("../models/admin.model");
 const userModel = require("../models/user.model");
 const teamModel = require("../models/team.model");
+const depositModel = require("../models/deposit.model");
 const bcrypt = require("bcryptjs");
 
 const PASSWORD_SALT_ROUNDS = 10;
@@ -298,6 +299,111 @@ const getDeposits = async (req, res) => {
   });
 };
 
+const refreshDeposit = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const deposit = await adminModel.getDeposits().then((items) => items.find((item) => Number(item.id) === Number(req.params.id)));
+
+  if (!deposit) {
+    return res.status(404).json({
+      success: false,
+      message: "Deposit not found"
+    });
+  }
+
+  const updatedDeposit = await depositModel.refreshDepositStatus(deposit.paymentId);
+
+  return res.status(200).json({
+    success: true,
+    message: "Deposit refreshed from NOWPayments",
+    data: updatedDeposit
+  });
+};
+
+const creditDeposit = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const deposit = await adminModel.creditDeposit(req.params.id);
+
+  if (!deposit) {
+    return res.status(404).json({
+      success: false,
+      message: "Deposit not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Deposit credited manually",
+    data: deposit
+  });
+};
+
+const updateDeposit = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const payload = {
+    priceAmount: req.body.priceAmount === undefined ? undefined : Number(req.body.priceAmount),
+    payAmount: req.body.payAmount === undefined ? undefined : Number(req.body.payAmount),
+    actuallyPaid: req.body.actuallyPaid === undefined ? undefined : Number(req.body.actuallyPaid),
+    actuallyPaidAtFiat: req.body.actuallyPaidAtFiat === undefined ? undefined : Number(req.body.actuallyPaidAtFiat),
+    payCurrency: req.body.payCurrency?.trim().toLowerCase(),
+    payNetwork: req.body.payNetwork?.trim().toLowerCase(),
+    paymentId: req.body.paymentId?.trim(),
+    payAddress: req.body.payAddress?.trim(),
+    status: req.body.status?.trim().toLowerCase()
+  };
+
+  const deposit = await adminModel.updateDeposit(req.params.id, payload);
+
+  if (!deposit) {
+    return res.status(404).json({
+      success: false,
+      message: "Deposit not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Deposit updated successfully",
+    data: deposit
+  });
+};
+
+const deleteDeposit = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const deposit = await adminModel.deleteDeposit(req.params.id);
+
+  if (!deposit) {
+    return res.status(404).json({
+      success: false,
+      message: "Deposit not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Deposit deleted successfully"
+  });
+};
+
 const getWithdrawals = async (req, res) => {
   const admin = await requireAdmin(req, res);
 
@@ -391,6 +497,10 @@ module.exports = {
   updateUser,
   deleteUser,
   getDeposits,
+  refreshDeposit,
+  creditDeposit,
+  updateDeposit,
+  deleteDeposit,
   getWithdrawals,
   getTrades,
   getLeaders,

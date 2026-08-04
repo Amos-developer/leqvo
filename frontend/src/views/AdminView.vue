@@ -3,6 +3,10 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   getAdminDeposits,
+  refreshAdminDeposit,
+  creditAdminDeposit,
+  updateAdminDeposit,
+  deleteAdminDeposit,
   getAdminLeaders,
   getAdminKyc,
   getAdminOverview,
@@ -32,6 +36,7 @@ const users = ref([]);
 const userSummary = ref({ total: 0, active: 0, inactive: 0, verified: 0 });
 const deposits = ref([]);
 const withdrawals = ref([]);
+const depositActionId = ref("");
 const userTrades = ref([]);
 const userTradeSummary = ref({ users: 0, active: 0, completed: 0, total: 0 });
 const withdrawalAddresses = ref([]);
@@ -353,6 +358,88 @@ const loadAdminData = async () => {
     errorMessage.value = error.message;
   } finally {
     isLoading.value = false;
+  }
+};
+
+const refreshDepositRecord = async (deposit) => {
+  depositActionId.value = `${deposit.id}-refresh`;
+  errorMessage.value = "";
+
+  try {
+    await refreshAdminDeposit(deposit.id);
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    depositActionId.value = "";
+  }
+};
+
+const creditDepositRecord = async (deposit) => {
+  depositActionId.value = `${deposit.id}-credit`;
+  errorMessage.value = "";
+
+  try {
+    await creditAdminDeposit(deposit.id);
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    depositActionId.value = "";
+  }
+};
+
+const editDepositRecord = async (deposit) => {
+  const priceAmount = window.prompt("Edit deposit amount (USD)", String(deposit.priceAmount ?? ""));
+
+  if (priceAmount === null) {
+    return;
+  }
+
+  const payAddress = window.prompt("Edit deposit address", deposit.payAddress || "");
+
+  if (payAddress === null) {
+    return;
+  }
+
+  const status = window.prompt("Edit deposit status", deposit.status || "");
+
+  if (status === null) {
+    return;
+  }
+
+  depositActionId.value = `${deposit.id}-edit`;
+  errorMessage.value = "";
+
+  try {
+    await updateAdminDeposit(deposit.id, {
+      priceAmount: Number(priceAmount),
+      payAddress: payAddress.trim(),
+      status: status.trim().toLowerCase()
+    });
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    depositActionId.value = "";
+  }
+};
+
+const deleteDepositRecord = async (deposit) => {
+  if (!window.confirm(`Delete deposit ${deposit.paymentId} for ${deposit.username}?`)) {
+    return;
+  }
+
+  depositActionId.value = `${deposit.id}-delete`;
+  errorMessage.value = "";
+
+  try {
+    await deleteAdminDeposit(deposit.id);
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    depositActionId.value = "";
   }
 };
 
@@ -740,7 +827,7 @@ onMounted(loadAdminData);
         <div class="admin-panel-head">
           <div>
             <h2>Deposits</h2>
-            <p>Deposit payments stored in PostgreSQL</p>
+            <p>Requested addresses, NOWPayments status, and manual credit controls</p>
           </div>
         </div>
 
@@ -753,19 +840,77 @@ onMounted(loadAdminData);
                 <th>Amount</th>
                 <th>Paid</th>
                 <th>Currency</th>
+                <th>Address</th>
+                <th>Payment</th>
                 <th>Status</th>
                 <th>Created</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(deposit, index) in deposits" :key="deposit.id">
                 <td>{{ index + 1 }}</td>
-                <td>{{ deposit.username }}</td>
-                <td>{{ money(deposit.priceAmount) }}</td>
-                <td>{{ money(deposit.actuallyPaid) }}</td>
-                <td>{{ deposit.payCurrency }} / {{ deposit.payNetwork }}</td>
-                <td>{{ deposit.status }}</td>
-                <td>{{ formatDate(deposit.createdAt) }}</td>
+                <td>
+                  <strong>{{ deposit.username }}</strong>
+                  <span>{{ deposit.userId }}</span>
+                </td>
+                <td>
+                  <strong>{{ money(deposit.priceAmount) }}</strong>
+                  <span>Target USD</span>
+                </td>
+                <td>
+                  <strong>{{ Number(deposit.actuallyPaid || 0).toFixed(6) }}</strong>
+                  <span>Fiat {{ money(deposit.actuallyPaidAtFiat || 0) }}</span>
+                </td>
+                <td>
+                  <strong>{{ deposit.payCurrency }} / {{ deposit.payNetwork }}</strong>
+                  <span>{{ Number(deposit.payAmount || 0).toFixed(6) }}</span>
+                </td>
+                <td>
+                  <strong>{{ deposit.payAddress }}</strong>
+                </td>
+                <td>
+                  <strong>{{ deposit.paymentId }}</strong>
+                  <span>{{ deposit.creditedAt ? "Credited" : "Pending credit" }}</span>
+                </td>
+                <td>
+                  <strong>{{ deposit.status }}</strong>
+                  <span>{{ deposit.creditedAt ? formatDateTime(deposit.creditedAt) : "Not credited" }}</span>
+                </td>
+                <td>{{ formatDateTime(deposit.createdAt) }}</td>
+                <td>
+                  <div class="admin-inline-actions">
+                    <button
+                      type="button"
+                      :disabled="depositActionId === `${deposit.id}-refresh`"
+                      @click="refreshDepositRecord(deposit)"
+                    >
+                      {{ depositActionId === `${deposit.id}-refresh` ? "Checking..." : "Check" }}
+                    </button>
+                    <button
+                      type="button"
+                      :disabled="Boolean(deposit.creditedAt) || depositActionId === `${deposit.id}-credit`"
+                      @click="creditDepositRecord(deposit)"
+                    >
+                      {{ depositActionId === `${deposit.id}-credit` ? "Crediting..." : "Credit" }}
+                    </button>
+                    <button
+                      type="button"
+                      :disabled="depositActionId === `${deposit.id}-edit`"
+                      @click="editDepositRecord(deposit)"
+                    >
+                      {{ depositActionId === `${deposit.id}-edit` ? "Saving..." : "Edit" }}
+                    </button>
+                    <button
+                      type="button"
+                      class="danger"
+                      :disabled="depositActionId === `${deposit.id}-delete`"
+                      @click="deleteDepositRecord(deposit)"
+                    >
+                      {{ depositActionId === `${deposit.id}-delete` ? "Deleting..." : "Delete" }}
+                    </button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>

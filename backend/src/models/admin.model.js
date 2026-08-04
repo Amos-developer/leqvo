@@ -1,6 +1,7 @@
 const database = require("../config/database");
 const leadershipModel = require("./leadership.model");
 const userModel = require("./user.model");
+const depositModel = require("./deposit.model");
 
 const getOverview = async () => {
   const [
@@ -181,18 +182,34 @@ const getDeposits = async () => {
       price_amount AS "priceAmount",
       pay_amount AS "payAmount",
       actually_paid AS "actuallyPaid",
+      actually_paid_at_fiat AS "actuallyPaidAtFiat",
       pay_currency AS "payCurrency",
       pay_network AS "payNetwork",
       pay_id AS "paymentId",
+      pay_address AS "payAddress",
+      qr_code AS "qrCode",
       status,
       credited_at AS "creditedAt",
-      created_at AS "createdAt"
+      created_at AS "createdAt",
+      updated_at AS "updatedAt"
     FROM deposits
     ORDER BY created_at DESC
     LIMIT 100
   `);
 
   return result.rows;
+};
+
+const creditDeposit = async (id) => {
+  return depositModel.creditDepositManually(id);
+};
+
+const updateDeposit = async (id, payload) => {
+  return depositModel.updateDepositByAdmin(id, payload);
+};
+
+const deleteDeposit = async (id) => {
+  return depositModel.deleteDepositByAdmin(id);
 };
 
 const getWithdrawals = async () => {
@@ -765,6 +782,9 @@ module.exports = {
   getUserDetails,
   getBalanceAudit,
   getDeposits,
+  creditDeposit,
+  updateDeposit,
+  deleteDeposit,
   getWithdrawals,
   getTrades,
   getLeaders,

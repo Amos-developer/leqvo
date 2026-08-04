@@ -318,6 +318,35 @@ export const getAdminDeposits = () => {
   });
 };
 
+export const refreshAdminDeposit = (id) => {
+  return request(`/admin/deposits/${id}/refresh`, {
+    method: "POST",
+    headers: getAdminHeaders()
+  });
+};
+
+export const creditAdminDeposit = (id) => {
+  return request(`/admin/deposits/${id}/credit`, {
+    method: "POST",
+    headers: getAdminHeaders()
+  });
+};
+
+export const updateAdminDeposit = (id, payload) => {
+  return request(`/admin/deposits/${id}`, {
+    method: "PATCH",
+    headers: getAdminHeaders(),
+    body: JSON.stringify(payload)
+  });
+};
+
+export const deleteAdminDeposit = (id) => {
+  return request(`/admin/deposits/${id}`, {
+    method: "DELETE",
+    headers: getAdminHeaders()
+  });
+};
+
 export const getAdminWithdrawals = () => {
   return request("/admin/withdrawals", {
     headers: getAdminHeaders()
