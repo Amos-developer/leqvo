@@ -77,14 +77,16 @@
 
 .auth-copy h1 {
   max-width: 15ch;
-  font-size: clamp(1.95rem, 8vw, 3rem);
+  font-size: clamp(1.3rem, 5vw, 2.2rem);
   line-height: 1.05;
   letter-spacing: 0;
   margin-bottom: 8px;
+  font-weight: 800;
 }
 
 .auth-copy > p:last-child {
   max-width: 30rem;
+  font-size: 0.82rem;
   line-height: 1.5;
   margin: 0;
 }
@@ -114,6 +116,14 @@
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
+.auth-form label {
+  display: grid;
+  gap: 7px;
+  color: #4c4a55;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .auth-form input:focus {
   border-color: var(--pink);
   box-shadow: 0 0 0 4px rgba(249, 79, 167, 0.12);
@@ -123,7 +133,12 @@
 .auth-footer {
   margin: 16px 0 0;
   color: var(--muted);
+  font-size: 0.82rem;
   text-align: center;
+}
+
+.auth-footer a {
+  font-weight: 800;
 }
 
 .register-visual {
@@ -167,15 +182,15 @@
 
 .optional-label {
   color: var(--pink);
-  font-size: 0.7rem;
-  font-weight: 900;
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 
 .code-helper-message {
   margin: -2px 0 0;
   color: #139665;
-  font-size: 0.74rem;
-  font-weight: 800;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .register-options {
@@ -189,8 +204,8 @@
   align-items: center;
   gap: 9px !important;
   color: var(--muted) !important;
-  font-size: 0.78rem !important;
-  font-weight: 800 !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
   line-height: 1.35;
 }
 
