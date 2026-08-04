@@ -23,9 +23,9 @@ const errorMessage = ref("");
 const successMessage = ref("");
 
 const documentCards = [
-  { key: "idFront", title: "ID front", text: "Upload the front page clearly" },
-  { key: "idBack", title: "ID back", text: "Upload the back page clearly" },
-  { key: "selfie", title: "Selfie", text: "Take a bright selfie holding no document" }
+  { key: "idFront", title: "ID front", text: "Upload the front page clearly", placeholder: "Front" },
+  { key: "idBack", title: "ID back", text: "Upload the back page clearly", placeholder: "Back" },
+  { key: "selfie", title: "Selfie", text: "Take a bright selfie holding no document", placeholder: "Selfie" }
 ];
 
 const canSubmit = computed(() => {
@@ -186,7 +186,7 @@ onMounted(loadKyc);
       <article v-for="card in documentCards" :key="card.key" class="kyc-upload-card">
         <div class="kyc-preview">
           <img v-if="previews[card.key]" :src="previews[card.key]" :alt="card.title" />
-          <span v-else>{{ card.title.charAt(0) }}</span>
+          <span v-else>{{ card.placeholder }}</span>
         </div>
         <div>
           <strong>{{ card.title }}</strong>
