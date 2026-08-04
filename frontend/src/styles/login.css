@@ -202,6 +202,53 @@
   line-height: 1.45;
 }
 
+.login-trust-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.login-trust-item {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 247, 252, 0.96), rgba(245, 245, 255, 0.94));
+  border: 1px solid rgba(232, 220, 243, 0.92);
+  box-shadow: 0 10px 24px rgba(78, 83, 110, 0.06);
+  text-align: center;
+}
+
+.login-trust-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(169, 107, 245, 0.16), rgba(217, 79, 255, 0.18));
+  color: var(--violet);
+}
+
+.login-trust-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.login-trust-item strong {
+  display: block;
+  color: #5d5070;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
 @media (min-width: 900px) {
   .login-page {
     grid-template-columns: 1fr;
@@ -231,6 +278,7 @@
     min-height: auto;
     padding: 0;
   }
+
 }
 
 @media (max-width: 380px) {
@@ -252,6 +300,10 @@
 
   .login-security-tip {
     padding: 11px;
+  }
+
+  .login-trust-row {
+    grid-template-columns: 1fr;
   }
 }
 

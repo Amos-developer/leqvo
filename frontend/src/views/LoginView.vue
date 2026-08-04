@@ -106,6 +106,36 @@ const handleLogin = async () => {
           <p>Never share your email or password with anyone. Leqvo admin will never ask for your login details.</p>
         </div>
       </div>
+
+      <section class="login-trust-row" aria-label="Platform trust points">
+        <article class="login-trust-item">
+          <span class="login-trust-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 3l7 3v5c0 4.6-2.8 8.6-7 10-4.2-1.4-7-5.4-7-10V6l7-3Z" />
+              <path d="M9 12l2 2 4-5" />
+            </svg>
+          </span>
+          <strong>Secure</strong>
+        </article>
+        <article class="login-trust-item">
+          <span class="login-trust-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 7v5l3 3" />
+              <circle cx="12" cy="12" r="8" />
+            </svg>
+          </span>
+          <strong>24/7 Support</strong>
+        </article>
+        <article class="login-trust-item">
+          <span class="login-trust-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M5 16l4-4 3 3 7-7" />
+              <path d="M16 8h3v3" />
+            </svg>
+          </span>
+          <strong>Live Markets</strong>
+        </article>
+      </section>
     </div>
   </section>
 </template>
