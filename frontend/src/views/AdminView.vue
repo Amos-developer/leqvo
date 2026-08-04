@@ -37,6 +37,9 @@ const userSummary = ref({ total: 0, active: 0, inactive: 0, verified: 0 });
 const deposits = ref([]);
 const withdrawals = ref([]);
 const depositActionId = ref("");
+const depositSearch = ref("");
+const depositStatusFilter = ref("all");
+const depositAssetFilter = ref("all");
 const userTrades = ref([]);
 const userTradeSummary = ref({ users: 0, active: 0, completed: 0, total: 0 });
 const withdrawalAddresses = ref([]);
@@ -167,6 +170,60 @@ const reviewItems = computed(() => [
   { title: "Withdrawal approvals", status: `${overview.value?.withdrawals?.pending || 0} urgent`, accent: "pink" },
   { title: "Registered users", status: `${overview.value?.users?.total || 0} accounts`, accent: "amber" }
 ]);
+
+const depositSummaryCards = computed(() => {
+  const total = deposits.value.length;
+  const credited = deposits.value.filter((deposit) => Boolean(deposit.creditedAt)).length;
+  const ignored = deposits.value.filter((deposit) => {
+    return !deposit.creditedAt && !["waiting", "confirming", "confirmed", "finished"].includes(String(deposit.status || "").toLowerCase());
+  }).length;
+  const creditedTotal = deposits.value.reduce((totalAmount, deposit) => {
+    return totalAmount + (deposit.creditedAt ? Number(deposit.priceAmount || 0) : 0);
+  }, 0);
+
+  return [
+    { label: "Transactions", value: total, note: "Database deposit rows" },
+    { label: "Counted Credited", value: credited, note: "Credited to user balance" },
+    { label: "Ignored", value: ignored, note: "Uncredited or rejected rows" },
+    { label: "Counted Deposit Total", value: `${money(creditedTotal)} USDT`, note: "Credited deposit volume" }
+  ];
+});
+
+const depositStatusOptions = [
+  { label: "All Statuses", value: "all" },
+  { label: "Waiting", value: "waiting" },
+  { label: "Confirming", value: "confirming" },
+  { label: "Confirmed", value: "confirmed" },
+  { label: "Finished", value: "finished" },
+  { label: "Expired", value: "expired" },
+  { label: "Failed", value: "failed" }
+];
+
+const depositAssetOptions = computed(() => {
+  const assets = [...new Set(deposits.value.map((deposit) => String(deposit.payCurrency || "").toUpperCase()).filter(Boolean))];
+  return [{ label: "All Assets", value: "all" }, ...assets.map((asset) => ({ label: asset, value: asset }))];
+});
+
+const filteredDeposits = computed(() => {
+  const search = depositSearch.value.trim().toLowerCase();
+
+  return deposits.value.filter((deposit) => {
+    const status = String(deposit.status || "").toLowerCase();
+    const asset = String(deposit.payCurrency || "").toUpperCase();
+    const matchesSearch =
+      !search ||
+      String(deposit.id).toLowerCase().includes(search) ||
+      String(deposit.paymentId || "").toLowerCase().includes(search) ||
+      String(deposit.username || "").toLowerCase().includes(search) ||
+      String(deposit.userId || "").toLowerCase().includes(search) ||
+      String(deposit.payAddress || "").toLowerCase().includes(search);
+
+    const matchesStatus = depositStatusFilter.value === "all" || status === depositStatusFilter.value;
+    const matchesAsset = depositAssetFilter.value === "all" || asset === depositAssetFilter.value;
+
+    return matchesSearch && matchesStatus && matchesAsset;
+  });
+});
 
 const leaderCards = computed(() => [
   { label: "Tracked Leaders", value: leaderSummary.value.total || 0, note: "Leadership records" },
@@ -823,98 +880,143 @@ onMounted(loadAdminData);
         @loading="isLoading = $event"
       />
 
-      <section v-else-if="activeTab === 'Deposits'" class="admin-panel admin-table-panel">
-        <div class="admin-panel-head">
+      <section v-else-if="activeTab === 'Deposits'" class="admin-view-stack deposit-operations-view">
+        <section class="admin-panel deposit-operations-hero">
           <div>
-            <h2>Deposits</h2>
-            <p>Requested addresses, NOWPayments status, and manual credit controls</p>
+            <span>Deposit Operations</span>
+            <h2>Track NOWPayments deposits inside the admin panel.</h2>
+            <p>Review incoming crypto deposits, fetch live provider details, inspect addresses and payment ids, and control which credited deposits are counted in platform totals.</p>
           </div>
-        </div>
+        </section>
 
-        <div class="admin-table-scroll">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>User</th>
-                <th>Amount</th>
-                <th>Paid</th>
-                <th>Currency</th>
-                <th>Address</th>
-                <th>Payment</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(deposit, index) in deposits" :key="deposit.id">
-                <td>{{ index + 1 }}</td>
-                <td>
+        <section class="deposit-operations-metrics" aria-label="Deposit operations metrics">
+          <article v-for="card in depositSummaryCards" :key="card.label" class="deposit-operations-metric">
+            <span>{{ card.label }}</span>
+            <strong>{{ card.value }}</strong>
+            <p>{{ card.note }}</p>
+          </article>
+        </section>
+
+        <section class="admin-panel deposit-records-panel">
+          <div class="deposit-records-head">
+            <div>
+              <span>Transactions</span>
+              <h2>Deposit Records</h2>
+            </div>
+          </div>
+
+          <div class="deposit-records-filters">
+            <label class="deposit-records-search">
+              <input
+                v-model.trim="depositSearch"
+                type="search"
+                placeholder="Search by DEP ID, user, payment ID or address"
+              />
+            </label>
+            <select v-model="depositStatusFilter">
+              <option v-for="option in depositStatusOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <select v-model="depositAssetFilter">
+              <option v-for="option in depositAssetOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <button type="button" @click="loadAdminData">Apply</button>
+            <button
+              type="button"
+              class="ghost"
+              @click="
+                depositSearch = '';
+                depositStatusFilter = 'all';
+                depositAssetFilter = 'all';
+              "
+            >
+              Reset
+            </button>
+          </div>
+
+          <div class="deposit-records-list">
+            <article v-if="!filteredDeposits.length" class="admin-empty-state">
+              <h2>No deposit records found</h2>
+              <p>Every visible deposit row here is loaded from the database.</p>
+            </article>
+
+            <article v-for="deposit in filteredDeposits" v-else :key="deposit.id" class="deposit-record-card">
+              <div class="deposit-record-user">
+                <div class="admin-user-mini">{{ deposit.username.charAt(0).toUpperCase() }}</div>
+                <div>
                   <strong>{{ deposit.username }}</strong>
                   <span>{{ deposit.userId }}</span>
-                </td>
-                <td>
-                  <strong>{{ money(deposit.priceAmount) }}</strong>
-                  <span>Target USD</span>
-                </td>
-                <td>
-                  <strong>{{ Number(deposit.actuallyPaid || 0).toFixed(6) }}</strong>
-                  <span>Fiat {{ money(deposit.actuallyPaidAtFiat || 0) }}</span>
-                </td>
-                <td>
-                  <strong>{{ deposit.payCurrency }} / {{ deposit.payNetwork }}</strong>
-                  <span>{{ Number(deposit.payAmount || 0).toFixed(6) }}</span>
-                </td>
-                <td>
-                  <strong>{{ deposit.payAddress }}</strong>
-                </td>
-                <td>
-                  <strong>{{ deposit.paymentId }}</strong>
-                  <span>{{ deposit.creditedAt ? "Credited" : "Pending credit" }}</span>
-                </td>
-                <td>
-                  <strong>{{ deposit.status }}</strong>
-                  <span>{{ deposit.creditedAt ? formatDateTime(deposit.creditedAt) : "Not credited" }}</span>
-                </td>
-                <td>{{ formatDateTime(deposit.createdAt) }}</td>
-                <td>
-                  <div class="admin-inline-actions">
-                    <button
-                      type="button"
-                      :disabled="depositActionId === `${deposit.id}-refresh`"
-                      @click="refreshDepositRecord(deposit)"
-                    >
-                      {{ depositActionId === `${deposit.id}-refresh` ? "Checking..." : "Check" }}
-                    </button>
-                    <button
-                      type="button"
-                      :disabled="Boolean(deposit.creditedAt) || depositActionId === `${deposit.id}-credit`"
-                      @click="creditDepositRecord(deposit)"
-                    >
-                      {{ depositActionId === `${deposit.id}-credit` ? "Crediting..." : "Credit" }}
-                    </button>
-                    <button
-                      type="button"
-                      :disabled="depositActionId === `${deposit.id}-edit`"
-                      @click="editDepositRecord(deposit)"
-                    >
-                      {{ depositActionId === `${deposit.id}-edit` ? "Saving..." : "Edit" }}
-                    </button>
-                    <button
-                      type="button"
-                      class="danger"
-                      :disabled="depositActionId === `${deposit.id}-delete`"
-                      @click="deleteDepositRecord(deposit)"
-                    >
-                      {{ depositActionId === `${deposit.id}-delete` ? "Deleting..." : "Delete" }}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </div>
+
+              <div class="deposit-record-amount">
+                <strong>{{ money(deposit.priceAmount) }}</strong>
+                <span>Expected {{ Number(deposit.payAmount || 0).toFixed(6) }} {{ String(deposit.payCurrency || "").toUpperCase() }}</span>
+                <b>Paid {{ Number(deposit.actuallyPaid || 0).toFixed(6) }} {{ String(deposit.payCurrency || "").toUpperCase() }}</b>
+                <small>Credited {{ deposit.creditedAt ? money(deposit.priceAmount) : "0.00" }} USDT</small>
+              </div>
+
+              <div class="deposit-record-status">
+                <span :class="['deposit-record-badge', deposit.creditedAt ? 'completed' : String(deposit.status || '').toLowerCase()]">
+                  {{ deposit.creditedAt ? "Credited" : deposit.status }}
+                </span>
+              </div>
+
+              <div class="deposit-record-payment">
+                <strong>{{ String(deposit.payCurrency || "").toUpperCase() }}</strong>
+                <span>{{ String(deposit.payNetwork || "").toUpperCase() }}</span>
+                <small>{{ deposit.payAddress }}</small>
+              </div>
+
+              <div class="deposit-record-payment-id">
+                <strong>DEP-{{ deposit.id }}</strong>
+                <span>Payment ID: {{ deposit.paymentId }}</span>
+                <small>Address: {{ deposit.payAddress }}</small>
+              </div>
+
+              <div class="deposit-record-timeline">
+                <span>Created: {{ formatDateTime(deposit.createdAt) }}</span>
+                <span>Updated: {{ formatDateTime(deposit.updatedAt) }}</span>
+                <span>Credited: {{ deposit.creditedAt ? formatDateTime(deposit.creditedAt) : "Not credited" }}</span>
+              </div>
+
+              <div class="deposit-record-actions">
+                <button
+                  type="button"
+                  :disabled="depositActionId === `${deposit.id}-refresh`"
+                  @click="refreshDepositRecord(deposit)"
+                >
+                  {{ depositActionId === `${deposit.id}-refresh` ? "Checking..." : "Check NowPayments" }}
+                </button>
+                <button
+                  type="button"
+                  :disabled="Boolean(deposit.creditedAt) || depositActionId === `${deposit.id}-credit`"
+                  @click="creditDepositRecord(deposit)"
+                >
+                  {{ depositActionId === `${deposit.id}-credit` ? "Crediting..." : "Manual Credit" }}
+                </button>
+                <button
+                  type="button"
+                  :disabled="depositActionId === `${deposit.id}-edit`"
+                  @click="editDepositRecord(deposit)"
+                >
+                  {{ depositActionId === `${deposit.id}-edit` ? "Saving..." : "Edit" }}
+                </button>
+                <button
+                  type="button"
+                  class="ghost"
+                  :disabled="depositActionId === `${deposit.id}-delete`"
+                  @click="deleteDepositRecord(deposit)"
+                >
+                  {{ depositActionId === `${deposit.id}-delete` ? "Deleting..." : "Delete" }}
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
       </section>
 
       <section v-else-if="activeTab === 'Withdrawals'" class="admin-panel admin-table-panel">

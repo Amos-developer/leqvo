@@ -642,6 +642,252 @@
   background: #fff7f9;
 }
 
+.deposit-operations-view {
+  gap: 12px;
+}
+
+.deposit-operations-hero {
+  min-height: 132px;
+  background:
+    radial-gradient(circle at 85% 12%, rgba(96, 165, 250, 0.14), transparent 26%),
+    linear-gradient(135deg, #f8fbff, #edf5ff 58%, #e7f0fb);
+}
+
+.deposit-operations-hero span,
+.deposit-records-head span {
+  color: #2563eb;
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.deposit-operations-hero h2,
+.deposit-records-head h2 {
+  margin: 8px 0 0;
+  color: var(--admin-ink);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.deposit-operations-hero p {
+  max-width: 820px;
+  margin: 10px 0 0;
+  color: var(--admin-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.deposit-operations-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.deposit-operations-metric {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+}
+
+.deposit-operations-metric span {
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.deposit-operations-metric strong {
+  color: var(--admin-ink);
+  font-size: 1.15rem;
+  line-height: 1.1;
+}
+
+.deposit-operations-metric p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 0.76rem;
+}
+
+.deposit-records-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.deposit-records-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.deposit-records-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(180px, 0.68fr) minmax(180px, 0.68fr) auto auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.deposit-records-search input,
+.deposit-records-filters select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #dbe4ef;
+  border-radius: 14px;
+  outline: 0;
+  padding: 0 14px;
+  background: #fff;
+  color: var(--admin-ink);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.deposit-records-filters button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #1d8be7;
+  color: #fff;
+  font-weight: 900;
+}
+
+.deposit-records-filters button.ghost,
+.deposit-record-actions button.ghost {
+  background: transparent;
+  color: #2563eb;
+}
+
+.deposit-records-list {
+  display: grid;
+  gap: 10px;
+}
+
+.deposit-record-card {
+  display: grid;
+  grid-template-columns: 1.1fr 1.05fr 0.72fr 0.86fr 1fr 1fr 1.1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 0;
+  border-top: 1px solid #e7edf5;
+}
+
+.deposit-record-card:first-child {
+  border-top: 0;
+}
+
+.deposit-record-user,
+.deposit-record-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.deposit-record-user strong,
+.deposit-record-amount strong,
+.deposit-record-payment strong,
+.deposit-record-payment-id strong {
+  display: block;
+}
+
+.deposit-record-user span,
+.deposit-record-amount span,
+.deposit-record-payment span,
+.deposit-record-payment small,
+.deposit-record-payment-id span,
+.deposit-record-payment-id small,
+.deposit-record-timeline span {
+  display: block;
+  margin-top: 3px;
+  color: var(--admin-muted);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.deposit-record-amount b {
+  display: block;
+  margin-top: 6px;
+  color: #15803d;
+  font-size: 0.8rem;
+}
+
+.deposit-record-amount small {
+  display: block;
+  margin-top: 4px;
+  color: #0a9f66;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.deposit-record-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: #2563eb;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.deposit-record-badge.completed,
+.deposit-record-badge.finished {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.deposit-record-badge.failed,
+.deposit-record-badge.expired {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+.deposit-record-timeline {
+  display: grid;
+  gap: 6px;
+}
+
+.deposit-record-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.deposit-record-actions button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #dbe4ef;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--admin-ink);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+@media (max-width: 1180px) {
+  .deposit-record-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deposit-record-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 920px) {
+  .deposit-operations-metrics,
+  .deposit-records-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-empty-state {
   padding: 24px;
   text-align: center;
