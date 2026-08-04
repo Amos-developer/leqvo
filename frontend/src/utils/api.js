@@ -205,6 +205,10 @@ export const createTrade = (payload) => {
   });
 };
 
+export const getMyTrades = () => {
+  return request("/trades/my");
+};
+
 export const previewTradeSignal = (signalCode) => {
   return request(`/copy-signals/preview/${encodeURIComponent(signalCode)}`);
 };

@@ -5,7 +5,6 @@ import { CandlestickSeries, createChart } from "lightweight-charts";
 import { createBinanceKlineSocket, fetchBinanceKlines } from "../utils/binanceKlineSocket";
 import { createBinanceMarketSocket, createInitialBinanceMarkets } from "../utils/binanceMarketSocket";
 import { createTrade, previewTradeSignal } from "../utils/api";
-import { saveTradeRecord } from "../utils/tradeHistory";
 
 const route = useRoute();
 const router = useRouter();
@@ -68,11 +67,6 @@ const formatChange = (value) => {
   return `${sign}${numberValue.toFixed(2)}%`;
 };
 
-const syncUserBalances = (updatedUser) => {
-  userBalance.value = Number(updatedUser.tradingBalance || 0);
-  localStorage.setItem("leqvoUser", JSON.stringify(updatedUser));
-};
-
 const showPopup = ({ tone, title, message, buttonLabel = "OK", actionType = "close", previewSignal = null }) => {
   popupState.value = {
     visible: true,
@@ -126,7 +120,7 @@ const handlePopupAction = () => {
   closePopup();
 
   if (shouldRedirectToHistory) {
-    router.push({ name: "history", query: { tab: "active" } });
+    router.push({ name: "history" });
   }
 };
 
@@ -208,7 +202,7 @@ const completeTrade = async () => {
 
   try {
     await createTrade(tradePayload);
-    saveTradeRecord(tradePayload);
+    userBalance.value = Math.max(userBalance.value - tradePayload.amount, 0);
   } catch (error) {
     showPopup({
       tone: "error",

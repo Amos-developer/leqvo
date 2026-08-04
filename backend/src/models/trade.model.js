@@ -186,7 +186,22 @@ const createTrade = async ({
   }
 };
 
+const findTradesByUserId = async (userId) => {
+  await settleCompletedTradesForUser(userId);
+
+  const result = await database.query(
+    `SELECT ${tradeFields}
+     FROM trades
+     WHERE user_id = $1
+     ORDER BY created_at DESC`,
+    [userId]
+  );
+
+  return result.rows;
+};
+
 module.exports = {
   createTrade,
-  settleCompletedTradesForUser
+  settleCompletedTradesForUser,
+  findTradesByUserId
 };

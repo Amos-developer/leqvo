@@ -80,6 +80,16 @@ const createTrade = async (req, res) => {
   });
 };
 
+const getMyTrades = async (req, res) => {
+  const trades = await tradeModel.findTradesByUserId(req.user.id);
+
+  return res.status(200).json({
+    success: true,
+    data: trades
+  });
+};
+
 module.exports = {
-  createTrade
+  createTrade,
+  getMyTrades
 };
