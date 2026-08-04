@@ -277,6 +277,13 @@
   font-size: 0.82rem;
 }
 
+@media (min-width: 760px) {
+  .history-page.phone-shell {
+    width: min(100%, 1180px);
+    padding: 14px 14px 88px;
+  }
+}
+
 @media (max-width: 370px) {
   .history-summary,
   .history-meta-grid {

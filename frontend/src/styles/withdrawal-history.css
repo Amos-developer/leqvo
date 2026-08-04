@@ -253,10 +253,6 @@
 }
 
 @media (min-width: 760px) {
-  .withdrawal-history-page {
-    width: min(100%, 920px);
-  }
-
   .withdrawal-history-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

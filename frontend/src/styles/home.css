@@ -970,6 +970,7 @@
 
 @media (min-width: 760px) {
   .account-page.premium-account {
+    width: min(100%, 1180px);
     padding-top: 14px;
     padding-right: 14px;
     padding-left: 14px;

@@ -377,9 +377,3 @@
     opacity: 1;
   }
 }
-
-@media (min-width: 760px) {
-  .support-page {
-    width: min(100%, 760px);
-  }
-}

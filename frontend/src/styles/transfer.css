@@ -378,7 +378,6 @@
 
 @media (min-width: 860px) {
   .transfer-page {
-    width: min(100%, 980px);
     grid-template-columns: minmax(0, 1fr) 360px;
     grid-template-areas:
       "header header"

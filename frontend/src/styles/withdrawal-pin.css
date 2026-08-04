@@ -194,10 +194,6 @@
 }
 
 @media (min-width: 760px) {
-  .withdrawal-pin-page {
-    width: min(100%, 760px);
-  }
-
   .withdrawal-pin-hero {
     grid-template-columns: minmax(0, 1fr) 160px;
     align-items: center;

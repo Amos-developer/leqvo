@@ -267,10 +267,6 @@
 }
 
 @media (min-width: 760px) {
-  .kyc-page {
-    width: min(100%, 860px);
-  }
-
   .kyc-upload-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
