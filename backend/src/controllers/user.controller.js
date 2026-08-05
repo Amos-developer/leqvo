@@ -222,11 +222,11 @@ const requestPasswordChangeCode = async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    message: `Verification code requested for ${user.email}`,
+    message: `Testing code: ${code}`,
     data: {
       email: user.email,
       expiresAt: record.expiresAt,
-      code: process.env.NODE_ENV === "production" ? undefined : code
+      code
     }
   });
 };
@@ -347,11 +347,11 @@ const requestWithdrawalPinCode = async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    message: `Verification code requested for ${req.user.email}`,
+    message: `Testing code: ${code}`,
     data: {
       email: req.user.email,
       expiresAt: record.expiresAt,
-      code: process.env.NODE_ENV === "production" ? undefined : code
+      code
     }
   });
 };
