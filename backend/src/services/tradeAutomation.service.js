@@ -15,6 +15,26 @@ const slotByUtcHour = {
 
 let isProcessing = false;
 
+const getLatestSignalsBySlot = (signals) => {
+  const latestBySlot = new Map();
+
+  for (const signal of signals) {
+    const slotKey = slotByUtcHour[new Date(signal.validFrom).getUTCHours()];
+
+    if (!slotKey) {
+      continue;
+    }
+
+    const current = latestBySlot.get(slotKey);
+
+    if (!current || new Date(signal.createdAt).getTime() > new Date(current.createdAt).getTime()) {
+      latestBySlot.set(slotKey, signal);
+    }
+  }
+
+  return latestBySlot;
+};
+
 const getSignalAccessMessage = async (signal, userId) => {
   const minimumDepositRequired = Number(signal.minDepositRequired || 0);
 
@@ -46,18 +66,10 @@ const runTradeAutomationCycle = async () => {
     await tradeModel.settleCompletedTradesForAll();
 
     const activeSignals = await copySignalModel.getActiveSignals();
+    const latestSignalsBySlot = getLatestSignalsBySlot(activeSignals);
 
-    for (const signal of activeSignals) {
-      const slotKey = slotByUtcHour[new Date(signal.validFrom).getUTCHours()];
-
-      if (!slotKey) {
-        continue;
-      }
-
-      const automations = await tradeAutomationModel.getEnabledAutomationsBySignal({
-        pair: signal.pair,
-        slotKey
-      });
+    for (const [slotKey, signal] of latestSignalsBySlot.entries()) {
+      const automations = await tradeAutomationModel.getEnabledAutomationsBySignal({ slotKey });
 
       for (const automation of automations) {
         if (automation.lastSignalCode === signal.signalCode) {
@@ -129,7 +141,7 @@ const runTradeAutomationCycle = async () => {
             id: automation.id,
             signalCode: signal.signalCode,
             result: "executed",
-            message: `Automated ${signal.pair} trade entered successfully for the active ${slotKey.replace("_", " ")} session.`
+            message: `Automated trade entered successfully for the active ${slotKey.replace("_", " ")} session using ${signal.pair}.`
           });
         } catch (error) {
           await tradeAutomationModel.markAutomationRun({

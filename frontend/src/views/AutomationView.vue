@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { BINANCE_MARKETS } from "../utils/binanceMarketSocket";
 import {
   createTradeAutomation,
   deleteTradeAutomation,
@@ -18,7 +17,6 @@ const successMessage = ref("");
 const user = ref(JSON.parse(localStorage.getItem("leqvoUser") || "{}"));
 
 const form = ref({
-  pair: "BTC/USDT",
   slotKey: "first",
   allocationPercent: 20
 });
@@ -30,14 +28,6 @@ const slotOptions = [
   { value: "fourth", label: "Fourth trade", note: "Standard session for active funded members." },
   { value: "fifth_bonus", label: "Bonus trade", note: "Requires a 300 USDT deposit or a directly invited member with 300 USDT deposit." }
 ];
-
-const pairOptions = computed(() => {
-  return BINANCE_MARKETS.map((market) => ({
-    value: `${market.symbol}/USDT`,
-    label: `${market.symbol}/USDT`,
-    name: market.name
-  }));
-});
 
 const selectedSlot = computed(() => {
   return slotOptions.find((slot) => slot.value === form.value.slotKey) || slotOptions[0];
@@ -93,7 +83,6 @@ const createAutomationRule = async () => {
 
   try {
     const result = await createTradeAutomation({
-      pair: form.value.pair,
       slotKey: form.value.slotKey,
       allocationPercent: Number(form.value.allocationPercent)
     });
@@ -132,7 +121,7 @@ const toggleAutomation = async (automation) => {
 };
 
 const removeAutomation = async (automation) => {
-  if (!window.confirm(`Delete automation for ${automation.pair} ${automation.slotKey.replace("_", " ")}?`)) {
+  if (!window.confirm(`Delete automation for ${automation.slotKey.replace("_", " ")} session?`)) {
     return;
   }
 
@@ -165,7 +154,7 @@ onMounted(loadAutomations);
       <div>
         <span>Auto execution</span>
         <strong>Automate your preferred session when you cannot stay online.</strong>
-        <p>Leqvo will watch the active copy signal, enter the trade during the matching session window, and settle capital plus profit automatically after the 40-minute trade cycle ends.</p>
+        <p>Choose the trading session you may miss. When the admin shares the live signal for that session, Leqvo will enter it automatically and settle capital plus profit after the 40-minute cycle ends.</p>
       </div>
       <div class="automation-hero-badges">
         <span>{{ formatCurrency(tradingBalance) }} trading balance</span>
@@ -182,14 +171,6 @@ onMounted(loadAutomations);
       </div>
 
       <div class="automation-form-grid">
-        <label>
-          Pair
-          <select v-model="form.pair">
-            <option v-for="option in pairOptions" :key="option.value" :value="option.value">
-              {{ option.label }} - {{ option.name }}
-            </option>
-          </select>
-        </label>
         <label>
           Session
           <select v-model="form.slotKey">
@@ -231,7 +212,7 @@ onMounted(loadAutomations);
     <section class="automation-info-grid">
       <article>
         <strong>How it works</strong>
-        <p>Automation watches the matching copy signal session for your selected pair and enters only once for each active signal code.</p>
+        <p>Automation watches your selected session and enters only once for the active signal code shared by admin during that time window.</p>
       </article>
       <article>
         <strong>Execution rules</strong>
@@ -265,7 +246,7 @@ onMounted(loadAutomations);
         <article v-for="automation in automations" :key="automation.id" class="automation-card">
           <div class="automation-card-top">
             <div>
-              <span>{{ automation.pair }}</span>
+              <span>Admin live session</span>
               <strong>{{ slotOptions.find((slot) => slot.value === automation.slotKey)?.label || automation.slotKey }}</strong>
             </div>
             <b :class="automation.isEnabled ? 'enabled' : 'paused'">

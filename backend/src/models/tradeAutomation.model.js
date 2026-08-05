@@ -71,15 +71,14 @@ const deleteAutomation = async ({ id, userId }) => {
   return result.rows[0] || null;
 };
 
-const getEnabledAutomationsBySignal = async ({ pair, slotKey }) => {
+const getEnabledAutomationsBySignal = async ({ slotKey }) => {
   const result = await database.query(
     `SELECT ${automationFields}
      FROM trade_automations
      WHERE is_enabled = TRUE
-       AND pair = $1
-       AND slot_key = $2
+       AND slot_key = $1
      ORDER BY created_at ASC`,
-    [pair, slotKey]
+    [slotKey]
   );
 
   return result.rows;

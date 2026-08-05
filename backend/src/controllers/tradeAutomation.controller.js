@@ -14,21 +14,13 @@ const getMyAutomations = async (req, res) => {
 };
 
 const createAutomation = async (req, res) => {
-  const pair = req.body.pair?.trim().toUpperCase();
   const slotKey = req.body.slotKey?.trim().toLowerCase();
   const allocationPercent = Number(req.body.allocationPercent);
 
-  if (!pair || !slotKey || !allocationPercent) {
+  if (!slotKey || !allocationPercent) {
     return res.status(400).json({
       success: false,
-      message: "Pair, trade slot, and allocation are required"
-    });
-  }
-
-  if (!/^[A-Z0-9]{2,12}\/[A-Z0-9]{2,12}$/.test(pair)) {
-    return res.status(400).json({
-      success: false,
-      message: "Pair must look like BTC/USDT"
+      message: "Trade slot and allocation are required"
     });
   }
 
@@ -47,19 +39,19 @@ const createAutomation = async (req, res) => {
   }
 
   const existingAutomations = await tradeAutomationModel.getByUserId(req.user.id);
-  const duplicateAutomation = existingAutomations.find((item) => item.pair === pair && item.slotKey === slotKey);
+  const duplicateAutomation = existingAutomations.find((item) => item.slotKey === slotKey);
 
   if (duplicateAutomation) {
     return res.status(409).json({
       success: false,
-      message: "An automation for this pair and session already exists"
+      message: "An automation for this trade session already exists"
     });
   }
 
   const automation = await tradeAutomationModel.createAutomation({
     userId: req.user.id,
     username: req.user.username,
-    pair,
+    pair: "ANY",
     slotKey,
     allocationPercent
   });
