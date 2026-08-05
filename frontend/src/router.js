@@ -26,6 +26,7 @@ import DailySpinView from "./views/DailySpinView.vue";
 import RewardsView from "./views/RewardsView.vue";
 import TransferView from "./views/TransferView.vue";
 import SupportChatView from "./views/SupportChatView.vue";
+import AutomationView from "./views/AutomationView.vue";
 import AdminView from "./views/AdminView.vue";
 
 const routes = [
@@ -54,6 +55,7 @@ const routes = [
   { path: "/leadership", name: "leadership", component: LeadershipView, meta: { requiresAuth: true } },
   { path: "/team", name: "team", component: TeamView, meta: { requiresAuth: true } },
   { path: "/support", name: "support", component: SupportChatView, meta: { requiresAuth: true } },
+  { path: "/account/automation", name: "automation", component: AutomationView, meta: { requiresAuth: true } },
   {
     path: "/admin/:section?",
     name: "admin",

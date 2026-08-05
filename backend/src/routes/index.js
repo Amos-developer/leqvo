@@ -14,6 +14,7 @@ const luckyBoxRoutes = require("./luckyBox.routes");
 const dailySpinRoutes = require("./dailySpin.routes");
 const rewardRoutes = require("./reward.routes");
 const kycRoutes = require("./kyc.routes");
+const tradeAutomationRoutes = require("./tradeAutomation.routes");
 
 router.use("/health", healthRoutes);
 router.use("/users", userRoutes);
@@ -29,5 +30,6 @@ router.use("/lucky-box", luckyBoxRoutes);
 router.use("/daily-spin", dailySpinRoutes);
 router.use("/rewards", rewardRoutes);
 router.use("/kyc", kycRoutes);
+router.use("/trade-automations", tradeAutomationRoutes);
 
 module.exports = router;

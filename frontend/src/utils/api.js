@@ -257,6 +257,30 @@ export const getMyRewards = () => {
   return request("/rewards");
 };
 
+export const getMyTradeAutomations = () => {
+  return request("/trade-automations");
+};
+
+export const createTradeAutomation = (payload) => {
+  return request("/trade-automations", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const updateTradeAutomation = (id, payload) => {
+  return request(`/trade-automations/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const deleteTradeAutomation = (id) => {
+  return request(`/trade-automations/${id}`, {
+    method: "DELETE"
+  });
+};
+
 const getAdminHeaders = () => {
   const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 

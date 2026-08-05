@@ -379,6 +379,27 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
+      ALTER TABLE trades
+        ADD COLUMN IF NOT EXISTS automation_id INTEGER;
+    `);
+
+    await client.query(`
+      ALTER TABLE trades
+        ADD COLUMN IF NOT EXISTS execution_mode VARCHAR(20) NOT NULL DEFAULT 'manual';
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS trades_automation_id_index
+        ON trades (automation_id);
+    `);
+
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS trades_automation_signal_unique
+        ON trades (automation_id, signal_code)
+        WHERE automation_id IS NOT NULL;
+    `);
+
+    await client.query(`
       UPDATE trades t
       SET target_profit_percent = COALESCE(cs.profit_percent, t.target_profit_percent),
           settles_at = COALESCE(cs.valid_to, t.settles_at)
@@ -427,6 +448,38 @@ const connectDatabase = async () => {
     await client.query(`
       ALTER TABLE copy_signals
         ADD COLUMN IF NOT EXISTS min_deposit_required NUMERIC(18, 8) NOT NULL DEFAULT 0;
+    `);
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS trade_automations (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(10) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        username VARCHAR(80) NOT NULL,
+        pair VARCHAR(20) NOT NULL,
+        slot_key VARCHAR(20) NOT NULL,
+        allocation_percent NUMERIC(5, 2) NOT NULL,
+        is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        last_signal_code VARCHAR(80),
+        last_run_at TIMESTAMPTZ,
+        last_result VARCHAR(20) NOT NULL DEFAULT 'idle',
+        last_message TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        CONSTRAINT trade_automations_slot_key_check
+          CHECK (slot_key IN ('first', 'second', 'third', 'fourth', 'fifth_bonus')),
+        CONSTRAINT trade_automations_allocation_check
+          CHECK (allocation_percent IN (20, 40, 50, 60, 100))
+      );
+    `);
+
+    await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS trade_automations_user_pair_slot_unique
+        ON trade_automations (user_id, pair, slot_key);
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS trade_automations_enabled_index
+        ON trade_automations (is_enabled, slot_key, pair);
     `);
 
     await client.query(`

@@ -65,6 +65,19 @@ const findActiveSignalByPair = async (pair) => {
   return result.rows[0] || null;
 };
 
+const getActiveSignals = async () => {
+  const result = await database.query(
+    `SELECT ${signalFields}
+     FROM copy_signals
+     WHERE status = 'active'
+       AND valid_from <= NOW()
+       AND valid_to >= NOW()
+     ORDER BY valid_from ASC`
+  );
+
+  return result.rows;
+};
+
 const hasBonusSignalAccess = async (userId, minimumDepositRequired) => {
   const threshold = Number(minimumDepositRequired || 0);
 
@@ -101,5 +114,6 @@ module.exports = {
   getSignals,
   findSignalByCode,
   findActiveSignalByPair,
+  getActiveSignals,
   hasBonusSignalAccess
 };

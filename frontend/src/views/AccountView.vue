@@ -311,6 +311,14 @@ onUnmounted(() => {
           </div>
           <i></i>
         </button>
+        <button @click="router.push('/account/automation')">
+          <span class="settings-icon icon-preferences"></span>
+          <div>
+            <strong>Automation</strong>
+            <p>Schedule signal execution when you cannot be active during trade time</p>
+          </div>
+          <i></i>
+        </button>
         <button @click="router.push('/support')">
           <span class="settings-icon icon-preferences"></span>
           <div>

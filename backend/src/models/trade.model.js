@@ -13,6 +13,8 @@ const tradeFields = `
   exit_price AS "exitPrice",
   target_profit_percent AS "targetProfitPercent",
   settles_at AS "settlesAt",
+  automation_id AS "automationId",
+  execution_mode AS "executionMode",
   pnl_amount AS "pnlAmount",
   pnl_percent AS "pnlPercent",
   status,
@@ -84,6 +86,20 @@ const settleCompletedTradesForUser = async (userId, client = database) => {
   };
 };
 
+const settleCompletedTradesForAll = async () => {
+  const dueUsersResult = await database.query(
+    `SELECT DISTINCT user_id AS "userId"
+     FROM trades
+     WHERE status = 'active'
+       AND settles_at IS NOT NULL
+       AND settles_at <= NOW()`
+  );
+
+  for (const row of dueUsersResult.rows) {
+    await settleCompletedTradesForUser(row.userId);
+  }
+};
+
 const createTrade = async ({
   user,
   pair,
@@ -92,7 +108,9 @@ const createTrade = async ({
   allocationPercent,
   amount,
   entryPrice,
-  targetProfitPercent
+  targetProfitPercent,
+  automationId = null,
+  executionMode = "manual"
 }) => {
   const client = await database.pool.connect();
 
@@ -157,9 +175,11 @@ const createTrade = async ({
          entry_price,
          target_profit_percent,
          settles_at,
-         is_trial_trade
+         is_trial_trade,
+         automation_id,
+         execution_mode
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        RETURNING ${tradeFields}`,
       [
         user.id,
@@ -172,7 +192,9 @@ const createTrade = async ({
         entryPrice,
         targetProfitPercent,
         settlesAt,
-        isTrialTrade
+        isTrialTrade,
+        automationId,
+        executionMode
       ]
     );
 
@@ -204,5 +226,6 @@ const findTradesByUserId = async (userId) => {
 module.exports = {
   createTrade,
   settleCompletedTradesForUser,
+  settleCompletedTradesForAll,
   findTradesByUserId
 };
