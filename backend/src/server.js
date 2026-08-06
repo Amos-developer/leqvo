@@ -19,7 +19,7 @@ const startServer = async () => {
       runTradeAutomationCycle().catch((error) => {
         console.error("Trade automation cycle failed:", error.message || error);
       });
-    }, 60 * 1000);
+    }, 15 * 1000);
   } catch (error) {
     console.error("Failed to start Leqvo API:", error.message || error);
     console.error("Database target:", {

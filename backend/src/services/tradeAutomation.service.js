@@ -14,6 +14,7 @@ const slotByUtcHour = {
 };
 
 let isProcessing = false;
+let rerunRequested = false;
 
 const getLatestSignalsBySlot = (signals) => {
   const latestBySlot = new Map();
@@ -57,10 +58,12 @@ const getSignalAccessMessage = async (signal, userId) => {
 
 const runTradeAutomationCycle = async () => {
   if (isProcessing) {
+    rerunRequested = true;
     return;
   }
 
   isProcessing = true;
+  rerunRequested = false;
 
   try {
     await tradeModel.settleCompletedTradesForAll();
@@ -155,6 +158,13 @@ const runTradeAutomationCycle = async () => {
     }
   } finally {
     isProcessing = false;
+
+    if (rerunRequested) {
+      rerunRequested = false;
+      setImmediate(() => {
+        runTradeAutomationCycle().catch(() => {});
+      });
+    }
   }
 };
 

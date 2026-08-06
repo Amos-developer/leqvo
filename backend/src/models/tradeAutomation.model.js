@@ -1,27 +1,48 @@
 const database = require("../config/database");
 
 const automationFields = `
-  id,
-  user_id AS "userId",
-  username,
-  pair,
-  slot_key AS "slotKey",
-  allocation_percent AS "allocationPercent",
-  is_enabled AS "isEnabled",
-  last_signal_code AS "lastSignalCode",
-  last_run_at AS "lastRunAt",
-  last_result AS "lastResult",
-  last_message AS "lastMessage",
-  created_at AS "createdAt",
-  updated_at AS "updatedAt"
+  ta.id,
+  ta.user_id AS "userId",
+  ta.username,
+  ta.pair,
+  ta.slot_key AS "slotKey",
+  ta.allocation_percent AS "allocationPercent",
+  ta.is_enabled AS "isEnabled",
+  ta.last_signal_code AS "lastSignalCode",
+  ta.last_run_at AS "lastRunAt",
+  ta.last_result AS "lastResult",
+  ta.last_message AS "lastMessage",
+  ta.created_at AS "createdAt",
+  ta.updated_at AS "updatedAt",
+  latest_trade.id AS "latestTradeId",
+  latest_trade.status AS "latestTradeStatus",
+  latest_trade.opened_at AS "latestTradeOpenedAt",
+  latest_trade.closed_at AS "latestTradeClosedAt",
+  latest_trade.execution_mode AS "latestTradeExecutionMode"
+`;
+
+const automationFromClause = `
+  FROM trade_automations ta
+  LEFT JOIN LATERAL (
+    SELECT
+      t.id,
+      t.status,
+      t.opened_at,
+      t.closed_at,
+      t.execution_mode
+    FROM trades t
+    WHERE t.automation_id = ta.id
+    ORDER BY t.created_at DESC
+    LIMIT 1
+  ) latest_trade ON TRUE
 `;
 
 const getByUserId = async (userId) => {
   const result = await database.query(
     `SELECT ${automationFields}
-     FROM trade_automations
-     WHERE user_id = $1
-     ORDER BY created_at DESC`,
+     ${automationFromClause}
+     WHERE ta.user_id = $1
+     ORDER BY ta.created_at DESC`,
     [userId]
   );
 
@@ -31,9 +52,9 @@ const getByUserId = async (userId) => {
 const getById = async ({ id, userId }) => {
   const result = await database.query(
     `SELECT ${automationFields}
-     FROM trade_automations
-     WHERE id = $1
-       AND user_id = $2
+     ${automationFromClause}
+     WHERE ta.id = $1
+       AND ta.user_id = $2
      LIMIT 1`,
     [id, userId]
   );
@@ -89,10 +110,10 @@ const deleteAutomation = async ({ id, userId }) => {
 const getEnabledAutomationsBySignal = async ({ slotKey }) => {
   const result = await database.query(
     `SELECT ${automationFields}
-     FROM trade_automations
-     WHERE is_enabled = TRUE
-       AND slot_key = $1
-     ORDER BY created_at ASC`,
+     ${automationFromClause}
+     WHERE ta.is_enabled = TRUE
+       AND ta.slot_key = $1
+     ORDER BY ta.created_at ASC`,
     [slotKey]
   );
 

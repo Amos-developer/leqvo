@@ -33,11 +33,11 @@ const selectedSlot = computed(() => {
 });
 
 const completedAutomations = computed(() => {
-  return automations.value.filter((automation) => automation.lastResult === "executed");
+  return automations.value.filter((automation) => ["win", "loose"].includes(automation.latestTradeStatus));
 });
 
 const pendingAutomations = computed(() => {
-  return automations.value.filter((automation) => automation.lastResult !== "executed");
+  return automations.value.filter((automation) => !["win", "loose"].includes(automation.latestTradeStatus));
 });
 
 const tradingBalance = computed(() => {
@@ -88,6 +88,9 @@ const formatResultLabel = (value) => {
   if (value === "failed") return "Failed";
   if (value === "skipped") return "Skipped";
   if (value === "idle") return "Waiting";
+  if (value === "active") return "Ongoing";
+  if (value === "win") return "Completed";
+  if (value === "loose") return "Finished";
 
   return value || "Waiting";
 };
@@ -347,7 +350,7 @@ onMounted(loadAutomations);
                 </div>
                 <div>
                   <span>Status</span>
-                  <strong>{{ formatResultLabel(automation.lastResult) }}</strong>
+                  <strong>{{ formatResultLabel(automation.latestTradeStatus || automation.lastResult) }}</strong>
                 </div>
                 <div>
                   <span>Last signal</span>
@@ -412,11 +415,11 @@ onMounted(loadAutomations);
                 </div>
                 <div>
                   <span>Result</span>
-                  <strong>{{ formatResultLabel(automation.lastResult) }}</strong>
+                  <strong>{{ formatResultLabel(automation.latestTradeStatus || automation.lastResult) }}</strong>
                 </div>
               </div>
 
-              <p class="automation-card-message">{{ automation.lastMessage || "Automated trade completed successfully." }}</p>
+              <p class="automation-card-message">{{ automation.lastTradeClosedAt ? `Automated trade closed ${formatDateTime(automation.lastTradeClosedAt)}.` : (automation.lastMessage || "Automated trade completed successfully.") }}</p>
             </article>
           </div>
         </section>
