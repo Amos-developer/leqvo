@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   getAdminDeposits,
@@ -101,6 +101,8 @@ const slugToTab = (slug) => {
   return menuItems.find((item) => tabToSlug(item) === slug) || "Overview";
 };
 const activeTab = ref(slugToTab(route.params.section));
+const now = ref(Date.now());
+let signalRefreshTimer = null;
 
 const switchTab = (tab) => {
   activeTab.value = tab;
@@ -138,6 +140,46 @@ const formatDateTime = (date) => {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(date));
+};
+
+const getSignalDisplayStatus = (signal) => {
+  const validFrom = new Date(signal.validFrom).getTime();
+  const validTo = new Date(signal.validTo).getTime();
+
+  if (signal.status === "cancelled") {
+    return "cancelled";
+  }
+
+  if (!Number.isFinite(validFrom) || !Number.isFinite(validTo)) {
+    return signal.status || "unknown";
+  }
+
+  if (now.value < validFrom) {
+    return "scheduled";
+  }
+
+  if (now.value > validTo) {
+    return "expired";
+  }
+
+  return "active";
+};
+
+const startSignalRefresh = () => {
+  window.clearInterval(signalRefreshTimer);
+
+  signalRefreshTimer = window.setInterval(async () => {
+    now.value = Date.now();
+
+    if (activeTab.value === "Copy Signals") {
+      try {
+        const result = await getAdminCopySignals();
+        copySignals.value = result.data || [];
+      } catch (error) {
+        errorMessage.value = error.message;
+      }
+    }
+  }, 10000);
 };
 
 const nowLabel = computed(() => formatDate(new Date()));
@@ -872,7 +914,14 @@ watch(
   }
 );
 
-onMounted(loadAdminData);
+onMounted(() => {
+  loadAdminData();
+  startSignalRefresh();
+});
+
+onUnmounted(() => {
+  window.clearInterval(signalRefreshTimer);
+});
 </script>
 
 <template>
@@ -1573,7 +1622,7 @@ onMounted(loadAdminData);
                 <span>{{ signal.signalCode }} · {{ Number(signal.profitPercent).toFixed(2) }}%</span>
                 <span v-if="Number(signal.minDepositRequired || 0) > 0">Bonus · Min {{ money(signal.minDepositRequired) }} USDT</span>
               </div>
-              <small>{{ formatSignalTime(signal.validFrom) }} - {{ formatSignalTime(signal.validTo) }}</small>
+              <small>{{ formatSignalTime(signal.validFrom) }} - {{ formatSignalTime(signal.validTo) }} | {{ getSignalDisplayStatus(signal) }}</small>
               <div class="copy-signal-actions">
                 <button type="button" @click="viewCopySignal(signal)">View</button>
                 <button
