@@ -103,6 +103,7 @@ const slugToTab = (slug) => {
 const activeTab = ref(slugToTab(route.params.section));
 const now = ref(Date.now());
 let signalRefreshTimer = null;
+let adminLiveRefreshTimer = null;
 
 const switchTab = (tab) => {
   activeTab.value = tab;
@@ -175,6 +176,28 @@ const startSignalRefresh = () => {
       try {
         const result = await getAdminCopySignals();
         copySignals.value = result.data || [];
+      } catch (error) {
+        errorMessage.value = error.message;
+      }
+    }
+  }, 10000);
+};
+
+const startAdminLiveRefresh = () => {
+  window.clearInterval(adminLiveRefreshTimer);
+
+  adminLiveRefreshTimer = window.setInterval(async () => {
+    if (activeTab.value === "Users Signals") {
+      try {
+        const [tradesResult, automationsResult] = await Promise.all([
+          getAdminTrades(),
+          getAdminTradeAutomations()
+        ]);
+
+        userTrades.value = tradesResult.data.trades || [];
+        userTradeSummary.value = tradesResult.data.summary || userTradeSummary.value;
+        tradeAutomations.value = automationsResult.data.automations || [];
+        tradeAutomationSummary.value = automationsResult.data.summary || tradeAutomationSummary.value;
       } catch (error) {
         errorMessage.value = error.message;
       }
@@ -917,10 +940,12 @@ watch(
 onMounted(() => {
   loadAdminData();
   startSignalRefresh();
+  startAdminLiveRefresh();
 });
 
 onUnmounted(() => {
   window.clearInterval(signalRefreshTimer);
+  window.clearInterval(adminLiveRefreshTimer);
 });
 </script>
 
