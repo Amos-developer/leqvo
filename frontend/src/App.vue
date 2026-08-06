@@ -2,6 +2,7 @@
   <div :class="{ 'admin-route-shell': route.name === 'admin' }">
     <RouterView />
     <AppFooter v-if="showFooter" />
+    <UserPopup v-if="route.name !== 'admin'" />
     <div v-if="showSessionWarning" class="session-modal" role="dialog" aria-modal="true" aria-labelledby="session-title">
       <div class="session-modal-card">
         <div class="session-warning-icon">!</div>
@@ -23,6 +24,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import AppFooter from "./components/AppFooter.vue";
+import UserPopup from "./components/UserPopup.vue";
 
 const route = useRoute();
 const router = useRouter();

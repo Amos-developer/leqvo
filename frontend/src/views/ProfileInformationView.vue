@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import { updateMyProfile } from "../utils/api";
 
 const router = useRouter();
@@ -9,8 +10,6 @@ const form = ref({
   username: storedUser.username || ""
 });
 const isSaving = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
 
 const initials = computed(() => {
   return (form.value.username || storedUser.username || "Member")
@@ -32,13 +31,14 @@ const validateForm = () => {
 };
 
 const saveProfile = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
   const validationError = validateForm();
 
   if (validationError) {
-    errorMessage.value = validationError;
+    showUserPopup({
+      tone: "error",
+      title: "Check your details",
+      message: validationError
+    });
     return;
   }
 
@@ -50,9 +50,17 @@ const saveProfile = async () => {
     });
 
     localStorage.setItem("leqvoUser", JSON.stringify(result.data));
-    successMessage.value = "Profile information updated.";
+    showUserPopup({
+      tone: "success",
+      title: "Profile updated",
+      message: "Profile information updated."
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not update profile.";
+    showUserPopup({
+      tone: "error",
+      title: "Update failed",
+      message: error.message || "Could not update profile."
+    });
   } finally {
     isSaving.value = false;
   }
@@ -97,9 +105,6 @@ const saveProfile = async () => {
       <button class="profile-info-submit" type="button" :disabled="isSaving" @click="saveProfile">
         {{ isSaving ? "Saving..." : "Save Changes" }}
       </button>
-
-      <p v-if="errorMessage" class="profile-info-message error">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="profile-info-message success">{{ successMessage }}</p>
     </section>
 
     <section class="profile-security-guide">

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import { getAccountTransfers, getUserById, transferAccountBalance } from "../utils/api";
 
 const router = useRouter();
@@ -10,8 +11,6 @@ const direction = ref("main-to-trading");
 const amount = ref("");
 const isLoading = ref(false);
 const isSubmitting = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
 const transfers = ref([]);
 const eligibility = ref({
   hasTradingEntry: false,
@@ -70,7 +69,11 @@ const loadTransferPage = async () => {
     transfers.value = transferResult.data?.transfers || [];
     eligibility.value = transferResult.data?.eligibility || eligibility.value;
   } catch (error) {
-    errorMessage.value = error.message || "Could not load transfer details.";
+    showUserPopup({
+      tone: "error",
+      title: "Transfer unavailable",
+      message: error.message || "Could not load transfer details."
+    });
   } finally {
     isLoading.value = false;
   }
@@ -82,21 +85,31 @@ const setMaxAmount = () => {
 
 const submitTransfer = async () => {
   const transferAmount = Number(amount.value);
-  errorMessage.value = "";
-  successMessage.value = "";
 
   if (!Number.isFinite(transferAmount) || transferAmount <= 0) {
-    errorMessage.value = "Enter a valid transfer amount.";
+    showUserPopup({
+      tone: "error",
+      title: "Invalid amount",
+      message: "Enter a valid transfer amount."
+    });
     return;
   }
 
   if (fromAccount.value === "main" && toAccount.value === "trading" && transferAmount < 30) {
-    errorMessage.value = "Minimum trading entry is 30 USDT.";
+    showUserPopup({
+      tone: "error",
+      title: "Minimum not reached",
+      message: "Minimum trading entry is 30 USDT."
+    });
     return;
   }
 
   if (transferAmount > availableBalance.value) {
-    errorMessage.value = `Your ${accountLabel(fromAccount.value).toLowerCase()} balance is not enough.`;
+    showUserPopup({
+      tone: "error",
+      title: "Balance not enough",
+      message: `Your ${accountLabel(fromAccount.value).toLowerCase()} balance is not enough.`
+    });
     return;
   }
 
@@ -113,9 +126,17 @@ const submitTransfer = async () => {
     transfers.value = [result.data.transfer, ...transfers.value].slice(0, 30);
     await loadTransferPage();
     amount.value = "";
-    successMessage.value = "Transfer completed successfully.";
+    showUserPopup({
+      tone: "success",
+      title: "Transfer completed",
+      message: "Transfer completed successfully."
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Transfer failed. Please try again.";
+    showUserPopup({
+      tone: "error",
+      title: "Transfer failed",
+      message: error.message || "Transfer failed. Please try again."
+    });
   } finally {
     isSubmitting.value = false;
   }
@@ -216,9 +237,6 @@ onMounted(loadTransferPage);
       <button class="transfer-submit" type="button" :disabled="isSubmitting" @click="submitTransfer">
         {{ isSubmitting ? "Processing..." : "Confirm Transfer" }}
       </button>
-
-      <p v-if="errorMessage" class="transfer-message error">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="transfer-message success">{{ successMessage }}</p>
     </section>
 
     <section class="transfer-history">

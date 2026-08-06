@@ -1,11 +1,10 @@
 <script setup>
 import { reactive, ref } from "vue";
 import AuthLayout from "../components/AuthLayout.vue";
+import { showUserPopup } from "../composables/useUserPopup";
 import { requestForgotPassword } from "../utils/api";
 
 const isSubmitting = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
 
 const form = reactive({
   email: ""
@@ -14,18 +13,23 @@ const form = reactive({
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const handleContinue = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
   const email = form.email.trim().toLowerCase();
 
   if (!email) {
-    errorMessage.value = "Email is required.";
+    showUserPopup({
+      tone: "error",
+      title: "Email required",
+      message: "Email is required."
+    });
     return;
   }
 
   if (!emailPattern.test(email)) {
-    errorMessage.value = "Enter a valid email address.";
+    showUserPopup({
+      tone: "error",
+      title: "Invalid email",
+      message: "Enter a valid email address."
+    });
     return;
   }
 
@@ -33,9 +37,17 @@ const handleContinue = async () => {
 
   try {
     const result = await requestForgotPassword({ email });
-    successMessage.value = result.message || `Recovery request prepared for ${email}.`;
+    showUserPopup({
+      tone: "success",
+      title: "Recovery ready",
+      message: result.message || `Recovery request prepared for ${email}.`
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not validate this email.";
+    showUserPopup({
+      tone: "error",
+      title: "Request failed",
+      message: error.message || "Could not validate this email."
+    });
   } finally {
     isSubmitting.value = false;
   }
@@ -95,9 +107,6 @@ const handleContinue = async () => {
           </div>
         </article>
       </div>
-
-      <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="form-message success">{{ successMessage }}</p>
 
       <button type="submit" class="primary-button" :disabled="isSubmitting">
         {{ isSubmitting ? "Preparing..." : "Continue" }}

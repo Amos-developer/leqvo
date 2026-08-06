@@ -2,15 +2,13 @@
 import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import AuthLayout from "../components/AuthLayout.vue";
+import { showUserPopup } from "../composables/useUserPopup";
 import { registerUser } from "../utils/api";
 
 const router = useRouter();
 const route = useRoute();
 const isLoading = ref(false);
 const isRequestingCode = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
-const codeMessage = ref("");
 
 const form = reactive({
   username: "",
@@ -66,11 +64,12 @@ const validateForm = () => {
 };
 
 const handleRequestCode = () => {
-  errorMessage.value = "";
-  codeMessage.value = "";
-
   if (!validators.email.test(form.email.trim())) {
-    errorMessage.value = "Enter a valid email address before requesting a code.";
+    showUserPopup({
+      tone: "error",
+      title: "Email needed",
+      message: "Enter a valid email address before requesting a code."
+    });
     return;
   }
 
@@ -78,17 +77,22 @@ const handleRequestCode = () => {
 
   window.setTimeout(() => {
     isRequestingCode.value = false;
-    codeMessage.value = `Code requested. Test code: ${generateTestCode()}`;
+    showUserPopup({
+      tone: "success",
+      title: "Code ready",
+      message: `Testing code: ${generateTestCode()}`
+    });
   }, 650);
 };
 
 const handleRegister = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
   const validationError = validateForm();
   if (validationError) {
-    errorMessage.value = validationError;
+    showUserPopup({
+      tone: "error",
+      title: "Check your details",
+      message: validationError
+    });
     return;
   }
 
@@ -103,12 +107,18 @@ const handleRegister = async () => {
       inviterCode: form.inviterCode.trim()
     });
 
-    successMessage.value = `${result.data.username} registered successfully. Your ID is ${result.data.id}.`;
-    setTimeout(() => {
-      router.push("/login");
-    }, 900);
+    showUserPopup({
+      tone: "success",
+      title: "Account created",
+      message: `${result.data.username} registered successfully. Your ID is ${result.data.id}.`,
+      onConfirm: () => router.push("/login")
+    });
   } catch (error) {
-    errorMessage.value = error.message;
+    showUserPopup({
+      tone: "error",
+      title: "Registration failed",
+      message: error.message || "Could not create your account."
+    });
   } finally {
     isLoading.value = false;
   }
@@ -156,7 +166,6 @@ const handleRegister = async () => {
           {{ isRequestingCode ? "Sending..." : "Get Code" }}
         </button>
       </div>
-      <p v-if="codeMessage" class="code-helper-message">{{ codeMessage }}</p>
       <label>
         Password
         <input
@@ -199,8 +208,6 @@ const handleRegister = async () => {
           <span>I agree to the Terms and Privacy Policy</span>
         </label>
       </div>
-      <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="form-message success">{{ successMessage }}</p>
       <button type="submit" class="primary-button" :disabled="isLoading">
         {{ isLoading ? "Creating account..." : "Register" }}
       </button>

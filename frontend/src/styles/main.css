@@ -82,6 +82,91 @@ a {
   animation: sessionFadeIn 220ms ease both;
 }
 
+.user-popup-backdrop {
+  position: fixed;
+  z-index: 55;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(29, 23, 42, 0.38);
+  backdrop-filter: blur(10px);
+  animation: sessionFadeIn 220ms ease both;
+}
+
+.user-popup-card {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 360px);
+  padding: 24px 20px 20px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 42px rgba(45, 38, 64, 0.18);
+  animation: sessionPopIn 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.user-popup-card.success {
+  border: 1px solid rgba(38, 199, 135, 0.22);
+}
+
+.user-popup-card.error {
+  border: 1px solid rgba(249, 79, 167, 0.22);
+}
+
+.user-popup-pill {
+  justify-self: start;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.user-popup-card.success .user-popup-pill {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.user-popup-card.error .user-popup-pill {
+  background: var(--pink-soft);
+  color: var(--pink);
+}
+
+.user-popup-card strong {
+  font-size: 1.05rem;
+}
+
+.user-popup-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.user-popup-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.user-popup-actions button {
+  min-width: 110px;
+  height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--pink), #d94fff);
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 14px 26px rgba(249, 79, 167, 0.25);
+}
+
+.user-popup-actions button.secondary {
+  background: #f4f5fa;
+  color: var(--ink);
+  box-shadow: none;
+}
+
 .session-modal-card {
   display: grid;
   justify-items: center;

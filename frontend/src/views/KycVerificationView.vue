@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import { getMyKyc, submitKyc } from "../utils/api";
 
 const router = useRouter();
@@ -19,8 +20,6 @@ const previews = ref({
 const currentKyc = ref(null);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
 
 const documentCards = [
   { key: "idFront", title: "ID front", text: "Upload the front page clearly", placeholder: "Front" },
@@ -65,21 +64,27 @@ const readFileAsDataUrl = (file) => {
 
 const handleFile = async (event, key) => {
   const file = event.target.files?.[0];
-  errorMessage.value = "";
-  successMessage.value = "";
 
   if (!file) {
     return;
   }
 
   if (!allowedTypes.includes(file.type)) {
-    errorMessage.value = "Only JPG, PNG, or WEBP images are allowed.";
+    showUserPopup({
+      tone: "error",
+      title: "Invalid file type",
+      message: "Only JPG, PNG, or WEBP images are allowed."
+    });
     event.target.value = "";
     return;
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    errorMessage.value = "Each document must be 1MB or smaller.";
+    showUserPopup({
+      tone: "error",
+      title: "File too large",
+      message: "Each document must be 1MB or smaller."
+    });
     event.target.value = "";
     return;
   }
@@ -91,24 +96,28 @@ const handleFile = async (event, key) => {
 
 const loadKyc = async () => {
   isLoading.value = true;
-  errorMessage.value = "";
 
   try {
     const result = await getMyKyc();
     currentKyc.value = result.data;
   } catch (error) {
-    errorMessage.value = error.message || "Could not load KYC status.";
+    showUserPopup({
+      tone: "error",
+      title: "KYC unavailable",
+      message: error.message || "Could not load KYC status."
+    });
   } finally {
     isLoading.value = false;
   }
 };
 
 const submitDocuments = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
   if (!canSubmit.value) {
-    errorMessage.value = "Upload all three documents before submitting.";
+    showUserPopup({
+      tone: "error",
+      title: "Documents missing",
+      message: "Upload all three documents before submitting."
+    });
     return;
   }
 
@@ -119,9 +128,17 @@ const submitDocuments = async () => {
     currentKyc.value = result.data;
     documents.value = { idFront: null, idBack: null, selfie: null };
     previews.value = { idFront: "", idBack: "", selfie: "" };
-    successMessage.value = "KYC submitted for admin review.";
+    showUserPopup({
+      tone: "success",
+      title: "KYC submitted",
+      message: "KYC submitted for admin review."
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not submit KYC.";
+    showUserPopup({
+      tone: "error",
+      title: "Submission failed",
+      message: error.message || "Could not submit KYC."
+    });
   } finally {
     isSubmitting.value = false;
   }
@@ -227,9 +244,6 @@ onMounted(loadKyc);
     >
       {{ isSubmitting ? "Submitting..." : "Submit for Review" }}
     </button>
-
-    <p v-if="errorMessage" class="kyc-message error">{{ errorMessage }}</p>
-    <p v-if="successMessage" class="kyc-message success">{{ successMessage }}</p>
     <p v-if="isLoading" class="kyc-message info">Loading verification status...</p>
   </section>
 </template>

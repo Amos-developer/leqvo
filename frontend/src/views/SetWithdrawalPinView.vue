@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import { requestWithdrawalPinCode, setWithdrawalPin } from "../utils/api";
 
 const router = useRouter();
@@ -13,24 +14,26 @@ const form = ref({
 const codeRequested = ref(false);
 const isRequestingCode = ref(false);
 const isSaving = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
-const codeMessage = ref("");
 
 const requestCode = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-  codeMessage.value = "";
   isRequestingCode.value = true;
 
   try {
     const result = await requestWithdrawalPinCode();
     codeRequested.value = true;
-    codeMessage.value = result.data?.code
-      ? `Code requested. Test code: ${result.data.code}`
-      : `Code requested for ${user.email || "your email"}.`;
+    showUserPopup({
+      tone: "success",
+      title: "Code sent",
+      message: result.data?.code
+        ? `Testing code: ${result.data.code}`
+        : `Code requested for ${user.email || "your email"}.`
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not request email code.";
+    showUserPopup({
+      tone: "error",
+      title: "Code request failed",
+      message: error.message || "Could not request email code."
+    });
   } finally {
     isRequestingCode.value = false;
   }
@@ -57,13 +60,14 @@ const validateForm = () => {
 };
 
 const submitPin = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
   const validationError = validateForm();
 
   if (validationError) {
-    errorMessage.value = validationError;
+    showUserPopup({
+      tone: "error",
+      title: "Check your details",
+      message: validationError
+    });
     return;
   }
 
@@ -77,10 +81,18 @@ const submitPin = async () => {
     });
 
     localStorage.setItem("leqvoUser", JSON.stringify(result.data));
-    successMessage.value = "Withdrawal PIN set successfully.";
-    setTimeout(() => router.push("/account"), 900);
+    showUserPopup({
+      tone: "success",
+      title: "PIN saved",
+      message: "Withdrawal PIN set successfully.",
+      onConfirm: () => router.push("/account")
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not set withdrawal PIN.";
+    showUserPopup({
+      tone: "error",
+      title: "PIN not saved",
+      message: error.message || "Could not set withdrawal PIN."
+    });
   } finally {
     isSaving.value = false;
   }
@@ -109,8 +121,6 @@ const submitPin = async () => {
     </section>
 
     <section class="withdrawal-pin-card">
-      <p v-if="codeMessage" class="withdrawal-pin-message info">{{ codeMessage }}</p>
-
       <label class="withdrawal-pin-field">
         <span>Email code</span>
         <input v-model.trim="form.code" type="text" maxlength="6" inputmode="numeric" placeholder="Enter email code" />
@@ -129,9 +139,6 @@ const submitPin = async () => {
       <button class="withdrawal-pin-submit" type="button" :disabled="isSaving" @click="submitPin">
         {{ isSaving ? "Saving..." : "Set PIN" }}
       </button>
-
-      <p v-if="errorMessage" class="withdrawal-pin-message error">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="withdrawal-pin-message success">{{ successMessage }}</p>
     </section>
 
     <section class="withdrawal-pin-guide">

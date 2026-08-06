@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import { createDeposit } from "../utils/api";
 
 const assets = [
@@ -33,7 +34,6 @@ const amount = ref("");
 const MINIMUM_DEPOSIT = 30;
 const router = useRouter();
 const isGenerating = ref(false);
-const errorMessage = ref("");
 
 const availableNetworks = computed(() => selectedAsset.value.networks);
 const isMinimumMet = computed(() => Number(amount.value) >= MINIMUM_DEPOSIT);
@@ -54,7 +54,6 @@ const generateAddress = async () => {
   const user = JSON.parse(localStorage.getItem("leqvoUser") || "{}");
 
   isGenerating.value = true;
-  errorMessage.value = "";
 
   try {
     const result = await createDeposit({
@@ -83,7 +82,11 @@ const generateAddress = async () => {
 
     router.push("/deposit/address");
   } catch (error) {
-    errorMessage.value = error.message;
+    showUserPopup({
+      tone: "error",
+      title: "Address request failed",
+      message: error.message || "Could not generate deposit address."
+    });
   } finally {
     isGenerating.value = false;
   }
@@ -154,7 +157,6 @@ watch(selectedAsset, (asset) => {
         </div>
       </label>
       <p v-if="amount && !isMinimumMet" class="minimum-note">Minimum deposit amount is $30.</p>
-      <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
 
       <button class="primary-button" :disabled="!canGenerate || isGenerating" @click="generateAddress">
         {{ isGenerating ? "Requesting address..." : "Generate address" }}

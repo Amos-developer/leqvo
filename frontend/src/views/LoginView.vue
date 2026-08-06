@@ -2,12 +2,12 @@
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import AuthLanguageDropdown from "../components/AuthLanguageDropdown.vue";
+import { showUserPopup } from "../composables/useUserPopup";
 import { loginUser } from "../utils/api";
 import authLogo from "../assets/icons/leqvo-wordmark.svg";
 
 const router = useRouter();
 const isLoading = ref(false);
-const errorMessage = ref("");
 
 const form = reactive({
   email: "",
@@ -15,15 +15,17 @@ const form = reactive({
 });
 
 const handleLogin = async () => {
-  errorMessage.value = "";
-
   const payload = {
     email: form.email.trim(),
     password: form.password
   };
 
   if (!payload.email || !payload.password) {
-    errorMessage.value = "Email and password are required.";
+    showUserPopup({
+      tone: "error",
+      title: "Missing details",
+      message: "Email and password are required."
+    });
     return;
   }
 
@@ -36,7 +38,11 @@ const handleLogin = async () => {
     localStorage.setItem("leqvoToken", result.token);
     router.push(result.data.isAdmin ? "/admin" : "/");
   } catch (error) {
-    errorMessage.value = error.message;
+    showUserPopup({
+      tone: "error",
+      title: "Sign in failed",
+      message: error.message || "Could not sign in."
+    });
   } finally {
     isLoading.value = false;
   }
@@ -78,8 +84,6 @@ const handleLogin = async () => {
           <label class="check-label"><input type="checkbox" /> Remember me</label>
           <RouterLink to="/forgot-password">Forgot password?</RouterLink>
         </div>
-
-        <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
         <button type="submit" class="primary-button" :disabled="isLoading">
           {{ isLoading ? "Signing in..." : "Sign in" }}
         </button>

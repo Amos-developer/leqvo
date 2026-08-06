@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import {
   createTradeAutomation,
   deleteTradeAutomation,
@@ -12,8 +13,6 @@ const router = useRouter();
 const automations = ref([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
 const user = ref(JSON.parse(localStorage.getItem("leqvoUser") || "{}"));
 
 const form = ref({
@@ -64,13 +63,16 @@ const formatDateTime = (value) => {
 
 const loadAutomations = async () => {
   isLoading.value = true;
-  errorMessage.value = "";
 
   try {
     const result = await getMyTradeAutomations();
     automations.value = result.data || [];
   } catch (error) {
-    errorMessage.value = error.message || "Could not load automations.";
+    showUserPopup({
+      tone: "error",
+      title: "Automation unavailable",
+      message: error.message || "Could not load automations."
+    });
   } finally {
     isLoading.value = false;
   }
@@ -78,8 +80,6 @@ const loadAutomations = async () => {
 
 const createAutomationRule = async () => {
   isSaving.value = true;
-  errorMessage.value = "";
-  successMessage.value = "";
 
   try {
     const result = await createTradeAutomation({
@@ -88,18 +88,23 @@ const createAutomationRule = async () => {
     });
 
     automations.value = [result.data, ...automations.value];
-    successMessage.value = "Automation created successfully.";
+    showUserPopup({
+      tone: "success",
+      title: "Automation saved",
+      message: "Automation created successfully."
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not create automation.";
+    showUserPopup({
+      tone: "error",
+      title: "Save failed",
+      message: error.message || "Could not create automation."
+    });
   } finally {
     isSaving.value = false;
   }
 };
 
 const toggleAutomation = async (automation) => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
   try {
     const result = await updateTradeAutomation(automation.id, {
       isEnabled: !automation.isEnabled
@@ -114,27 +119,45 @@ const toggleAutomation = async (automation) => {
       localStorage.setItem("leqvoUser", JSON.stringify(result.data.user));
     }
 
-    successMessage.value = `Automation ${result.data.automation.isEnabled ? "enabled" : "paused"} successfully.`;
+    showUserPopup({
+      tone: "success",
+      title: "Automation updated",
+      message: `Automation ${result.data.automation.isEnabled ? "enabled" : "paused"} successfully.`
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not update automation.";
+    showUserPopup({
+      tone: "error",
+      title: "Update failed",
+      message: error.message || "Could not update automation."
+    });
   }
 };
 
 const removeAutomation = async (automation) => {
-  if (!window.confirm(`Delete automation for ${automation.slotKey.replace("_", " ")} session?`)) {
-    return;
-  }
-
-  errorMessage.value = "";
-  successMessage.value = "";
-
-  try {
-    await deleteTradeAutomation(automation.id);
-    automations.value = automations.value.filter((item) => item.id !== automation.id);
-    successMessage.value = "Automation deleted successfully.";
-  } catch (error) {
-    errorMessage.value = error.message || "Could not delete automation.";
-  }
+  showUserPopup({
+    tone: "error",
+    title: "Delete automation",
+    message: `Delete automation for ${automation.slotKey.replace("_", " ")} session?`,
+    buttonLabel: "Delete",
+    secondaryLabel: "Cancel",
+    onConfirm: async () => {
+      try {
+        await deleteTradeAutomation(automation.id);
+        automations.value = automations.value.filter((item) => item.id !== automation.id);
+        showUserPopup({
+          tone: "success",
+          title: "Automation deleted",
+          message: "Automation deleted successfully."
+        });
+      } catch (error) {
+        showUserPopup({
+          tone: "error",
+          title: "Delete failed",
+          message: error.message || "Could not delete automation."
+        });
+      }
+    }
+  });
 };
 
 onMounted(loadAutomations);
@@ -200,10 +223,6 @@ onMounted(loadAutomations);
         </div>
         <p>{{ selectedSlot.note }}</p>
       </div>
-
-      <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
-      <p v-else-if="successMessage" class="form-message success">{{ successMessage }}</p>
-
       <button class="automation-submit" type="button" :disabled="isSaving" @click="createAutomationRule">
         {{ isSaving ? "Saving..." : "Save automation" }}
       </button>

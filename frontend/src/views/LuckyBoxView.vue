@@ -1,13 +1,13 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import { getLuckyBoxStatus, openLuckyBox } from "../utils/api";
 
 const router = useRouter();
 const user = ref(JSON.parse(localStorage.getItem("leqvoUser") || "{}"));
 const isLoading = ref(true);
 const isOpening = ref(false);
-const errorMessage = ref("");
 const selectedBox = ref(null);
 const openedBox = ref(null);
 const reward = ref(null);
@@ -35,7 +35,6 @@ const formatPrize = (value) => `$${Number(value || 0).toFixed(2)}`;
 
 const loadStatus = async () => {
   isLoading.value = true;
-  errorMessage.value = "";
 
   try {
     const result = await getLuckyBoxStatus();
@@ -50,7 +49,11 @@ const loadStatus = async () => {
     selectedBox.value = null;
     reward.value = null;
   } catch (error) {
-    errorMessage.value = error.message;
+    showUserPopup({
+      tone: "error",
+      title: "Lucky Box unavailable",
+      message: error.message || "Could not load lucky box status."
+    });
   } finally {
     isLoading.value = false;
   }
@@ -64,7 +67,6 @@ const chooseBox = async (boxNumber) => {
   selectedBox.value = boxNumber;
   openedBox.value = null;
   reward.value = null;
-  errorMessage.value = "";
   isOpening.value = true;
 
   try {
@@ -76,10 +78,19 @@ const chooseBox = async (boxNumber) => {
       user.value = result.data.user;
       localStorage.setItem("leqvoUser", JSON.stringify(result.data.user));
       isOpening.value = false;
+      showUserPopup({
+        tone: "success",
+        title: "Prize unlocked",
+        message: `Congratulations. You won ${formatPrize(result.data.reward.prizeAmount)}.`
+      });
       loadStatus();
     }, 900);
   } catch (error) {
-    errorMessage.value = error.message;
+    showUserPopup({
+      tone: "error",
+      title: "Box not opened",
+      message: error.message || "Could not open lucky box."
+    });
     isOpening.value = false;
     loadStatus();
   }
@@ -139,7 +150,6 @@ onMounted(loadStatus);
       </div>
 
       <article v-if="isLoading" class="lucky-state">Loading lucky box...</article>
-      <p v-if="errorMessage" class="form-message error">{{ errorMessage }}</p>
 
       <div v-else class="lucky-grid">
         <button

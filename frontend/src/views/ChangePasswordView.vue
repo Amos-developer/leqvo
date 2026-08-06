@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import { changeMyPassword, requestPasswordChangeCode } from "../utils/api";
 
 const router = useRouter();
@@ -14,9 +15,6 @@ const form = ref({
 const codeRequested = ref(false);
 const isRequestingCode = ref(false);
 const isSaving = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
-const codeMessage = ref("");
 
 const maskedEmail = computed(() => {
   const email = user.email || "";
@@ -42,19 +40,24 @@ const passwordStrength = computed(() => {
 });
 
 const requestCode = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-  codeMessage.value = "";
   isRequestingCode.value = true;
 
   try {
     const result = await requestPasswordChangeCode();
     codeRequested.value = true;
-    codeMessage.value = result.data?.code
-      ? `Code requested. Test code: ${result.data.code}`
-      : `Code requested for ${maskedEmail.value}.`;
+    showUserPopup({
+      tone: "success",
+      title: "Code sent",
+      message: result.data?.code
+        ? `Testing code: ${result.data.code}`
+        : `Code requested for ${maskedEmail.value}.`
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not request email code.";
+    showUserPopup({
+      tone: "error",
+      title: "Code request failed",
+      message: error.message || "Could not request email code."
+    });
   } finally {
     isRequestingCode.value = false;
   }
@@ -89,13 +92,14 @@ const validateForm = () => {
 };
 
 const submitPasswordChange = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
   const validationError = validateForm();
 
   if (validationError) {
-    errorMessage.value = validationError;
+    showUserPopup({
+      tone: "error",
+      title: "Check your details",
+      message: validationError
+    });
     return;
   }
 
@@ -116,10 +120,17 @@ const submitPasswordChange = async () => {
       confirmPassword: ""
     };
     codeRequested.value = false;
-    codeMessage.value = "";
-    successMessage.value = "Password changed successfully.";
+    showUserPopup({
+      tone: "success",
+      title: "Password updated",
+      message: "Password changed successfully."
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not change password.";
+    showUserPopup({
+      tone: "error",
+      title: "Update failed",
+      message: error.message || "Could not change password."
+    });
   } finally {
     isSaving.value = false;
   }
@@ -148,8 +159,6 @@ const submitPasswordChange = async () => {
     </section>
 
     <section class="change-password-card">
-      <p v-if="codeMessage" class="change-password-message info">{{ codeMessage }}</p>
-
       <label class="change-password-field">
         <span>Email code</span>
         <input v-model.trim="form.code" type="text" maxlength="6" inputmode="numeric" placeholder="Enter email code" />
@@ -180,9 +189,6 @@ const submitPasswordChange = async () => {
       <button class="change-password-submit" type="button" :disabled="isSaving" @click="submitPasswordChange">
         {{ isSaving ? "Updating..." : "Update Password" }}
       </button>
-
-      <p v-if="errorMessage" class="change-password-message error">{{ errorMessage }}</p>
-      <p v-if="successMessage" class="change-password-message success">{{ successMessage }}</p>
     </section>
 
     <section class="password-security-guide">

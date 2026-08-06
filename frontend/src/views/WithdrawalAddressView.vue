@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { showUserPopup } from "../composables/useUserPopup";
 import { getMyWithdrawalAddress, requestWithdrawalAddressCode, submitWithdrawalAddress } from "../utils/api";
 
 const router = useRouter();
@@ -19,9 +20,6 @@ const currentAddress = ref(null);
 const isLoading = ref(false);
 const isRequestingCode = ref(false);
 const isSubmitting = ref(false);
-const errorMessage = ref("");
-const successMessage = ref("");
-const codeMessage = ref("");
 const codeRequested = ref(false);
 
 const availableNetworks = computed(() => assets.find((asset) => asset.value === form.value.asset)?.networks || []);
@@ -74,7 +72,6 @@ const formatDate = (date) => {
 
 const loadAddress = async () => {
   isLoading.value = true;
-  errorMessage.value = "";
 
   try {
     const result = await getMyWithdrawalAddress();
@@ -86,30 +83,43 @@ const loadAddress = async () => {
       form.value.address = activeAddress.value.address || "";
     }
   } catch (error) {
-    errorMessage.value = error.message || "Could not load withdrawal address.";
+    showUserPopup({
+      tone: "error",
+      title: "Address unavailable",
+      message: error.message || "Could not load withdrawal address."
+    });
   } finally {
     isLoading.value = false;
   }
 };
 
 const submitAddress = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-
   const validationError = validateAddress();
 
   if (validationError) {
-    errorMessage.value = validationError;
+    showUserPopup({
+      tone: "error",
+      title: "Check address details",
+      message: validationError
+    });
     return;
   }
 
   if (!codeRequested.value) {
-    errorMessage.value = "Request an email code first.";
+    showUserPopup({
+      tone: "error",
+      title: "Code required",
+      message: "Request an email code first."
+    });
     return;
   }
 
   if (!/^\d{6}$/.test(form.value.code.trim())) {
-    errorMessage.value = "Email code must be exactly 6 numbers.";
+    showUserPopup({
+      tone: "error",
+      title: "Invalid code",
+      message: "Email code must be exactly 6 numbers."
+    });
     return;
   }
 
@@ -126,29 +136,39 @@ const submitAddress = async () => {
     form.value.address = activeAddress.value?.address || "";
     form.value.code = "";
     codeRequested.value = false;
-    codeMessage.value = "";
-    successMessage.value = "Withdrawal address submitted for admin approval.";
+    showUserPopup({
+      tone: "success",
+      title: "Address submitted",
+      message: "Withdrawal address submitted for admin approval."
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not submit withdrawal address.";
+    showUserPopup({
+      tone: "error",
+      title: "Submission failed",
+      message: error.message || "Could not submit withdrawal address."
+    });
   } finally {
     isSubmitting.value = false;
   }
 };
 
 const requestCode = async () => {
-  errorMessage.value = "";
-  successMessage.value = "";
-  codeMessage.value = "";
   isRequestingCode.value = true;
 
   try {
     const result = await requestWithdrawalAddressCode();
     codeRequested.value = true;
-    codeMessage.value = result.data?.code
-      ? `Code requested. Test code: ${result.data.code}`
-      : "Email code requested.";
+    showUserPopup({
+      tone: "success",
+      title: "Code sent",
+      message: result.data?.code ? `Testing code: ${result.data.code}` : "Email code requested."
+    });
   } catch (error) {
-    errorMessage.value = error.message || "Could not request email code.";
+    showUserPopup({
+      tone: "error",
+      title: "Code request failed",
+      message: error.message || "Could not request email code."
+    });
   } finally {
     isRequestingCode.value = false;
   }
@@ -235,9 +255,6 @@ onMounted(loadAddress);
           {{ isRequestingCode ? "Sending..." : codeRequested ? "Resend" : "Get Code" }}
         </button>
       </div>
-
-      <p v-if="codeMessage" class="withdrawal-address-message info">{{ codeMessage }}</p>
-
       <button class="withdrawal-address-submit" type="button" :disabled="isSubmitting" @click="submitAddress">
         {{ isSubmitting ? "Submitting..." : "Submit for Approval" }}
       </button>
@@ -261,9 +278,6 @@ onMounted(loadAddress);
         <p>Pending addresses cannot be used until admin reviews and approves them.</p>
       </article>
     </section>
-
-    <p v-if="errorMessage" class="withdrawal-address-message error">{{ errorMessage }}</p>
-    <p v-if="successMessage" class="withdrawal-address-message success">{{ successMessage }}</p>
     <p v-if="isLoading" class="withdrawal-address-message info">Loading address status...</p>
   </section>
 </template>
