@@ -52,6 +52,7 @@ const updateAutomation = async ({ id, userId, isEnabled }) => {
          updated_at = NOW()
      WHERE id = $1
        AND user_id = $2
+       AND COALESCE(last_result, 'idle') <> 'executed'
      RETURNING ${automationFields}`,
     [id, userId, isEnabled]
   );
@@ -64,6 +65,7 @@ const deleteAutomation = async ({ id, userId }) => {
     `DELETE FROM trade_automations
      WHERE id = $1
        AND user_id = $2
+       AND COALESCE(last_result, 'idle') <> 'executed'
      RETURNING id`,
     [id, userId]
   );
@@ -91,6 +93,7 @@ const markAutomationRun = async ({ id, signalCode, result, message }) => {
          last_run_at = NOW(),
          last_result = $3,
          last_message = $4,
+         is_enabled = CASE WHEN $3 = 'executed' THEN FALSE ELSE is_enabled END,
          updated_at = NOW()
      WHERE id = $1`,
     [id, signalCode, result, message]

@@ -32,6 +32,14 @@ const selectedSlot = computed(() => {
   return slotOptions.find((slot) => slot.value === form.value.slotKey) || slotOptions[0];
 });
 
+const completedAutomations = computed(() => {
+  return automations.value.filter((automation) => automation.lastResult === "executed");
+});
+
+const pendingAutomations = computed(() => {
+  return automations.value.filter((automation) => automation.lastResult !== "executed");
+});
+
 const tradingBalance = computed(() => {
   return Number(user.value.tradingBalance || 0);
 });
@@ -39,6 +47,20 @@ const tradingBalance = computed(() => {
 const estimatedExecutionAmount = computed(() => {
   return Number(((tradingBalance.value * Number(form.value.allocationPercent || 0)) / 100).toFixed(2));
 });
+
+const selectedSlotMinimumDeposit = computed(() => {
+  if (form.value.slotKey === "third") {
+    return 100;
+  }
+
+  if (form.value.slotKey === "fifth_bonus") {
+    return 300;
+  }
+
+  return 0;
+});
+
+const projectedExecutionReady = computed(() => estimatedExecutionAmount.value >= 30 && estimatedExecutionAmount.value <= tradingBalance.value);
 
 const formatCurrency = (value) => {
   return Number(value || 0).toLocaleString("en-US", {
@@ -60,6 +82,31 @@ const formatDateTime = (value) => {
     minute: "2-digit"
   }).format(new Date(value));
 };
+
+const formatResultLabel = (value) => {
+  if (value === "executed") return "Completed";
+  if (value === "failed") return "Failed";
+  if (value === "skipped") return "Skipped";
+  if (value === "idle") return "Waiting";
+
+  return value || "Waiting";
+};
+
+const sessionEligibilityMessage = computed(() => {
+  if (!projectedExecutionReady.value) {
+    return `Your selected allocation must produce at least 30 USDT. Current estimate: ${formatCurrency(estimatedExecutionAmount.value)}.`;
+  }
+
+  if (selectedSlotMinimumDeposit.value >= 300) {
+    return "Bonus trade requires a credited deposit of 300 USDT or an eligible direct referral deposit. Final eligibility is checked automatically when you save.";
+  }
+
+  if (selectedSlotMinimumDeposit.value > 0) {
+    return `This session requires a credited deposit of ${selectedSlotMinimumDeposit.value} USDT or above. Final eligibility is checked automatically when you save.`;
+  }
+
+  return selectedSlot.note;
+});
 
 const loadAutomations = async () => {
   isLoading.value = true;
@@ -221,9 +268,14 @@ onMounted(loadAutomations);
           <span>Estimated execution</span>
           <strong>{{ formatCurrency(estimatedExecutionAmount) }}</strong>
         </div>
-        <p>{{ selectedSlot.note }}</p>
+        <p>{{ sessionEligibilityMessage }}</p>
       </div>
-      <button class="automation-submit" type="button" :disabled="isSaving" @click="createAutomationRule">
+      <button
+        class="automation-submit"
+        type="button"
+        :disabled="isSaving || !projectedExecutionReady"
+        @click="createAutomationRule"
+      >
         {{ isSaving ? "Saving..." : "Save automation" }}
       </button>
     </section>
@@ -247,7 +299,7 @@ onMounted(loadAutomations);
       <div class="automation-section-head">
         <div>
           <span>Saved rules</span>
-          <h2>Active Automations</h2>
+          <h2>Automation Center</h2>
         </div>
       </div>
 
@@ -261,48 +313,113 @@ onMounted(loadAutomations);
         <p>Create your first automation to let Leqvo execute a session for you when you cannot be active.</p>
       </div>
 
-      <div v-else class="automation-list">
-        <article v-for="automation in automations" :key="automation.id" class="automation-card">
-          <div class="automation-card-top">
+      <div v-else class="automation-record-groups">
+        <section class="automation-record-group">
+          <div class="automation-subhead">
             <div>
-              <span>Admin live session</span>
-              <strong>{{ slotOptions.find((slot) => slot.value === automation.slotKey)?.label || automation.slotKey }}</strong>
+              <span>Live rules</span>
+              <h3>Active and pending</h3>
             </div>
-            <b :class="automation.isEnabled ? 'enabled' : 'paused'">
-              {{ automation.isEnabled ? "Enabled" : "Paused" }}
-            </b>
+            <b>{{ pendingAutomations.length }}</b>
           </div>
 
-          <div class="automation-card-grid">
-            <div>
-              <span>Allocation</span>
-              <strong>{{ Number(automation.allocationPercent).toFixed(0) }}%</strong>
-            </div>
-            <div>
-              <span>Last result</span>
-              <strong>{{ automation.lastResult || "idle" }}</strong>
-            </div>
-            <div>
-              <span>Last signal</span>
-              <strong>{{ automation.lastSignalCode || "None" }}</strong>
-            </div>
-            <div>
-              <span>Last run</span>
-              <strong>{{ formatDateTime(automation.lastRunAt) }}</strong>
-            </div>
+          <div v-if="!pendingAutomations.length" class="automation-empty-state compact">
+            <strong>No pending automation rules</strong>
+            <p>Your next saved session will appear here.</p>
           </div>
 
-          <p class="automation-card-message">{{ automation.lastMessage || "Waiting for the next matching signal session." }}</p>
+          <div v-else class="automation-list">
+            <article v-for="automation in pendingAutomations" :key="automation.id" class="automation-card">
+              <div class="automation-card-top">
+                <div>
+                  <span>Admin live session</span>
+                  <strong>{{ slotOptions.find((slot) => slot.value === automation.slotKey)?.label || automation.slotKey }}</strong>
+                </div>
+                <b :class="automation.isEnabled ? 'enabled' : 'paused'">
+                  {{ automation.isEnabled ? "Enabled" : "Paused" }}
+                </b>
+              </div>
 
-          <div class="automation-card-actions">
-            <button type="button" @click="toggleAutomation(automation)">
-              {{ automation.isEnabled ? "Pause" : "Enable" }}
-            </button>
-            <button type="button" class="danger" @click="removeAutomation(automation)">
-              Delete
-            </button>
+              <div class="automation-card-grid">
+                <div>
+                  <span>Allocation</span>
+                  <strong>{{ Number(automation.allocationPercent).toFixed(0) }}%</strong>
+                </div>
+                <div>
+                  <span>Status</span>
+                  <strong>{{ formatResultLabel(automation.lastResult) }}</strong>
+                </div>
+                <div>
+                  <span>Last signal</span>
+                  <strong>{{ automation.lastSignalCode || "None" }}</strong>
+                </div>
+                <div>
+                  <span>Last run</span>
+                  <strong>{{ formatDateTime(automation.lastRunAt) }}</strong>
+                </div>
+              </div>
+
+              <p class="automation-card-message">{{ automation.lastMessage || "Waiting for the next matching signal session." }}</p>
+
+              <div class="automation-card-actions">
+                <button type="button" @click="toggleAutomation(automation)">
+                  {{ automation.isEnabled ? "Pause" : "Enable" }}
+                </button>
+                <button type="button" class="danger" @click="removeAutomation(automation)">
+                  Delete
+                </button>
+              </div>
+            </article>
           </div>
-        </article>
+        </section>
+
+        <section class="automation-record-group">
+          <div class="automation-subhead">
+            <div>
+              <span>Trade history</span>
+              <h3>Completed automated trades</h3>
+            </div>
+            <b>{{ completedAutomations.length }}</b>
+          </div>
+
+          <div v-if="!completedAutomations.length" class="automation-empty-state compact">
+            <strong>No completed automated trades yet</strong>
+            <p>Completed automated sessions will be stored here in a shorter history list.</p>
+          </div>
+
+          <div v-else class="automation-history-list">
+            <article v-for="automation in completedAutomations" :key="automation.id" class="automation-card completed">
+              <div class="automation-card-top">
+                <div>
+                  <span>Completed session</span>
+                  <strong>{{ slotOptions.find((slot) => slot.value === automation.slotKey)?.label || automation.slotKey }}</strong>
+                </div>
+                <b class="completed">Completed</b>
+              </div>
+
+              <div class="automation-card-grid compact">
+                <div>
+                  <span>Allocation</span>
+                  <strong>{{ Number(automation.allocationPercent).toFixed(0) }}%</strong>
+                </div>
+                <div>
+                  <span>Signal</span>
+                  <strong>{{ automation.lastSignalCode || "None" }}</strong>
+                </div>
+                <div>
+                  <span>Completed at</span>
+                  <strong>{{ formatDateTime(automation.lastRunAt) }}</strong>
+                </div>
+                <div>
+                  <span>Result</span>
+                  <strong>{{ formatResultLabel(automation.lastResult) }}</strong>
+                </div>
+              </div>
+
+              <p class="automation-card-message">{{ automation.lastMessage || "Automated trade completed successfully." }}</p>
+            </article>
+          </div>
+        </section>
       </div>
     </section>
   </section>

@@ -1,8 +1,53 @@
 const tradeAutomationModel = require("../models/tradeAutomation.model");
 const userModel = require("../models/user.model");
+const copySignalModel = require("../models/copySignal.model");
 
 const ALLOWED_SLOTS = ["first", "second", "third", "fourth", "fifth_bonus"];
 const ALLOWED_ALLOCATIONS = [20, 40, 50, 60, 100];
+const MINIMUM_TRADE_ENTRY_AMOUNT = 30;
+
+const getSlotRequirement = (slotKey) => {
+  if (slotKey === "third") {
+    return 100;
+  }
+
+  if (slotKey === "fifth_bonus") {
+    return 300;
+  }
+
+  return 0;
+};
+
+const validateAutomationEligibility = async ({ user, slotKey, allocationPercent }) => {
+  const tradingBalance = Number(user.tradingBalance || 0);
+  const projectedAmount = Number(((tradingBalance * Number(allocationPercent || 0)) / 100).toFixed(2));
+
+  if (projectedAmount < MINIMUM_TRADE_ENTRY_AMOUNT) {
+    return `Trading balance is too low for this automation. Your selected allocation must produce at least ${MINIMUM_TRADE_ENTRY_AMOUNT} USDT.`;
+  }
+
+  if (projectedAmount > tradingBalance) {
+    return "Trading balance is not enough for this automation.";
+  }
+
+  const minimumDepositRequired = getSlotRequirement(slotKey);
+
+  if (!minimumDepositRequired) {
+    return null;
+  }
+
+  const eligible = await copySignalModel.hasBonusSignalAccess(user.id, minimumDepositRequired);
+
+  if (eligible) {
+    return null;
+  }
+
+  if (minimumDepositRequired >= 300) {
+    return `This session is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
+  }
+
+  return `This session is only available to users with a credited deposit of ${minimumDepositRequired} USDT or above.`;
+};
 
 const getMyAutomations = async (req, res) => {
   const automations = await tradeAutomationModel.getByUserId(req.user.id);
@@ -48,6 +93,19 @@ const createAutomation = async (req, res) => {
     });
   }
 
+  const eligibilityError = await validateAutomationEligibility({
+    user: req.user,
+    slotKey,
+    allocationPercent
+  });
+
+  if (eligibilityError) {
+    return res.status(400).json({
+      success: false,
+      message: eligibilityError
+    });
+  }
+
   const automation = await tradeAutomationModel.createAutomation({
     userId: req.user.id,
     username: req.user.username,
@@ -70,6 +128,36 @@ const updateAutomation = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "Automation enabled state must be true or false"
+    });
+  }
+
+  const existingAutomations = await tradeAutomationModel.getByUserId(req.user.id);
+  const existingAutomation = existingAutomations.find((item) => Number(item.id) === Number(req.params.id));
+
+  if (!existingAutomation) {
+    return res.status(404).json({
+      success: false,
+      message: "Automation was not found"
+    });
+  }
+
+  if (existingAutomation.lastResult === "executed") {
+    return res.status(400).json({
+      success: false,
+      message: "Completed automated trades can no longer be changed."
+    });
+  }
+
+  const eligibilityError = await validateAutomationEligibility({
+    user: req.user,
+    slotKey: existingAutomation.slotKey,
+    allocationPercent: existingAutomation.allocationPercent
+  });
+
+  if (eligibilityError) {
+    return res.status(400).json({
+      success: false,
+      message: eligibilityError
     });
   }
 
@@ -99,6 +187,23 @@ const updateAutomation = async (req, res) => {
 };
 
 const deleteAutomation = async (req, res) => {
+  const existingAutomations = await tradeAutomationModel.getByUserId(req.user.id);
+  const existingAutomation = existingAutomations.find((item) => Number(item.id) === Number(req.params.id));
+
+  if (!existingAutomation) {
+    return res.status(404).json({
+      success: false,
+      message: "Automation was not found"
+    });
+  }
+
+  if (existingAutomation.lastResult === "executed") {
+    return res.status(400).json({
+      success: false,
+      message: "Completed automated trades can no longer be deleted."
+    });
+  }
+
   const deleted = await tradeAutomationModel.deleteAutomation({
     id: req.params.id,
     userId: req.user.id
