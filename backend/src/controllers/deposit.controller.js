@@ -68,7 +68,7 @@ const verifyNowPaymentsSignature = (payload, signature) => {
 
   const sortedPayload = JSON.stringify(sortObject(payload));
   const expectedSignature = crypto
-    .createHmac("sha512", env.nowpayments.ipnSecret)
+    .createHmac("sha256", env.nowpayments.ipnSecret)
     .update(sortedPayload)
     .digest("hex");
 
