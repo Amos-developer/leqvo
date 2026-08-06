@@ -121,7 +121,7 @@ const ongoingCount = computed(() => {
 });
 
 const totalInvested = computed(() => {
-  return normalizedTrades.value.reduce((total, trade) => total + Number(trade.invested || 0), 0);
+  return filteredTrades.value.reduce((total, trade) => total + Number(trade.invested || 0), 0);
 });
 
 const loadTrades = async () => {
