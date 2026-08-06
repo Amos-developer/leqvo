@@ -437,6 +437,13 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
+      DELETE FROM copy_signals older
+      USING copy_signals newer
+      WHERE older.valid_from = newer.valid_from
+        AND older.id < newer.id;
+    `);
+
+    await client.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS copy_signals_valid_from_unique
         ON copy_signals (valid_from);
     `);
@@ -453,13 +460,6 @@ const connectDatabase = async () => {
       FROM copy_signals cs
       WHERE t.signal_code = cs.signal_code
         AND (t.target_profit_percent = 0 OR t.settles_at IS NULL);
-    `);
-
-    await client.query(`
-      DELETE FROM copy_signals older
-      USING copy_signals newer
-      WHERE older.valid_from = newer.valid_from
-        AND older.id < newer.id;
     `);
 
     await client.query(`
