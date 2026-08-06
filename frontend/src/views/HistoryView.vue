@@ -11,6 +11,7 @@ const isLoading = ref(true);
 const errorMessage = ref("");
 const now = ref(Date.now());
 let countdownTimer = null;
+let refreshTimer = null;
 
 const tabs = [
   { label: "All", value: "all" },
@@ -156,10 +157,14 @@ onMounted(() => {
   countdownTimer = window.setInterval(() => {
     now.value = Date.now();
   }, 1000);
+  refreshTimer = window.setInterval(() => {
+    loadTrades();
+  }, 10000);
 });
 
 onBeforeUnmount(() => {
   window.clearInterval(countdownTimer);
+  window.clearInterval(refreshTimer);
 });
 </script>
 
