@@ -74,11 +74,14 @@ const createAutomation = async ({ userId, username, pair, slotKey, allocationPer
        allocation_percent
      )
      VALUES ($1, $2, $3, $4, $5)
-     RETURNING ${automationFields}`,
+     RETURNING id`,
     [userId, username, pair, slotKey, allocationPercent]
   );
 
-  return result.rows[0];
+  return getById({
+    id: result.rows[0]?.id,
+    userId
+  });
 };
 
 const updateAutomation = async ({ id, userId, isEnabled }) => {
@@ -89,11 +92,18 @@ const updateAutomation = async ({ id, userId, isEnabled }) => {
      WHERE id = $1
        AND user_id = $2
        AND COALESCE(last_result, 'idle') <> 'executed'
-     RETURNING ${automationFields}`,
+     RETURNING id`,
     [id, userId, isEnabled]
   );
 
-  return result.rows[0] || null;
+  if (!result.rows[0]?.id) {
+    return null;
+  }
+
+  return getById({
+    id: result.rows[0].id,
+    userId
+  });
 };
 
 const deleteAutomation = async ({ id, userId }) => {
