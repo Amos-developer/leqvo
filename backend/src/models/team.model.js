@@ -54,7 +54,7 @@ const getTeamOverview = async (userId) => {
     ),
     database.query(
       `SELECT
-         COUNT(t.member_id)::INT AS "totalMembers",
+         COUNT(DISTINCT t.member_id)::INT AS "totalMembers",
          COUNT(DISTINCT t.member_id)::INT AS "totalTeam",
          COUNT(DISTINCT t.member_id) FILTER (
            WHERE EXISTS (
@@ -71,7 +71,13 @@ const getTeamOverview = async (userId) => {
            )
          )::INT AS "inactiveMembers",
          COALESCE(SUM(d.price_amount) FILTER (WHERE d.credited_at IS NOT NULL), 0)::NUMERIC AS "teamDeposit",
-         COALESCE(SUM(w.amount) FILTER (WHERE w.status = 'approved'), 0)::NUMERIC AS "teamWithdrawal"
+         COALESCE(SUM(w.amount) FILTER (WHERE w.status = 'approved'), 0)::NUMERIC AS "teamWithdrawal",
+         COALESCE((
+           SELECT SUM(r.amount)
+           FROM rewards r
+           WHERE r.user_id = $1
+             AND r.source IN ('referral_first_deposit_bonus', 'trade_commission')
+         ), 0)::NUMERIC AS "totalEarnings"
        FROM teams t
        LEFT JOIN deposits d ON d.user_id = t.member_id
        LEFT JOIN withdrawals w ON w.user_id = t.member_id
@@ -134,7 +140,7 @@ const getTeamOverview = async (userId) => {
       ...summary,
       referralCode: user?.referralCode,
       leaderLevel,
-      totalEarnings: (teamDeposit * 0.05).toFixed(2),
+      totalEarnings: Number(summary.totalEarnings || 0).toFixed(2),
       leadership
     },
     levels: [1, 2, 3].map((level) => ({

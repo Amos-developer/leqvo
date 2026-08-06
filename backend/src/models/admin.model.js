@@ -699,7 +699,15 @@ const getBalanceAudit = async (userId) => {
          COALESCE((SELECT SUM(amount) FROM withdrawals WHERE user_id = $1 AND status = 'approved'), 0)::NUMERIC AS "totalWithdrawal",
          COALESCE((SELECT SUM(amount) FROM trades WHERE user_id = $1), 0)::NUMERIC AS "totalTradeAmount",
          COALESCE((SELECT SUM(pnl_amount) FROM trades WHERE user_id = $1), 0)::NUMERIC AS "totalTradeProfit",
-         COALESCE((SELECT SUM(amount) FROM leadership_rewards WHERE user_id = $1), 0)::NUMERIC AS "teamEarnings",
+         (
+           COALESCE((SELECT SUM(amount) FROM leadership_rewards WHERE user_id = $1), 0) +
+           COALESCE((
+             SELECT SUM(amount)
+             FROM rewards
+             WHERE user_id = $1
+               AND source IN ('referral_first_deposit_bonus', 'trade_commission')
+           ), 0)
+         )::NUMERIC AS "teamEarnings",
          COALESCE((SELECT COUNT(*) FROM trades WHERE user_id = $1), 0)::INT AS "tradeCount",
          COALESCE((SELECT COUNT(*) FROM trades WHERE user_id = $1 AND status = 'active'), 0)::INT AS "activeTradeCount",
          COALESCE((SELECT COUNT(*) FROM withdrawals WHERE user_id = $1), 0)::INT AS "withdrawalCount",

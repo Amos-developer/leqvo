@@ -2,9 +2,13 @@ const QRCode = require("qrcode");
 const env = require("../config/env");
 const database = require("../config/database");
 const userModel = require("./user.model");
+const rewardModel = require("./reward.model");
 
 const MINIMUM_CREDIT_AMOUNT = 30;
 const CREDITABLE_STATUS = "finished";
+const FIRST_DEPOSIT_BONUS_MINIMUM = 100;
+const USER_FIRST_DEPOSIT_BONUS_PERCENT = 0.06;
+const REFERRAL_FIRST_DEPOSIT_BONUS_PERCENT = 0.03;
 
 const currencyMap = {
   usdt: {
@@ -331,6 +335,99 @@ const shouldCreditDeposit = (deposit) => {
   );
 };
 
+const applyFirstDepositBonuses = async (deposit, client) => {
+  const creditedAmount = Number(deposit.priceAmount || 0);
+
+  if (creditedAmount < FIRST_DEPOSIT_BONUS_MINIMUM) {
+    return;
+  }
+
+  const [creditedDepositCountResult, userResult] = await Promise.all([
+    client.query(
+      `SELECT COUNT(*)::INT AS count
+       FROM deposits
+       WHERE user_id = $1
+         AND credited_at IS NOT NULL`,
+      [deposit.userId]
+    ),
+    client.query(
+      `SELECT id, username, referred_by AS "referredBy"
+       FROM users
+       WHERE id = $1
+       LIMIT 1`,
+      [deposit.userId]
+    )
+  ]);
+
+  const creditedDepositCount = Number(creditedDepositCountResult.rows[0]?.count || 0);
+  const user = userResult.rows[0];
+
+  if (!user || creditedDepositCount !== 1) {
+    return;
+  }
+
+  const userBonusAmount = Number((creditedAmount * USER_FIRST_DEPOSIT_BONUS_PERCENT).toFixed(8));
+
+  if (userBonusAmount > 0) {
+    const userBonusReward = await rewardModel.createRewardEntry(
+      {
+        userId: user.id,
+        username: user.username,
+        source: "first_deposit_bonus",
+        title: "First Deposit Bonus",
+        amount: userBonusAmount,
+        referenceId: `deposit-${deposit.id}-user-bonus`,
+        awardedAt: new Date()
+      },
+      client
+    );
+
+    if (userBonusReward) {
+      await userModel.incrementUserBalance(user.id, userBonusAmount, client);
+    }
+  }
+
+  if (!user.referredBy) {
+    return;
+  }
+
+  const inviterResult = await client.query(
+    `SELECT id, username
+     FROM users
+     WHERE id = $1
+     LIMIT 1`,
+    [user.referredBy]
+  );
+  const inviter = inviterResult.rows[0];
+
+  if (!inviter) {
+    return;
+  }
+
+  const inviterBonusAmount = Number((creditedAmount * REFERRAL_FIRST_DEPOSIT_BONUS_PERCENT).toFixed(8));
+
+  if (inviterBonusAmount <= 0) {
+    return;
+  }
+
+  const inviterBonusReward = await rewardModel.createRewardEntry(
+    {
+      userId: inviter.id,
+      username: inviter.username,
+      source: "referral_first_deposit_bonus",
+      title: "Referral First Deposit Bonus",
+      amount: inviterBonusAmount,
+      referenceId: `deposit-${deposit.id}-inviter-bonus`,
+      awardedAt: new Date()
+    },
+    client
+  );
+
+  if (inviterBonusReward) {
+    await userModel.incrementUserBalance(inviter.id, inviterBonusAmount, client);
+  }
+};
+
 const applyPaymentUpdate = async ({
   paymentId,
   status,
@@ -384,6 +481,7 @@ const applyPaymentUpdate = async ({
       );
 
       deposit = creditedResult.rows[0];
+      await applyFirstDepositBonuses(deposit, client);
     }
 
     await client.query("COMMIT");
@@ -448,8 +546,14 @@ const creditDepositManually = async (depositId) => {
       [Number(depositId)]
     );
 
+    const creditedDeposit = result.rows[0] || null;
+
+    if (creditedDeposit) {
+      await applyFirstDepositBonuses(creditedDeposit, client);
+    }
+
     await client.query("COMMIT");
-    return result.rows[0] || null;
+    return creditedDeposit;
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

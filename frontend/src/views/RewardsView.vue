@@ -11,7 +11,9 @@ const summary = ref({
   totalAmount: 0,
   luckyBoxAmount: 0,
   dailySpinAmount: 0,
-  leadershipAmount: 0
+  leadershipAmount: 0,
+  referralDepositBonusAmount: 0,
+  tradeCommissionAmount: 0
 });
 const rewards = ref([]);
 const activeFilter = ref("all");
@@ -20,14 +22,18 @@ const filters = [
   { label: "All", value: "all" },
   { label: "Lucky Box", value: "lucky_box" },
   { label: "Daily Spin", value: "daily_spin" },
-  { label: "Leadership", value: "leadership" }
+  { label: "Leadership", value: "leadership" },
+  { label: "Referral Bonus", value: "referral_first_deposit_bonus" },
+  { label: "Trade Commission", value: "trade_commission" }
 ];
 
 const cards = computed(() => [
   { label: "Total Rewards", value: money(summary.value.totalAmount), tone: "pink" },
   { label: "Lucky Box", value: money(summary.value.luckyBoxAmount), tone: "violet" },
   { label: "Daily Spin", value: money(summary.value.dailySpinAmount), tone: "amber" },
-  { label: "Leadership", value: money(summary.value.leadershipAmount), tone: "green" }
+  { label: "Leadership", value: money(summary.value.leadershipAmount), tone: "green" },
+  { label: "Referral Bonus", value: money(summary.value.referralDepositBonusAmount), tone: "pink" },
+  { label: "Trade Commission", value: money(summary.value.tradeCommissionAmount), tone: "violet" }
 ]);
 
 const filteredRewards = computed(() => {
@@ -62,7 +68,10 @@ const sourceLabel = (source) => {
   const labels = {
     lucky_box: "Lucky Box",
     daily_spin: "Daily Spin",
-    leadership: "Leadership"
+    leadership: "Leadership",
+    referral_first_deposit_bonus: "Referral Bonus",
+    trade_commission: "Trade Commission",
+    first_deposit_bonus: "First Deposit Bonus"
   };
 
   return labels[source] || "Reward";

@@ -1,4 +1,5 @@
 const database = require("../config/database");
+const rewardModel = require("./reward.model");
 
 const tradeFields = `
   id,
@@ -24,6 +25,71 @@ const tradeFields = `
   created_at AS "createdAt",
   updated_at AS "updatedAt"
 `;
+
+const TRADE_COMMISSION_LEVELS = {
+  1: 0.10,
+  2: 0.03,
+  3: 0.02
+};
+
+const awardTradeCommissions = async ({ tradeId, memberUserId, pnlAmount, closedAt }, client) => {
+  const profitAmount = Number(pnlAmount || 0);
+
+  if (profitAmount <= 0) {
+    return;
+  }
+
+  const uplinesResult = await client.query(
+    `SELECT
+       t.user_id AS "userId",
+       t.level,
+       u.username
+     FROM teams t
+     JOIN users u ON u.id = t.user_id
+     WHERE t.member_id = $1
+       AND t.level IN (1, 2, 3)
+     ORDER BY t.level ASC`,
+    [memberUserId]
+  );
+
+  for (const upline of uplinesResult.rows) {
+    const level = Number(upline.level || 0);
+    const percent = TRADE_COMMISSION_LEVELS[level];
+
+    if (!percent) {
+      continue;
+    }
+
+    const commissionAmount = Number((profitAmount * percent).toFixed(8));
+
+    if (commissionAmount <= 0) {
+      continue;
+    }
+
+    const commissionReward = await rewardModel.createRewardEntry(
+      {
+        userId: upline.userId,
+        username: upline.username,
+        source: "trade_commission",
+        title: `Level ${level} Trade Commission`,
+        amount: commissionAmount,
+        referenceId: `trade-${tradeId}-level-${level}`,
+        awardedAt: closedAt || new Date()
+      },
+      client
+    );
+
+    if (commissionReward) {
+      await client.query(
+        `UPDATE users
+         SET balance = balance + $1,
+             updated_at = NOW()
+         WHERE id = $2`,
+        [commissionAmount, upline.userId]
+      );
+    }
+  }
+};
 
 const settleCompletedTradesForUser = async (userId, client = database) => {
   const activeTradesResult = await client.query(
@@ -57,6 +123,7 @@ const settleCompletedTradesForUser = async (userId, client = database) => {
     const profitPercent = Number(trade.targetProfitPercent || 0);
     const pnlAmount = Number(((amount * profitPercent) / 100).toFixed(8));
     const settledAmount = Number((amount + pnlAmount).toFixed(8));
+    const closedAt = new Date();
 
     creditedAmount += settledAmount;
 
@@ -65,11 +132,18 @@ const settleCompletedTradesForUser = async (userId, client = database) => {
        SET pnl_amount = $2,
            pnl_percent = $3,
            status = 'win',
-           closed_at = NOW(),
+           closed_at = $4,
            updated_at = NOW()
        WHERE id = $1`,
-      [trade.id, pnlAmount, profitPercent]
+      [trade.id, pnlAmount, profitPercent, closedAt]
     );
+
+    await awardTradeCommissions({
+      tradeId: trade.id,
+      memberUserId: userId,
+      pnlAmount,
+      closedAt
+    }, client);
   }
 
   await client.query(
