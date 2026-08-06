@@ -84,7 +84,7 @@ const createAutomation = async ({ userId, username, pair, slotKey, allocationPer
 const updateAutomation = async ({ id, userId, isEnabled }) => {
   const result = await database.query(
     `UPDATE trade_automations
-     SET is_enabled = COALESCE($3, is_enabled),
+     SET is_enabled = COALESCE($3::BOOLEAN, is_enabled),
          updated_at = NOW()
      WHERE id = $1
        AND user_id = $2
@@ -127,9 +127,9 @@ const markAutomationRun = async ({ id, signalCode, result, message }) => {
     `UPDATE trade_automations
      SET last_signal_code = $2,
          last_run_at = NOW(),
-         last_result = $3,
+         last_result = $3::VARCHAR,
          last_message = $4,
-         is_enabled = CASE WHEN $3 = 'executed' THEN FALSE ELSE is_enabled END,
+         is_enabled = CASE WHEN $3::VARCHAR = 'executed' THEN FALSE ELSE is_enabled END,
          updated_at = NOW()
      WHERE id = $1`,
     [id, signalCode, result, message]

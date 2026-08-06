@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { showUserPopup } from "../composables/useUserPopup";
 import {
@@ -14,7 +14,6 @@ const automations = ref([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
 const user = ref(JSON.parse(localStorage.getItem("leqvoUser") || "{}"));
-let automationRefreshTimer = null;
 
 const form = ref({
   slotKey: "first",
@@ -211,16 +210,7 @@ const removeAutomation = async (automation) => {
   });
 };
 
-onMounted(() => {
-  loadAutomations();
-  automationRefreshTimer = window.setInterval(() => {
-    loadAutomations();
-  }, 10000);
-});
-
-onUnmounted(() => {
-  window.clearInterval(automationRefreshTimer);
-});
+onMounted(loadAutomations);
 </script>
 
 <template>
