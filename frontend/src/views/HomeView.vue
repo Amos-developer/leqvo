@@ -3,9 +3,9 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getPopularCrypto, getUserById } from "../utils/api";
 import { createBinanceMarketSocket, createInitialBinanceMarkets } from "../utils/binanceMarketSocket";
+import automationIcon from "../assets/icons/automation.svg";
 import dailySpinIcon from "../assets/icons/daily-spin.svg";
 import depositIcon from "../assets/icons/deposit.svg";
-import inviteIcon from "../assets/icons/invite.svg";
 import leadershipIcon from "../assets/icons/leadership.svg";
 import luckyBoxIcon from "../assets/icons/lucky-box.svg";
 import teamIcon from "../assets/icons/team.svg";
@@ -27,7 +27,7 @@ let marketSocket = null;
 const quickActions = [
   { label: "Deposit", to: "/deposit", icon: depositIcon, tone: "pink" },
   { label: "Withdrawal", to: "/withdrawal", icon: withdrawalIcon, tone: "green" },
-  { label: "Invite", to: "/invite", icon: inviteIcon, tone: "amber" },
+  { label: "Automation", to: "/account/automation", icon: automationIcon, tone: "amber" },
   { label: "Team", to: "/team", icon: teamIcon, tone: "blue" },
   { label: "Lucky-box", to: "/lucky-box", icon: luckyBoxIcon, tone: "violet" },
   { label: "Leadership", to: "/leadership", icon: leadershipIcon, tone: "teal" },

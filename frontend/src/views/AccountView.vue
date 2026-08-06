@@ -311,11 +311,11 @@ onUnmounted(() => {
           </div>
           <i></i>
         </button>
-        <button @click="router.push('/account/automation')">
+        <button @click="router.push('/invite')">
           <span class="settings-icon icon-preferences"></span>
           <div>
-            <strong>Automation</strong>
-            <p>Schedule signal execution when you cannot be active during trade time</p>
+            <strong>Invite</strong>
+            <p>Share your referral link and grow your team securely from one place</p>
           </div>
           <i></i>
         </button>
