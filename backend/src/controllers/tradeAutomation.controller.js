@@ -1,7 +1,7 @@
 const tradeAutomationModel = require("../models/tradeAutomation.model");
 const userModel = require("../models/user.model");
 const copySignalModel = require("../models/copySignal.model");
-const { runTradeAutomationCycle } = require("../services/tradeAutomation.service");
+const { runTradeAutomationCycle, runAutomationNow } = require("../services/tradeAutomation.service");
 
 const ALLOWED_SLOTS = ["first", "second", "third", "fourth", "fifth_bonus"];
 const ALLOWED_ALLOCATIONS = [20, 40, 50, 60, 100];
@@ -116,8 +116,8 @@ const createAutomation = async (req, res) => {
   });
 
   await runTradeAutomationCycle();
-  const refreshedAutomation = await tradeAutomationModel.getById({
-    id: automation.id,
+  const refreshedAutomation = await runAutomationNow({
+    automationId: automation.id,
     userId: req.user.id
   });
 
@@ -185,10 +185,15 @@ const updateAutomation = async (req, res) => {
     await runTradeAutomationCycle();
   }
 
-  const refreshedAutomation = await tradeAutomationModel.getById({
-    id: req.params.id,
-    userId: req.user.id
-  });
+  const refreshedAutomation = isEnabled
+    ? await runAutomationNow({
+        automationId: req.params.id,
+        userId: req.user.id
+      })
+    : await tradeAutomationModel.getById({
+        id: req.params.id,
+        userId: req.user.id
+      });
 
   const refreshedUser = await userModel.findUserById(req.user.id);
 

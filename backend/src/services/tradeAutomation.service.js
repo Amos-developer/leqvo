@@ -56,6 +56,88 @@ const getSignalAccessMessage = async (signal, userId) => {
   return `Requires a credited deposit of ${minimumDepositRequired} USDT or above.`;
 };
 
+const processAutomation = async (automation, signal, slotKey) => {
+  if (!automation || !signal || automation.lastSignalCode === signal.signalCode) {
+    return;
+  }
+
+  const user = await userModel.findUserById(automation.userId);
+
+  if (!user) {
+    await tradeAutomationModel.markAutomationRun({
+      id: automation.id,
+      signalCode: signal.signalCode,
+      result: "failed",
+      message: "User account was not found."
+    });
+    return;
+  }
+
+  const accessMessage = await getSignalAccessMessage(signal, user.id);
+
+  if (accessMessage) {
+    await tradeAutomationModel.markAutomationRun({
+      id: automation.id,
+      signalCode: signal.signalCode,
+      result: "skipped",
+      message: accessMessage
+    });
+    return;
+  }
+
+  const tradingBalance = Number(user.tradingBalance || 0);
+  const amount = Number(((tradingBalance * Number(automation.allocationPercent || 0)) / 100).toFixed(2));
+
+  if (amount < MINIMUM_TRADE_ENTRY_AMOUNT) {
+    await tradeAutomationModel.markAutomationRun({
+      id: automation.id,
+      signalCode: signal.signalCode,
+      result: "skipped",
+      message: `Trading balance is too low for automation. Minimum execution amount is ${MINIMUM_TRADE_ENTRY_AMOUNT} USDT.`
+    });
+    return;
+  }
+
+  if (amount > tradingBalance) {
+    await tradeAutomationModel.markAutomationRun({
+      id: automation.id,
+      signalCode: signal.signalCode,
+      result: "skipped",
+      message: "Trading balance is not enough for this automation."
+    });
+    return;
+  }
+
+  try {
+    await tradeModel.createTrade({
+      user,
+      pair: signal.pair,
+      symbol: signal.pair.split("/")[0],
+      signalCode: signal.signalCode,
+      allocationPercent: Number(automation.allocationPercent),
+      amount,
+      entryPrice: 0,
+      targetProfitPercent: Number(signal.profitPercent || 0),
+      automationId: automation.id,
+      executionMode: "automation"
+    });
+
+    await tradeAutomationModel.markAutomationRun({
+      id: automation.id,
+      signalCode: signal.signalCode,
+      result: "executed",
+      message: `Automated trade entered successfully for the active ${slotKey.replace("_", " ")} session using ${signal.pair}.`
+    });
+  } catch (error) {
+    await tradeAutomationModel.markAutomationRun({
+      id: automation.id,
+      signalCode: signal.signalCode,
+      result: "failed",
+      message: error.message || "Automation execution failed."
+    });
+  }
+};
+
 const runTradeAutomationCycle = async () => {
   if (isProcessing) {
     rerunRequested = true;
@@ -75,85 +157,7 @@ const runTradeAutomationCycle = async () => {
       const automations = await tradeAutomationModel.getEnabledAutomationsBySignal({ slotKey });
 
       for (const automation of automations) {
-        if (automation.lastSignalCode === signal.signalCode) {
-          continue;
-        }
-
-        const user = await userModel.findUserById(automation.userId);
-
-        if (!user) {
-          await tradeAutomationModel.markAutomationRun({
-            id: automation.id,
-            signalCode: signal.signalCode,
-            result: "failed",
-            message: "User account was not found."
-          });
-          continue;
-        }
-
-        const accessMessage = await getSignalAccessMessage(signal, user.id);
-
-        if (accessMessage) {
-          await tradeAutomationModel.markAutomationRun({
-            id: automation.id,
-            signalCode: signal.signalCode,
-            result: "skipped",
-            message: accessMessage
-          });
-          continue;
-        }
-
-        const tradingBalance = Number(user.tradingBalance || 0);
-        const amount = Number(((tradingBalance * Number(automation.allocationPercent || 0)) / 100).toFixed(2));
-
-        if (amount < MINIMUM_TRADE_ENTRY_AMOUNT) {
-          await tradeAutomationModel.markAutomationRun({
-            id: automation.id,
-            signalCode: signal.signalCode,
-            result: "skipped",
-            message: `Trading balance is too low for automation. Minimum execution amount is ${MINIMUM_TRADE_ENTRY_AMOUNT} USDT.`
-          });
-          continue;
-        }
-
-        if (amount > tradingBalance) {
-          await tradeAutomationModel.markAutomationRun({
-            id: automation.id,
-            signalCode: signal.signalCode,
-            result: "skipped",
-            message: "Trading balance is not enough for this automation."
-          });
-          continue;
-        }
-
-        try {
-          await tradeModel.createTrade({
-            user,
-            pair: signal.pair,
-            symbol: signal.pair.split("/")[0],
-            signalCode: signal.signalCode,
-            allocationPercent: Number(automation.allocationPercent),
-            amount,
-            entryPrice: 0,
-            targetProfitPercent: Number(signal.profitPercent || 0),
-            automationId: automation.id,
-            executionMode: "automation"
-          });
-
-          await tradeAutomationModel.markAutomationRun({
-            id: automation.id,
-            signalCode: signal.signalCode,
-            result: "executed",
-            message: `Automated trade entered successfully for the active ${slotKey.replace("_", " ")} session using ${signal.pair}.`
-          });
-        } catch (error) {
-          await tradeAutomationModel.markAutomationRun({
-            id: automation.id,
-            signalCode: signal.signalCode,
-            result: "failed",
-            message: error.message || "Automation execution failed."
-          });
-        }
+        await processAutomation(automation, signal, slotKey);
       }
     }
   } finally {
@@ -168,6 +172,29 @@ const runTradeAutomationCycle = async () => {
   }
 };
 
+const runAutomationNow = async ({ automationId, userId }) => {
+  const automation = await tradeAutomationModel.getById({ id: automationId, userId });
+
+  if (!automation || !automation.isEnabled) {
+    return automation;
+  }
+
+  await tradeModel.settleCompletedTradesForUser(userId);
+
+  const activeSignals = await copySignalModel.getActiveSignals();
+  const latestSignalsBySlot = getLatestSignalsBySlot(activeSignals);
+  const signal = latestSignalsBySlot.get(automation.slotKey);
+
+  if (!signal) {
+    return tradeAutomationModel.getById({ id: automationId, userId });
+  }
+
+  await processAutomation(automation, signal, automation.slotKey);
+
+  return tradeAutomationModel.getById({ id: automationId, userId });
+};
+
 module.exports = {
-  runTradeAutomationCycle
+  runTradeAutomationCycle,
+  runAutomationNow
 };
