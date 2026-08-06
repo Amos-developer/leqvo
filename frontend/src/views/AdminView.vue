@@ -12,6 +12,7 @@ import {
   getAdminOverview,
   getAdminTransactions,
   getAdminBalanceAudit,
+  getAdminTradeAutomations,
   getAdminUsers,
   getAdminTrades,
   getAdminWithdrawalAddresses,
@@ -44,6 +45,8 @@ const depositStatusFilter = ref("all");
 const depositAssetFilter = ref("all");
 const userTrades = ref([]);
 const userTradeSummary = ref({ users: 0, active: 0, completed: 0, total: 0 });
+const tradeAutomations = ref([]);
+const tradeAutomationSummary = ref({ total: 0, active: 0, paused: 0, users: 0 });
 const withdrawalAddresses = ref([]);
 const addressReviewId = ref("");
 const leaders = ref([]);
@@ -286,6 +289,33 @@ const userSignalCards = computed(() => [
   }
 ]);
 
+const automationCards = computed(() => [
+  {
+    label: "Automations",
+    value: tradeAutomationSummary.value.total || 0,
+    note: "All saved automation rules",
+    tone: "indigo"
+  },
+  {
+    label: "Enabled",
+    value: tradeAutomationSummary.value.active || 0,
+    note: "Ready to execute on schedule",
+    tone: "cyan"
+  },
+  {
+    label: "Paused",
+    value: tradeAutomationSummary.value.paused || 0,
+    note: "Temporarily disabled rules",
+    tone: "amber"
+  },
+  {
+    label: "Users Automated",
+    value: tradeAutomationSummary.value.users || 0,
+    note: "Users with automation rules",
+    tone: "emerald"
+  }
+]);
+
 const availableSignalPairs = computed(() => {
   return BINANCE_MARKETS.map((market) => ({
     value: `${market.symbol}/USDT`,
@@ -427,13 +457,14 @@ const loadAdminData = async () => {
   errorMessage.value = "";
 
   try {
-    const [overviewResult, transactionsResult, usersResult, depositsResult, withdrawalsResult, tradesResult, leadersResult, kycResult, addressesResult, signalsResult] = await Promise.all([
+    const [overviewResult, transactionsResult, usersResult, depositsResult, withdrawalsResult, tradesResult, automationsResult, leadersResult, kycResult, addressesResult, signalsResult] = await Promise.all([
       getAdminOverview(),
       getAdminTransactions(),
       getAdminUsers(),
       getAdminDeposits(),
       getAdminWithdrawals(),
       getAdminTrades(),
+      getAdminTradeAutomations(),
       getAdminLeaders(),
       getAdminKyc(),
       getAdminWithdrawalAddresses(),
@@ -448,6 +479,8 @@ const loadAdminData = async () => {
     withdrawals.value = withdrawalsResult.data;
     userTrades.value = tradesResult.data.trades;
     userTradeSummary.value = tradesResult.data.summary;
+    tradeAutomations.value = automationsResult.data.automations;
+    tradeAutomationSummary.value = automationsResult.data.summary;
     leaders.value = leadersResult.data.leaders;
     leaderRewards.value = leadersResult.data.rewards;
     leaderSummary.value = leadersResult.data.summary;
@@ -1529,6 +1562,75 @@ onMounted(loadAdminData);
               <footer>
                 <span>Opened {{ formatDate(trade.openedAt) }}</span>
                 <span>{{ trade.closedAt ? `Closed ${formatDate(trade.closedAt)}` : "Still active" }}</span>
+              </footer>
+            </article>
+          </div>
+        </section>
+
+        <section class="admin-panel user-signals-panel">
+          <div class="admin-panel-head">
+            <div>
+              <h2>Automated Signals</h2>
+              <p>All saved automation rules users created for scheduled trade execution</p>
+            </div>
+          </div>
+
+          <section class="user-signals-metrics" aria-label="Automation metrics">
+            <article v-for="card in automationCards" :key="card.label" class="user-signal-metric" :class="`is-${card.tone}`">
+              <span>{{ card.label }}</span>
+              <strong>{{ card.value }}</strong>
+              <p>{{ card.note }}</p>
+            </article>
+          </section>
+
+          <div class="user-signals-list">
+            <article v-if="!tradeAutomations.length" class="admin-empty-state">
+              <h2>No automated signals yet</h2>
+              <p>User automation rules will appear here after members save them from the account preferences page.</p>
+            </article>
+
+            <article v-for="automation in tradeAutomations" v-else :key="automation.id" class="user-signal-card automation-admin-card">
+              <div class="user-signal-main">
+                <div class="admin-user-mini">{{ automation.username.charAt(0).toUpperCase() }}</div>
+                <div>
+                  <strong>{{ automation.username }}</strong>
+                  <span>{{ automation.email }} · {{ automation.userId }}</span>
+                </div>
+                <b :class="automation.isEnabled ? 'win' : 'loose'">
+                  {{ automation.isEnabled ? "enabled" : "paused" }}
+                </b>
+              </div>
+
+              <div class="user-signal-grid">
+                <div>
+                  <span>Session</span>
+                  <strong>{{ automation.slotKey.replace("_", " ") }}</strong>
+                </div>
+                <div>
+                  <span>Allocation</span>
+                  <strong>{{ Number(automation.allocationPercent).toFixed(0) }}%</strong>
+                </div>
+                <div>
+                  <span>Last signal</span>
+                  <strong>{{ automation.lastSignalCode || "None" }}</strong>
+                </div>
+                <div>
+                  <span>Last result</span>
+                  <strong>{{ automation.lastResult || "idle" }}</strong>
+                </div>
+                <div>
+                  <span>Last run</span>
+                  <strong>{{ formatDateTime(automation.lastRunAt) }}</strong>
+                </div>
+                <div>
+                  <span>Created</span>
+                  <strong>{{ formatDateTime(automation.createdAt) }}</strong>
+                </div>
+              </div>
+
+              <footer>
+                <span>{{ automation.lastMessage || "Waiting for the next matching signal session." }}</span>
+                <span>Updated {{ formatDateTime(automation.updatedAt) }}</span>
               </footer>
             </article>
           </div>

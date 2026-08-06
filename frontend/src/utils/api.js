@@ -383,6 +383,12 @@ export const getAdminWithdrawals = () => {
   });
 };
 
+export const getAdminTradeAutomations = () => {
+  return request("/admin/trade-automations", {
+    headers: getAdminHeaders()
+  });
+};
+
 export const getAdminTrades = () => {
   return request("/admin/trades", {
     headers: getAdminHeaders()

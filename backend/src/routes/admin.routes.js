@@ -22,6 +22,7 @@ router.patch("/deposits/:id", asyncHandler(adminController.updateDeposit));
 router.delete("/deposits/:id", asyncHandler(adminController.deleteDeposit));
 router.get("/withdrawals", asyncHandler(adminController.getWithdrawals));
 router.get("/trades", asyncHandler(adminController.getTrades));
+router.get("/trade-automations", asyncHandler(adminController.getTradeAutomations));
 router.get("/transactions", asyncHandler(adminController.getTransactions));
 
 module.exports = router;

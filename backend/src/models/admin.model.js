@@ -361,6 +361,43 @@ const getTrades = async () => {
   };
 };
 
+const getTradeAutomations = async () => {
+  const [automationsResult, summaryResult] = await Promise.all([
+    database.query(`
+      SELECT
+        ta.id,
+        ta.user_id AS "userId",
+        ta.username,
+        u.email,
+        ta.slot_key AS "slotKey",
+        ta.allocation_percent AS "allocationPercent",
+        ta.is_enabled AS "isEnabled",
+        ta.last_signal_code AS "lastSignalCode",
+        ta.last_run_at AS "lastRunAt",
+        ta.last_result AS "lastResult",
+        ta.last_message AS "lastMessage",
+        ta.created_at AS "createdAt",
+        ta.updated_at AS "updatedAt"
+      FROM trade_automations ta
+      JOIN users u ON u.id = ta.user_id
+      ORDER BY ta.created_at DESC
+    `),
+    database.query(`
+      SELECT
+        COUNT(*)::INT AS total,
+        COUNT(*) FILTER (WHERE is_enabled = TRUE)::INT AS active,
+        COUNT(*) FILTER (WHERE is_enabled = FALSE)::INT AS paused,
+        COUNT(DISTINCT user_id)::INT AS users
+      FROM trade_automations
+    `)
+  ]);
+
+  return {
+    automations: automationsResult.rows,
+    summary: summaryResult.rows[0]
+  };
+};
+
 const refreshLeadershipRecords = async () => {
   const usersResult = await database.query(`
     SELECT id, username
@@ -872,6 +909,7 @@ module.exports = {
   deleteDeposit,
   getWithdrawals,
   getTrades,
+  getTradeAutomations,
   getTransactions,
   getLeaders,
   grantLeadershipReward

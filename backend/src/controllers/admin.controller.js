@@ -434,6 +434,21 @@ const getTrades = async (req, res) => {
   });
 };
 
+const getTradeAutomations = async (req, res) => {
+  const admin = await requireAdmin(req, res);
+
+  if (!admin) {
+    return;
+  }
+
+  const automations = await adminModel.getTradeAutomations();
+
+  return res.status(200).json({
+    success: true,
+    data: automations
+  });
+};
+
 const getTransactions = async (req, res) => {
   const admin = await requireAdmin(req, res);
 
@@ -518,6 +533,7 @@ module.exports = {
   deleteDeposit,
   getWithdrawals,
   getTrades,
+  getTradeAutomations,
   getTransactions,
   getLeaders,
   grantLeadershipReward
