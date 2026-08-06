@@ -175,6 +175,12 @@
   box-shadow: 0 16px 28px rgba(249, 79, 167, 0.22);
 }
 
+.automation-submit-secondary {
+  background: #f4f5fa;
+  color: var(--ink);
+  box-shadow: none;
+}
+
 .automation-info-grid {
   display: grid;
   gap: 10px;

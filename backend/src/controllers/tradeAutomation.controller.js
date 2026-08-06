@@ -49,6 +49,16 @@ const getSlotTimingError = (slotKey) => {
   return null;
 };
 
+const getUpcomingSlots = () => {
+  const now = new Date();
+  const currentUtcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+
+  return ALLOWED_SLOTS.filter((slotKey) => {
+    const slotStart = SLOT_START_MINUTES[slotKey];
+    return slotStart > currentUtcMinutes;
+  });
+};
+
 const validateAutomationEligibility = async ({ user, slotKey, allocationPercent }) => {
   const tradingBalance = Number(user.tradingBalance || 0);
   const projectedAmount = Number(((tradingBalance * Number(allocationPercent || 0)) / 100).toFixed(2));
@@ -101,7 +111,7 @@ const createAutomation = async (req, res) => {
     });
   }
 
-  if (!ALLOWED_SLOTS.includes(slotKey)) {
+  if (slotKey !== "all" && !ALLOWED_SLOTS.includes(slotKey)) {
     return res.status(400).json({
       success: false,
       message: "Choose a valid automation trade slot"
@@ -115,6 +125,73 @@ const createAutomation = async (req, res) => {
     });
   }
 
+  const existingAutomations = await tradeAutomationModel.getByUserId(req.user.id);
+
+  if (slotKey === "all") {
+    const upcomingSlots = getUpcomingSlots();
+
+    if (!upcomingSlots.length) {
+      return res.status(400).json({
+        success: false,
+        message: "There are no upcoming trade sessions left for today. Please come back before the next trading day starts."
+      });
+    }
+
+    const createdAutomations = [];
+
+    for (const targetSlot of upcomingSlots) {
+      const duplicateAutomation = existingAutomations.find((item) => item.slotKey === targetSlot);
+
+      if (duplicateAutomation) {
+        continue;
+      }
+
+      const eligibilityError = await validateAutomationEligibility({
+        user: req.user,
+        slotKey: targetSlot,
+        allocationPercent
+      });
+
+      if (eligibilityError) {
+        continue;
+      }
+
+      const created = await tradeAutomationModel.createAutomation({
+        userId: req.user.id,
+        username: req.user.username,
+        pair: "ANY",
+        slotKey: targetSlot,
+        allocationPercent
+      });
+
+      createdAutomations.push(created);
+    }
+
+    if (!createdAutomations.length) {
+      return res.status(409).json({
+        success: false,
+        message: "No upcoming automation rules could be created. They may already exist or you may not meet the session requirements."
+      });
+    }
+
+    await runTradeAutomationCycle();
+
+    const refreshedAutomations = await Promise.all(
+      createdAutomations.map((automation) =>
+        tradeAutomationModel.getById({
+          id: automation.id,
+          userId: req.user.id
+        })
+      )
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: `Automation saved for ${refreshedAutomations.length} upcoming trade session${refreshedAutomations.length === 1 ? "" : "s"}.`,
+      data: refreshedAutomations.filter(Boolean)
+    });
+  }
+
   const slotTimingError = getSlotTimingError(slotKey);
 
   if (slotTimingError) {
@@ -124,7 +201,6 @@ const createAutomation = async (req, res) => {
     });
   }
 
-  const existingAutomations = await tradeAutomationModel.getByUserId(req.user.id);
   const duplicateAutomation = existingAutomations.find((item) => item.slotKey === slotKey);
 
   if (duplicateAutomation) {

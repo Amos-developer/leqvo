@@ -137,7 +137,8 @@ const createAutomationRule = async () => {
       allocationPercent: Number(form.value.allocationPercent)
     });
 
-    automations.value = [result.data, ...automations.value];
+    const createdItems = Array.isArray(result.data) ? result.data : [result.data];
+    automations.value = [...createdItems.filter(Boolean), ...automations.value];
     showUserPopup({
       tone: "success",
       title: "Automation saved",
@@ -148,6 +149,38 @@ const createAutomationRule = async () => {
       tone: "error",
       title: "Save failed",
       message: error.message || "Could not create automation."
+    });
+  } finally {
+    isSaving.value = false;
+  }
+};
+
+const createAllAutomationRules = async () => {
+  isSaving.value = true;
+
+  try {
+    const result = await createTradeAutomation({
+      slotKey: "all",
+      allocationPercent: Number(form.value.allocationPercent)
+    });
+
+    const createdItems = Array.isArray(result.data) ? result.data : [];
+    const existingIds = new Set(automations.value.map((item) => item.id));
+    automations.value = [
+      ...createdItems.filter((item) => !existingIds.has(item.id)),
+      ...automations.value
+    ];
+
+    showUserPopup({
+      tone: "success",
+      title: "All upcoming trades automated",
+      message: result.message || "Automation rules were created for all upcoming trade sessions."
+    });
+  } catch (error) {
+    showUserPopup({
+      tone: "error",
+      title: "Bulk save failed",
+      message: error.message || "Could not automate all upcoming trade sessions."
     });
   } finally {
     isSaving.value = false;
@@ -280,6 +313,14 @@ onMounted(loadAutomations);
         @click="createAutomationRule"
       >
         {{ isSaving ? "Saving..." : "Save automation" }}
+      </button>
+      <button
+        class="automation-submit automation-submit-secondary"
+        type="button"
+        :disabled="isSaving || !projectedExecutionReady"
+        @click="createAllAutomationRules"
+      >
+        {{ isSaving ? "Saving..." : "Automate all upcoming trades" }}
       </button>
     </section>
 
