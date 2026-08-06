@@ -401,15 +401,6 @@ const connectDatabase = async () => {
 
     await client.query(`
       UPDATE trades t
-      SET target_profit_percent = COALESCE(cs.profit_percent, t.target_profit_percent),
-          settles_at = COALESCE(cs.valid_to, t.settles_at)
-      FROM copy_signals cs
-      WHERE t.signal_code = cs.signal_code
-        AND (t.target_profit_percent = 0 OR t.settles_at IS NULL);
-    `);
-
-    await client.query(`
-      UPDATE trades t
       SET is_trial_trade = TRUE
       WHERE NOT EXISTS (
         SELECT 1
@@ -453,6 +444,22 @@ const connectDatabase = async () => {
     await client.query(`
       ALTER TABLE copy_signals
         ADD COLUMN IF NOT EXISTS min_deposit_required NUMERIC(18, 8) NOT NULL DEFAULT 0;
+    `);
+
+    await client.query(`
+      UPDATE trades t
+      SET target_profit_percent = COALESCE(cs.profit_percent, t.target_profit_percent),
+          settles_at = COALESCE(cs.valid_to, t.settles_at)
+      FROM copy_signals cs
+      WHERE t.signal_code = cs.signal_code
+        AND (t.target_profit_percent = 0 OR t.settles_at IS NULL);
+    `);
+
+    await client.query(`
+      DELETE FROM copy_signals older
+      USING copy_signals newer
+      WHERE older.valid_from = newer.valid_from
+        AND older.id < newer.id;
     `);
 
     await client.query(`
