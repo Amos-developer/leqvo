@@ -1,6 +1,7 @@
 const tradeAutomationModel = require("../models/tradeAutomation.model");
 const userModel = require("../models/user.model");
 const copySignalModel = require("../models/copySignal.model");
+const { runTradeAutomationCycle } = require("../services/tradeAutomation.service");
 
 const ALLOWED_SLOTS = ["first", "second", "third", "fourth", "fifth_bonus"];
 const ALLOWED_ALLOCATIONS = [20, 40, 50, 60, 100];
@@ -114,10 +115,16 @@ const createAutomation = async (req, res) => {
     allocationPercent
   });
 
+  await runTradeAutomationCycle();
+  const refreshedAutomation = await tradeAutomationModel.getById({
+    id: automation.id,
+    userId: req.user.id
+  });
+
   return res.status(201).json({
     success: true,
     message: "Automation saved successfully",
-    data: automation
+    data: refreshedAutomation || automation
   });
 };
 
@@ -174,13 +181,22 @@ const updateAutomation = async (req, res) => {
     });
   }
 
+  if (isEnabled) {
+    await runTradeAutomationCycle();
+  }
+
+  const refreshedAutomation = await tradeAutomationModel.getById({
+    id: req.params.id,
+    userId: req.user.id
+  });
+
   const refreshedUser = await userModel.findUserById(req.user.id);
 
   return res.status(200).json({
     success: true,
     message: `Automation ${isEnabled ? "enabled" : "paused"} successfully`,
     data: {
-      automation,
+      automation: refreshedAutomation || automation,
       user: refreshedUser
     }
   });

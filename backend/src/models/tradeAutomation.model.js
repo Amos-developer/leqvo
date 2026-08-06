@@ -28,6 +28,19 @@ const getByUserId = async (userId) => {
   return result.rows;
 };
 
+const getById = async ({ id, userId }) => {
+  const result = await database.query(
+    `SELECT ${automationFields}
+     FROM trade_automations
+     WHERE id = $1
+       AND user_id = $2
+     LIMIT 1`,
+    [id, userId]
+  );
+
+  return result.rows[0] || null;
+};
+
 const createAutomation = async ({ userId, username, pair, slotKey, allocationPercent }) => {
   const result = await database.query(
     `INSERT INTO trade_automations (
@@ -101,6 +114,7 @@ const markAutomationRun = async ({ id, signalCode, result, message }) => {
 };
 
 module.exports = {
+  getById,
   getByUserId,
   createAutomation,
   updateAutomation,
