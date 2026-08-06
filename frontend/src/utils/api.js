@@ -217,10 +217,27 @@ export const getAdminCopySignals = () => {
   return request("/copy-signals");
 };
 
+export const getAdminCopySignal = (id) => {
+  return request(`/copy-signals/${id}`);
+};
+
 export const createAdminCopySignal = (payload) => {
   return request("/copy-signals", {
     method: "POST",
     body: JSON.stringify(payload)
+  });
+};
+
+export const updateAdminCopySignal = (id, payload) => {
+  return request(`/copy-signals/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload)
+  });
+};
+
+export const deleteAdminCopySignal = (id) => {
+  return request(`/copy-signals/${id}`, {
+    method: "DELETE"
   });
 };
 

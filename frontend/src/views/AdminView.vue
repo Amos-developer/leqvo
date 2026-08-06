@@ -21,6 +21,9 @@ import {
   deleteAdminKyc,
   createAdminCopySignal,
   getAdminCopySignals,
+  getAdminCopySignal,
+  updateAdminCopySignal,
+  deleteAdminCopySignal,
   updateAdminKycStatus,
   updateAdminWithdrawalAddressStatus,
   unlockAdminWithdrawalAddress
@@ -71,6 +74,7 @@ const signalForm = ref({
 const createdSignal = ref(null);
 const isCreatingSignal = ref(false);
 const copiedSignal = ref(false);
+const signalActionId = ref("");
 const balanceAudit = ref(null);
 const balanceAuditSearch = ref("");
 const balanceAuditUserId = ref("");
@@ -641,6 +645,93 @@ const copySignalMessage = async (signal) => {
   setTimeout(() => {
     copiedSignal.value = false;
   }, 1400);
+};
+
+const viewCopySignal = async (signal) => {
+  errorMessage.value = "";
+
+  try {
+    const result = await getAdminCopySignal(signal.id);
+    const item = result.data;
+    window.alert([
+      `Pair: ${item.pair}`,
+      `Signal Code: ${item.signalCode}`,
+      `Profit: ${Number(item.profitPercent).toFixed(2)}%`,
+      `Window: ${formatSignalTime(item.validFrom)} - ${formatSignalTime(item.validTo)}`,
+      `Status: ${item.status}`,
+      Number(item.minDepositRequired || 0) > 0 ? `Minimum Deposit: ${money(item.minDepositRequired)} USDT` : "Minimum Deposit: Standard session"
+    ].join("\n"));
+  } catch (error) {
+    errorMessage.value = error.message;
+  }
+};
+
+const editCopySignal = async (signal) => {
+  const pair = window.prompt("Edit pair", signal.pair || "");
+
+  if (pair === null) {
+    return;
+  }
+
+  const validFrom = window.prompt("Edit valid from (ISO UTC)", new Date(signal.validFrom).toISOString().slice(0, 16));
+
+  if (validFrom === null) {
+    return;
+  }
+
+  const validTo = window.prompt("Edit valid to (ISO UTC)", new Date(signal.validTo).toISOString().slice(0, 16));
+
+  if (validTo === null) {
+    return;
+  }
+
+  const profitPercent = window.prompt("Edit profit percent", String(signal.profitPercent ?? ""));
+
+  if (profitPercent === null) {
+    return;
+  }
+
+  const status = window.prompt("Edit status (active/expired/cancelled)", signal.status || "active");
+
+  if (status === null) {
+    return;
+  }
+
+  signalActionId.value = `${signal.id}-edit`;
+  errorMessage.value = "";
+
+  try {
+    await updateAdminCopySignal(signal.id, {
+      pair: pair.trim().toUpperCase(),
+      validFrom: new Date(validFrom).toISOString(),
+      validTo: new Date(validTo).toISOString(),
+      profitPercent: Number(profitPercent),
+      status: status.trim().toLowerCase()
+    });
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    signalActionId.value = "";
+  }
+};
+
+const removeCopySignal = async (signal) => {
+  if (!window.confirm(`Delete signal ${signal.signalCode} for ${signal.pair}?`)) {
+    return;
+  }
+
+  signalActionId.value = `${signal.id}-delete`;
+  errorMessage.value = "";
+
+  try {
+    await deleteAdminCopySignal(signal.id);
+    await loadAdminData();
+  } catch (error) {
+    errorMessage.value = error.message;
+  } finally {
+    signalActionId.value = "";
+  }
 };
 
 const reviewWithdrawalAddress = async (address, status) => {
@@ -1483,7 +1574,25 @@ onMounted(loadAdminData);
                 <span v-if="Number(signal.minDepositRequired || 0) > 0">Bonus · Min {{ money(signal.minDepositRequired) }} USDT</span>
               </div>
               <small>{{ formatSignalTime(signal.validFrom) }} - {{ formatSignalTime(signal.validTo) }}</small>
-              <a :href="telegramShareUrl(signal)" target="_blank" rel="noreferrer">Telegram</a>
+              <div class="copy-signal-actions">
+                <button type="button" @click="viewCopySignal(signal)">View</button>
+                <button
+                  type="button"
+                  :disabled="signalActionId === `${signal.id}-edit`"
+                  @click="editCopySignal(signal)"
+                >
+                  {{ signalActionId === `${signal.id}-edit` ? "Saving..." : "Edit" }}
+                </button>
+                <button
+                  type="button"
+                  class="ghost"
+                  :disabled="signalActionId === `${signal.id}-delete`"
+                  @click="removeCopySignal(signal)"
+                >
+                  {{ signalActionId === `${signal.id}-delete` ? "Deleting..." : "Delete" }}
+                </button>
+                <a :href="telegramShareUrl(signal)" target="_blank" rel="noreferrer">Telegram</a>
+              </div>
             </article>
           </div>
         </section>

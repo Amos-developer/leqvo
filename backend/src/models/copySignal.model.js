@@ -75,6 +75,20 @@ const findSignalByCode = async (signalCode) => {
   return result.rows[0] || null;
 };
 
+const findSignalById = async (id) => {
+  await expireElapsedSignals();
+
+  const result = await database.query(
+    `SELECT ${signalFields}
+     FROM copy_signals
+     WHERE id = $1
+     LIMIT 1`,
+    [id]
+  );
+
+  return result.rows[0] || null;
+};
+
 const findActiveSignalByPair = async (pair) => {
   await expireElapsedSignals();
 
@@ -139,13 +153,46 @@ const hasBonusSignalAccess = async (userId, minimumDepositRequired) => {
   return Boolean(eligibility.hasSelfQualified || eligibility.hasReferralQualified);
 };
 
+const updateSignalByAdmin = async ({ id, pair, currency, profitPercent, minDepositRequired, validFrom, validTo, status }) => {
+  const result = await database.query(
+    `UPDATE copy_signals
+     SET pair = COALESCE($2, pair),
+         currency = COALESCE($3, currency),
+         profit_percent = COALESCE($4, profit_percent),
+         min_deposit_required = COALESCE($5, min_deposit_required),
+         valid_from = COALESCE($6, valid_from),
+         valid_to = COALESCE($7, valid_to),
+         status = COALESCE($8, status),
+         updated_at = NOW()
+     WHERE id = $1
+     RETURNING ${signalFields}`,
+    [id, pair, currency, profitPercent, minDepositRequired, validFrom, validTo, status]
+  );
+
+  return result.rows[0] || null;
+};
+
+const deleteSignalByAdmin = async (id) => {
+  const result = await database.query(
+    `DELETE FROM copy_signals
+     WHERE id = $1
+     RETURNING id`,
+    [id]
+  );
+
+  return result.rows[0] || null;
+};
+
 module.exports = {
   expireElapsedSignals,
   createSignal,
   findSignalByValidFrom,
   getSignals,
+  findSignalById,
   findSignalByCode,
   findActiveSignalByPair,
   getActiveSignals,
-  hasBonusSignalAccess
+  hasBonusSignalAccess,
+  updateSignalByAdmin,
+  deleteSignalByAdmin
 };

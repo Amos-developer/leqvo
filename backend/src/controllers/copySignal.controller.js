@@ -60,6 +60,40 @@ const getSignalMinimumDepositRequirement = (validFrom) => {
   return 0;
 };
 
+const validateSignalPayload = ({ pair, validFrom, validTo, profitPercent }) => {
+  if (!pair || !validFrom || !validTo || !profitPercent) {
+    return "Pair, valid time, and profit percent are required";
+  }
+
+  if (!/^[A-Z0-9]{2,12}\/[A-Z0-9]{2,12}$/.test(pair)) {
+    return "Pair must look like BTC/USDT";
+  }
+
+  if (!ALLOWED_PAIRS.includes(pair)) {
+    return "Pair must be one of the available market pairs";
+  }
+
+  if (!Number.isFinite(validFrom.getTime()) || !Number.isFinite(validTo.getTime())) {
+    return "Choose a valid signal time";
+  }
+
+  const durationMinutes = Math.round((validTo.getTime() - validFrom.getTime()) / 60000);
+
+  if (durationMinutes !== 40) {
+    return "Signal must be valid for exactly 40 minutes";
+  }
+
+  if (validFrom.getUTCMinutes() !== 0 || !ALLOWED_UTC_START_HOURS.includes(validFrom.getUTCHours())) {
+    return "Signal start time must be 10:00, 11:00, 13:00, 14:00, or 15:00 UTC";
+  }
+
+  if (!Number.isFinite(profitPercent) || profitPercent <= 0 || profitPercent > 100) {
+    return "Profit percent must be between 0 and 100";
+  }
+
+  return "";
+};
+
 const ensureDepositTierSignalAccess = async (signal, userId) => {
   const minimumDepositRequired = Number(signal.minDepositRequired || 0);
 
@@ -153,54 +187,12 @@ const createSignal = async (req, res) => {
   const validTo = req.body.validTo ? new Date(req.body.validTo) : null;
   const profitPercent = Number(req.body.profitPercent);
 
-  if (!pair || !validFrom || !validTo || !profitPercent) {
+  const validationMessage = validateSignalPayload({ pair, validFrom, validTo, profitPercent });
+
+  if (validationMessage) {
     return res.status(400).json({
       success: false,
-      message: "Pair, valid time, and profit percent are required"
-    });
-  }
-
-  if (!/^[A-Z0-9]{2,12}\/[A-Z0-9]{2,12}$/.test(pair)) {
-    return res.status(400).json({
-      success: false,
-      message: "Pair must look like BTC/USDT"
-    });
-  }
-
-  if (!ALLOWED_PAIRS.includes(pair)) {
-    return res.status(400).json({
-      success: false,
-      message: "Pair must be one of the available market pairs"
-    });
-  }
-
-  if (!Number.isFinite(validFrom.getTime()) || !Number.isFinite(validTo.getTime())) {
-    return res.status(400).json({
-      success: false,
-      message: "Choose a valid signal time"
-    });
-  }
-
-  const durationMinutes = Math.round((validTo.getTime() - validFrom.getTime()) / 60000);
-
-  if (durationMinutes !== 40) {
-    return res.status(400).json({
-      success: false,
-      message: "Signal must be valid for exactly 40 minutes"
-    });
-  }
-
-  if (validFrom.getUTCMinutes() !== 0 || !ALLOWED_UTC_START_HOURS.includes(validFrom.getUTCHours())) {
-    return res.status(400).json({
-      success: false,
-      message: "Signal start time must be 10:00, 11:00, 13:00, 14:00, or 15:00 UTC"
-    });
-  }
-
-  if (!Number.isFinite(profitPercent) || profitPercent <= 0 || profitPercent > 100) {
-    return res.status(400).json({
-      success: false,
-      message: "Profit percent must be between 0 and 100"
+      message: validationMessage
     });
   }
 
@@ -231,8 +223,105 @@ const createSignal = async (req, res) => {
   });
 };
 
+const getSignal = async (req, res) => {
+  const signal = await copySignalModel.findSignalById(req.params.id);
+
+  if (!signal) {
+    return res.status(404).json({
+      success: false,
+      message: "Signal was not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    data: signal
+  });
+};
+
+const updateSignal = async (req, res) => {
+  const existingSignal = await copySignalModel.findSignalById(req.params.id);
+
+  if (!existingSignal) {
+    return res.status(404).json({
+      success: false,
+      message: "Signal was not found"
+    });
+  }
+
+  const pair = req.body.pair?.trim().toUpperCase() || existingSignal.pair;
+  const currency = pair.split("/")[1];
+  const validFrom = req.body.validFrom ? new Date(req.body.validFrom) : new Date(existingSignal.validFrom);
+  const validTo = req.body.validTo ? new Date(req.body.validTo) : new Date(existingSignal.validTo);
+  const profitPercent = req.body.profitPercent === undefined
+    ? Number(existingSignal.profitPercent)
+    : Number(req.body.profitPercent);
+  const status = req.body.status?.trim().toLowerCase() || existingSignal.status;
+
+  const validationMessage = validateSignalPayload({ pair, validFrom, validTo, profitPercent });
+
+  if (validationMessage) {
+    return res.status(400).json({
+      success: false,
+      message: validationMessage
+    });
+  }
+
+  if (!["active", "expired", "cancelled"].includes(status)) {
+    return res.status(400).json({
+      success: false,
+      message: "Status must be active, expired, or cancelled"
+    });
+  }
+
+  const duplicateSignal = await copySignalModel.findSignalByValidFrom(validFrom);
+
+  if (duplicateSignal && Number(duplicateSignal.id) !== Number(existingSignal.id)) {
+    return res.status(409).json({
+      success: false,
+      message: `A signal already exists for ${formatUtcTime(validFrom)} UTC on this session date.`
+    });
+  }
+
+  const signal = await copySignalModel.updateSignalByAdmin({
+    id: req.params.id,
+    pair,
+    currency,
+    profitPercent,
+    minDepositRequired: getSignalMinimumDepositRequirement(validFrom),
+    validFrom,
+    validTo,
+    status
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Signal updated successfully",
+    data: signal
+  });
+};
+
+const deleteSignal = async (req, res) => {
+  const signal = await copySignalModel.deleteSignalByAdmin(req.params.id);
+
+  if (!signal) {
+    return res.status(404).json({
+      success: false,
+      message: "Signal was not found"
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Signal deleted successfully"
+  });
+};
+
 module.exports = {
   getSignals,
+  getSignal,
   createSignal,
+  updateSignal,
+  deleteSignal,
   previewSignal
 };

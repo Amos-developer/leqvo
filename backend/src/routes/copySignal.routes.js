@@ -8,6 +8,9 @@ router.get("/preview/:signalCode", requireAuth, asyncHandler(copySignalControlle
 
 router.use(requireAuth, requireAdmin);
 router.get("/", asyncHandler(copySignalController.getSignals));
+router.get("/:id", asyncHandler(copySignalController.getSignal));
 router.post("/", asyncHandler(copySignalController.createSignal));
+router.patch("/:id", asyncHandler(copySignalController.updateSignal));
+router.delete("/:id", asyncHandler(copySignalController.deleteSignal));
 
 module.exports = router;
