@@ -446,6 +446,11 @@ const connectDatabase = async () => {
     `);
 
     await client.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS copy_signals_valid_from_unique
+        ON copy_signals (valid_from);
+    `);
+
+    await client.query(`
       ALTER TABLE copy_signals
         ADD COLUMN IF NOT EXISTS min_deposit_required NUMERIC(18, 8) NOT NULL DEFAULT 0;
     `);

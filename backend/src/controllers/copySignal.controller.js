@@ -204,6 +204,15 @@ const createSignal = async (req, res) => {
     });
   }
 
+  const existingSignal = await copySignalModel.findSignalByValidFrom(validFrom);
+
+  if (existingSignal) {
+    return res.status(409).json({
+      success: false,
+      message: `A signal already exists for ${formatUtcTime(validFrom)} UTC on this session date. Wait for it to expire before creating another one.`
+    });
+  }
+
   const signal = await copySignalModel.createSignal({
     pair,
     currency,

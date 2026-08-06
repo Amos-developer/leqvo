@@ -15,6 +15,16 @@ const signalFields = `
   updated_at AS "updatedAt"
 `;
 
+const expireElapsedSignals = async () => {
+  await database.query(
+    `UPDATE copy_signals
+     SET status = 'expired',
+         updated_at = NOW()
+     WHERE status = 'active'
+       AND valid_to < NOW()`
+  );
+};
+
 const createSignal = async ({ pair, currency, signalCode, profitPercent, minDepositRequired, validFrom, validTo, createdBy }) => {
   const result = await database.query(
     `INSERT INTO copy_signals (pair, currency, signal_code, profit_percent, min_deposit_required, valid_from, valid_to, created_by)
@@ -26,7 +36,21 @@ const createSignal = async ({ pair, currency, signalCode, profitPercent, minDepo
   return result.rows[0];
 };
 
+const findSignalByValidFrom = async (validFrom) => {
+  const result = await database.query(
+    `SELECT ${signalFields}
+     FROM copy_signals
+     WHERE valid_from = $1
+     LIMIT 1`,
+    [validFrom]
+  );
+
+  return result.rows[0] || null;
+};
+
 const getSignals = async () => {
+  await expireElapsedSignals();
+
   const result = await database.query(
     `SELECT ${signalFields}
      FROM copy_signals
@@ -38,6 +62,8 @@ const getSignals = async () => {
 };
 
 const findSignalByCode = async (signalCode) => {
+  await expireElapsedSignals();
+
   const result = await database.query(
     `SELECT ${signalFields}
      FROM copy_signals
@@ -50,6 +76,8 @@ const findSignalByCode = async (signalCode) => {
 };
 
 const findActiveSignalByPair = async (pair) => {
+  await expireElapsedSignals();
+
   const result = await database.query(
     `SELECT ${signalFields}
      FROM copy_signals
@@ -66,6 +94,8 @@ const findActiveSignalByPair = async (pair) => {
 };
 
 const getActiveSignals = async () => {
+  await expireElapsedSignals();
+
   const result = await database.query(
     `SELECT ${signalFields}
      FROM copy_signals
@@ -110,7 +140,9 @@ const hasBonusSignalAccess = async (userId, minimumDepositRequired) => {
 };
 
 module.exports = {
+  expireElapsedSignals,
   createSignal,
+  findSignalByValidFrom,
   getSignals,
   findSignalByCode,
   findActiveSignalByPair,
