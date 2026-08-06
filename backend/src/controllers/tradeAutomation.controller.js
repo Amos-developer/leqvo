@@ -6,6 +6,14 @@ const { runTradeAutomationCycle, runAutomationNow } = require("../services/trade
 const ALLOWED_SLOTS = ["first", "second", "third", "fourth", "fifth_bonus"];
 const ALLOWED_ALLOCATIONS = [20, 40, 50, 60, 100];
 const MINIMUM_TRADE_ENTRY_AMOUNT = 30;
+const SLOT_START_MINUTES = {
+  first: 10 * 60,
+  second: 11 * 60,
+  third: 13 * 60,
+  fourth: 14 * 60,
+  fifth_bonus: 15 * 60
+};
+const SLOT_DURATION_MINUTES = 40;
 
 const getSlotRequirement = (slotKey) => {
   if (slotKey === "third") {
@@ -17,6 +25,28 @@ const getSlotRequirement = (slotKey) => {
   }
 
   return 0;
+};
+
+const getSlotTimingError = (slotKey) => {
+  const slotStart = SLOT_START_MINUTES[slotKey];
+
+  if (slotStart === undefined) {
+    return null;
+  }
+
+  const now = new Date();
+  const currentUtcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const slotEnd = slotStart + SLOT_DURATION_MINUTES;
+
+  if (currentUtcMinutes >= slotStart && currentUtcMinutes < slotEnd) {
+    return "This trading session is already ongoing. Automation must be saved before the session starts.";
+  }
+
+  if (currentUtcMinutes >= slotEnd) {
+    return "This trading session has already finished for today. Please choose an upcoming session instead.";
+  }
+
+  return null;
 };
 
 const validateAutomationEligibility = async ({ user, slotKey, allocationPercent }) => {
@@ -82,6 +112,15 @@ const createAutomation = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "Automation allocation must be one of 20, 40, 50, 60, or 100"
+    });
+  }
+
+  const slotTimingError = getSlotTimingError(slotKey);
+
+  if (slotTimingError) {
+    return res.status(400).json({
+      success: false,
+      message: slotTimingError
     });
   }
 
@@ -154,6 +193,17 @@ const updateAutomation = async (req, res) => {
       success: false,
       message: "Completed automated trades can no longer be changed."
     });
+  }
+
+  if (isEnabled) {
+    const slotTimingError = getSlotTimingError(existingAutomation.slotKey);
+
+    if (slotTimingError) {
+      return res.status(400).json({
+        success: false,
+        message: slotTimingError
+      });
+    }
   }
 
   const eligibilityError = await validateAutomationEligibility({
