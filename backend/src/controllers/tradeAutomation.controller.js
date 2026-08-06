@@ -51,6 +51,7 @@ const validateAutomationEligibility = async ({ user, slotKey, allocationPercent 
 };
 
 const getMyAutomations = async (req, res) => {
+  await runTradeAutomationCycle();
   const automations = await tradeAutomationModel.getByUserId(req.user.id);
 
   return res.status(200).json({

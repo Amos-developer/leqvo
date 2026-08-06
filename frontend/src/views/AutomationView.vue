@@ -417,11 +417,11 @@ onUnmounted(() => {
                 </div>
                 <div>
                   <span>Signal</span>
-                  <strong>{{ automation.lastSignalCode || "None" }}</strong>
+                  <strong>{{ automation.latestTradeSignalCode || automation.lastSignalCode || "None" }}</strong>
                 </div>
                 <div>
                   <span>Completed at</span>
-                  <strong>{{ formatDateTime(automation.lastRunAt) }}</strong>
+                  <strong>{{ formatDateTime(automation.latestTradeClosedAt || automation.lastRunAt) }}</strong>
                 </div>
                 <div>
                   <span>Result</span>
@@ -429,7 +429,7 @@ onUnmounted(() => {
                 </div>
               </div>
 
-              <p class="automation-card-message">{{ automation.lastTradeClosedAt ? `Automated trade closed ${formatDateTime(automation.lastTradeClosedAt)}.` : (automation.lastMessage || "Automated trade completed successfully.") }}</p>
+              <p class="automation-card-message">{{ automation.latestTradeClosedAt ? `Automated trade closed ${formatDateTime(automation.latestTradeClosedAt)}.` : (automation.lastMessage || "Automated trade completed successfully.") }}</p>
             </article>
           </div>
         </section>

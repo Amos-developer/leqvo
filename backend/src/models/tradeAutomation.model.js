@@ -15,6 +15,7 @@ const automationFields = `
   ta.created_at AS "createdAt",
   ta.updated_at AS "updatedAt",
   latest_trade.id AS "latestTradeId",
+  latest_trade.signal_code AS "latestTradeSignalCode",
   latest_trade.status AS "latestTradeStatus",
   latest_trade.opened_at AS "latestTradeOpenedAt",
   latest_trade.closed_at AS "latestTradeClosedAt",
@@ -26,6 +27,7 @@ const automationFromClause = `
   LEFT JOIN LATERAL (
     SELECT
       t.id,
+      t.signal_code,
       t.status,
       t.opened_at,
       t.closed_at,
