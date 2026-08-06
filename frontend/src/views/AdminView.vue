@@ -397,8 +397,7 @@ const signalTimeSlots = [
   { start: "11:00", end: "11:40", label: "Second trade" },
   { start: "13:00", end: "13:40", label: "Third trade" },
   { start: "14:00", end: "14:40", label: "Fourth trade" },
-  { start: "admin-anytime", end: "", label: "Admin signal - Any time" },
-  { start: "15:00", end: "15:40", label: "Fifth bonus trade" }
+  { start: "admin-anytime", end: "", label: "Admin signal - Any time" }
 ];
 
 const padTime = (value) => String(value).padStart(2, "0");
@@ -672,7 +671,7 @@ const getSignalMessage = (signal = createdSignal.value) => {
     `Profit: ${Number(signal.profitPercent).toFixed(2)}%`,
     `Valid: ${formatSignalTime(signal.validFrom)} - ${formatSignalTime(signal.validTo)}`,
     Number(signal.minDepositRequired || 0) > 0
-      ? `Bonus trade: minimum deposit ${money(signal.minDepositRequired)} USDT`
+      ? `Restricted trade: minimum deposit ${money(signal.minDepositRequired)} USDT`
       : "Standard trade",
     "Signal is valid for 40 minutes only."
   ].join("\n");
@@ -1606,7 +1605,7 @@ onUnmounted(() => {
               <span>Valid for exactly 40 minutes</span>
               <strong>{{ resolvedSignalStartTime }} - {{ signalForm.validToTime }} UTC</strong>
               <small v-if="signalForm.validFromTime === '13:00'">Third trade requires a credited deposit of 100 USDT or above.</small>
-              <small v-if="signalForm.validFromTime === '15:00'">Bonus trade requires user deposit of 300 USDT and above.</small>
+              <small v-else-if="signalForm.validFromTime === '14:00'">Fourth trade requires a credited deposit of 500 USDT or an eligible direct referral deposit of 500 USDT or above.</small>
               <small v-else-if="signalForm.validFromTime === 'admin-anytime'">Admin signal ends exactly 40 minutes after the initiated time.</small>
             </div>
 

@@ -16,7 +16,7 @@ const generateSignalCode = (pair) => {
   return `${prefix}-${number}`;
 };
 
-const ALLOWED_UTC_START_HOURS = [10, 11, 13, 14, 15];
+const ALLOWED_UTC_START_HOURS = [10, 11, 13, 14];
 const ALLOWED_PAIRS = [
   "BTC/USDT",
   "ETH/USDT",
@@ -53,8 +53,8 @@ const getSignalMinimumDepositRequirement = (validFrom) => {
     return 100;
   }
 
-  if (startHour === 15) {
-    return 300;
+  if (startHour === 14) {
+    return 500;
   }
 
   return 0;
@@ -84,7 +84,7 @@ const validateSignalPayload = ({ pair, validFrom, validTo, profitPercent }) => {
   }
 
   if (validFrom.getUTCMinutes() !== 0 || !ALLOWED_UTC_START_HOURS.includes(validFrom.getUTCHours())) {
-    return "Signal start time must be 10:00, 11:00, 13:00, 14:00, or 15:00 UTC";
+    return "Signal start time must be 10:00, 11:00, 13:00, or 14:00 UTC";
   }
 
   if (!Number.isFinite(profitPercent) || profitPercent <= 0 || profitPercent > 100) {
@@ -107,11 +107,9 @@ const ensureDepositTierSignalAccess = async (signal, userId) => {
     return null;
   }
 
-  if (minimumDepositRequired >= 300) {
+  if (minimumDepositRequired >= 100) {
     return `This signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
   }
-
-  return `This signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or above.`;
 };
 
 const getSignals = async (req, res) => {

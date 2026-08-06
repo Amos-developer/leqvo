@@ -9,8 +9,7 @@ const slotByUtcHour = {
   10: "first",
   11: "second",
   13: "third",
-  14: "fourth",
-  15: "fifth_bonus"
+  14: "fourth"
 };
 
 let isProcessing = false;
@@ -49,11 +48,9 @@ const getSignalAccessMessage = async (signal, userId) => {
     return null;
   }
 
-  if (minimumDepositRequired >= 300) {
+  if (minimumDepositRequired >= 100) {
     return `Requires a credited deposit of ${minimumDepositRequired} USDT or a directly invited member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
   }
-
-  return `Requires a credited deposit of ${minimumDepositRequired} USDT or above.`;
 };
 
 const processAutomation = async (automation, signal, slotKey) => {

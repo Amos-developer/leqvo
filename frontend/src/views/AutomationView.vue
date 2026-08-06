@@ -23,9 +23,8 @@ const form = ref({
 const slotOptions = [
   { value: "first", label: "First trade", note: "Open to funded trading accounts. Minimum execution amount is 30 USDT." },
   { value: "second", label: "Second trade", note: "Open to funded trading accounts. Minimum execution amount is 30 USDT." },
-  { value: "third", label: "Third trade", note: "Requires a credited deposit of 100 USDT or above." },
-  { value: "fourth", label: "Fourth trade", note: "Standard session for active funded members." },
-  { value: "fifth_bonus", label: "Bonus trade", note: "Requires a 300 USDT deposit or a directly invited member with 300 USDT deposit." }
+  { value: "third", label: "Third trade", note: "Requires a credited deposit of 100 USDT or an eligible direct referral deposit of 100 USDT or above." },
+  { value: "fourth", label: "Fourth trade", note: "Requires a credited deposit of 500 USDT or an eligible direct referral deposit of 500 USDT or above." }
 ];
 
 const selectedSlot = computed(() => {
@@ -53,8 +52,8 @@ const selectedSlotMinimumDeposit = computed(() => {
     return 100;
   }
 
-  if (form.value.slotKey === "fifth_bonus") {
-    return 300;
+  if (form.value.slotKey === "fourth") {
+    return 500;
   }
 
   return 0;
@@ -100,8 +99,8 @@ const sessionEligibilityMessage = computed(() => {
     return `Your selected allocation must produce at least 30 USDT. Current estimate: ${formatCurrency(estimatedExecutionAmount.value)}.`;
   }
 
-  if (selectedSlotMinimumDeposit.value >= 300) {
-    return "Bonus trade requires a credited deposit of 300 USDT or an eligible direct referral deposit. Final eligibility is checked automatically when you save.";
+  if (selectedSlotMinimumDeposit.value >= 100) {
+    return `This session requires a credited deposit of ${selectedSlotMinimumDeposit.value} USDT or an eligible direct referral deposit of ${selectedSlotMinimumDeposit.value} USDT or above. Final eligibility is checked automatically when you save.`;
   }
 
   if (selectedSlotMinimumDeposit.value > 0) {

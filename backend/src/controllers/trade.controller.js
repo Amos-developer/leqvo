@@ -25,11 +25,9 @@ const getDepositTierSignalAccessMessage = async (signal, userId) => {
     return null;
   }
 
-  if (minimumDepositRequired >= 300) {
+  if (minimumDepositRequired >= 100) {
     return `This signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
   }
-
-  return `This signal is only available to users with a credited deposit of ${minimumDepositRequired} USDT or above.`;
 };
 
 const createTrade = async (req, res) => {

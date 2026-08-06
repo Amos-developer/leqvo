@@ -478,7 +478,7 @@ const connectDatabase = async () => {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         CONSTRAINT trade_automations_slot_key_check
-          CHECK (slot_key IN ('first', 'second', 'third', 'fourth', 'fifth_bonus')),
+          CHECK (slot_key IN ('first', 'second', 'third', 'fourth')),
         CONSTRAINT trade_automations_allocation_check
           CHECK (allocation_percent IN (20, 40, 50, 60, 100))
       );
@@ -487,6 +487,17 @@ const connectDatabase = async () => {
     await client.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS trade_automations_user_pair_slot_unique
         ON trade_automations (user_id, pair, slot_key);
+    `);
+
+    await client.query(`
+      ALTER TABLE trade_automations
+      DROP CONSTRAINT IF EXISTS trade_automations_slot_key_check;
+    `);
+
+    await client.query(`
+      ALTER TABLE trade_automations
+      ADD CONSTRAINT trade_automations_slot_key_check
+      CHECK (slot_key IN ('first', 'second', 'third', 'fourth'));
     `);
 
     await client.query(`

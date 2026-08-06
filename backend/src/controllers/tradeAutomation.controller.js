@@ -3,15 +3,14 @@ const userModel = require("../models/user.model");
 const copySignalModel = require("../models/copySignal.model");
 const { runTradeAutomationCycle, runAutomationNow } = require("../services/tradeAutomation.service");
 
-const ALLOWED_SLOTS = ["first", "second", "third", "fourth", "fifth_bonus"];
+const ALLOWED_SLOTS = ["first", "second", "third", "fourth"];
 const ALLOWED_ALLOCATIONS = [20, 40, 50, 60, 100];
 const MINIMUM_TRADE_ENTRY_AMOUNT = 30;
 const SLOT_START_MINUTES = {
   first: 10 * 60,
   second: 11 * 60,
   third: 13 * 60,
-  fourth: 14 * 60,
-  fifth_bonus: 15 * 60
+  fourth: 14 * 60
 };
 const SLOT_DURATION_MINUTES = 40;
 
@@ -20,8 +19,8 @@ const getSlotRequirement = (slotKey) => {
     return 100;
   }
 
-  if (slotKey === "fifth_bonus") {
-    return 300;
+  if (slotKey === "fourth") {
+    return 500;
   }
 
   return 0;
@@ -84,11 +83,9 @@ const validateAutomationEligibility = async ({ user, slotKey, allocationPercent 
     return null;
   }
 
-  if (minimumDepositRequired >= 300) {
+  if (minimumDepositRequired >= 100) {
     return `This session is only available to users with a credited deposit of ${minimumDepositRequired} USDT or leaders who directly invited a member with a credited deposit of ${minimumDepositRequired} USDT or above.`;
   }
-
-  return `This session is only available to users with a credited deposit of ${minimumDepositRequired} USDT or above.`;
 };
 
 const getMyAutomations = async (req, res) => {
