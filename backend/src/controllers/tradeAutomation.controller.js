@@ -52,11 +52,12 @@ const getSlotTimingError = (slotKey) => {
 const getUpcomingSlots = () => {
   const now = new Date();
   const currentUtcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
-
-  return ALLOWED_SLOTS.filter((slotKey) => {
+  const remainingToday = ALLOWED_SLOTS.filter((slotKey) => {
     const slotStart = SLOT_START_MINUTES[slotKey];
     return slotStart > currentUtcMinutes;
   });
+
+  return remainingToday.length ? remainingToday : [...ALLOWED_SLOTS];
 };
 
 const validateAutomationEligibility = async ({ user, slotKey, allocationPercent }) => {
@@ -129,20 +130,14 @@ const createAutomation = async (req, res) => {
 
   if (slotKey === "all") {
     const upcomingSlots = getUpcomingSlots();
-
-    if (!upcomingSlots.length) {
-      return res.status(400).json({
-        success: false,
-        message: "There are no upcoming trade sessions left for today. Please come back before the next trading day starts."
-      });
-    }
-
     const createdAutomations = [];
+    const skippedSlots = [];
 
     for (const targetSlot of upcomingSlots) {
       const duplicateAutomation = existingAutomations.find((item) => item.slotKey === targetSlot);
 
       if (duplicateAutomation) {
+        skippedSlots.push(`${targetSlot}: already saved`);
         continue;
       }
 
@@ -153,6 +148,7 @@ const createAutomation = async (req, res) => {
       });
 
       if (eligibilityError) {
+        skippedSlots.push(`${targetSlot}: ${eligibilityError}`);
         continue;
       }
 
@@ -170,7 +166,9 @@ const createAutomation = async (req, res) => {
     if (!createdAutomations.length) {
       return res.status(409).json({
         success: false,
-        message: "No upcoming automation rules could be created. They may already exist or you may not meet the session requirements."
+        message: skippedSlots.length
+          ? `No automation rules could be created. ${skippedSlots.join(" | ")}`
+          : "No automation rules could be created."
       });
     }
 
@@ -187,7 +185,7 @@ const createAutomation = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: `Automation saved for ${refreshedAutomations.length} upcoming trade session${refreshedAutomations.length === 1 ? "" : "s"}.`,
+      message: `Automation saved for ${refreshedAutomations.length} trade session${refreshedAutomations.length === 1 ? "" : "s"}${upcomingSlots.length === ALLOWED_SLOTS.length ? " in the next trading cycle" : ""}.`,
       data: refreshedAutomations.filter(Boolean)
     });
   }
